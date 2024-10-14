@@ -1,0 +1,37 @@
+version: "3"
+services:
+  nextjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    depends_on:
+      - laravel
+    environment:
+      - NODE_ENV=development
+    command: "npm run dev"
+
+  laravel:
+    build:
+      context: ../../backend/ggps-backend # Path to your Laravel backend folder
+      dockerfile: Dockerfile
+    ports:
+      - "8000:9000"
+    volumes:
+      - ../../backend/ggps-backend:/var/www/html # Mount Laravel app folder
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: newsDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretnewsDb
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data

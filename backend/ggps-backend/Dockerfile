@@ -1,4 +1,4 @@
-FROM php:8.0-fpm
+FROM php:8.2-fpm
 
 WORKDIR /var/www/html
 
@@ -8,12 +8,14 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libpq-dev \
     zip \
     unzip \
     git \
-    nano
+    nano 
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 COPY . /var/www/html
 

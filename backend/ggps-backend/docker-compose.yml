@@ -12,13 +12,12 @@ services:
       - db
 
   db:
-    image: mariadb:10.6
+    image: postgres:13
     ports:
-      - "3306:3306"
+      - "5432:5432"
     environment:
-      MYSQL_DATABASE: newsDb
-      MYSQL_USER: root
-      MYSQL_PASSWORD: secretnewsDb
-      MYSQL_ROOT_PASSWORD: secretnewsDb
+      POSTGRES_DB: newsDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretnewsDb
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./postgresql:/var/lib/postgresql/data
