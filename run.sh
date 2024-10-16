@@ -1,12 +1,8 @@
-#!/bin/bash
-
-# Check if an argument is provided
 if [ -z "$1" ]; then
   echo "Usage: $0 <build|down>"
   exit 1
 fi
 
-# If the argument is 'build', perform the following actions
 if [ "$1" == "build" ]; then
   sudo chmod -R 777 .
 
@@ -39,7 +35,7 @@ elif [ "$1" == "down" ]; then
   docker compose down
 
   echo "Docker containers stopped."
-  
+
 
 else
   echo "Invalid argument. Use 'build' to build and start, or 'down' to stop the containers."
