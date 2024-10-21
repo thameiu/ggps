@@ -13,3 +13,13 @@ export class AuthDto {
     @IsNotEmpty()
     username: string;
 }
+
+export class LogDto {
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+
+    @IsString()
+    @IsNotEmpty()
+    password: string;
+}
