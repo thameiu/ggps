@@ -13,5 +13,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{}
-model EVent{}
+model User{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  username String
+  email String
+  hash String
+
+  firstName String?
+  lastName String?
+
+}
+
+model Event{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  title String
+  description String
+  beginDate DateTime
+  endDate DateTime
+}

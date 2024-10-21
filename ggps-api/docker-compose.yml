@@ -3,11 +3,11 @@ services:
     dev-db:
         image: postgres:13
         ports:
-            - 5432:5432
+            - 5434:5432
         environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: azerty
-            POSTGRES_DB: nest
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=hQ8yyTb4TqxxDMQ
+            - POSTGRES_DB=nest
         networks:
             - ggps
 networks:
