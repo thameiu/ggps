@@ -36,4 +36,12 @@ model Event{
   description String
   beginDate DateTime
   endDate DateTime
+  street String
+  number String
+  city String
+  zipCode String
+  country String  
+  latitude Float?
+  longitude Float?
+  
 }

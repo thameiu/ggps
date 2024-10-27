@@ -16,8 +16,13 @@ export class EventService {
                 data: {
                     title: dto.title,
                     description: dto.description,
-                    beginDate: dto.beginDate,
-                    endDate: dto.endDate,
+                    beginDate: new Date(dto.beginDate),
+                    endDate: new Date(dto.endDate),
+                    street: dto.street,
+                    number: dto.number,
+                    city: dto.city,
+                    zipCode: dto.zipCode,
+                    country: dto.country
                 }
             });
             return event;
