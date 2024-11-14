@@ -35,5 +35,12 @@ export class EventService {
             throw error;
         }
     }
-    
+    async findAll() {
+        try {
+            const events = await this.prisma.event.findMany();
+            return events;
+        } catch (error) {
+            throw error;
+        }
+    }
 }

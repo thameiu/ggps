@@ -1,21 +1,35 @@
-import { Body, Controller, ParseIntPipe, Post, Req } from "@nestjs/common";
+import { Body, Controller, HttpCode, ParseIntPipe, Post, Req, UnauthorizedException } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthDto, LogDto } from "./dto";
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService : AuthService){
+  constructor(private authService: AuthService) {}
+
+  @Post('login')
+  login(@Body() dto: LogDto) {
+    return this.authService.login(dto); // No changes needed here
+  }
+
+  @Post('signup')
+  signup(@Body() dto: AuthDto) {
+    return this.authService.signup(dto);
+  }
+
+  @Post('verify-token')
+  @HttpCode(200)
+  async verifyToken(@Req() req) {
+    const token = req.headers['authorization'];
+    console.log({ token });
+    if (!token) {
+      throw new UnauthorizedException('Token not found');
     }
 
-    @Post('login')
-    login(@Body() dto: LogDto){
-        return this.authService.login(dto);
-    };
-
-    @Post('signup')
-    signup(@Body() dto: AuthDto){
-        return this.authService.signup(dto);
-    };
-
-    
+    try {
+      const payload = await this.authService.verifyToken(token);
+      return { valid: true, user: payload };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 }

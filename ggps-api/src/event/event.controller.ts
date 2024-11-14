@@ -11,5 +11,9 @@ export class EventController {
     login(@Body() dto: EventDto){
         return this.eventService.create(dto);
     };
+    @Post('getAll')
+    getAllEvents() {
+        return this.eventService.findAll();
+    }
 
 }
