@@ -1,3 +1,5 @@
+
+
 .topbar {
     display: inline-block;
     justify-content: space-between;
@@ -24,6 +26,8 @@
 
 .nav li {
     margin-left: 20px;
+    font-family: var(--font-sofia-pro-medium-az);
+
 }
 
 .nav a {

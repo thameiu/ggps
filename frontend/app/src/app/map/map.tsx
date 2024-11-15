@@ -70,7 +70,10 @@ export default function MapComponent() {
                     },
                 }
             );
-            setEvents(eventsResponse.data); // Save events to state
+            if (eventsResponse.data.length > 50) {
+                eventsResponse.data = eventsResponse.data.slice(0, 50);
+            }
+            setEvents(eventsResponse.data); 
         } catch (error) {
             console.error("Failed to fetch events:", error);
         }
@@ -146,13 +149,25 @@ export default function MapComponent() {
     }
 
     return (
-        <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100vh", width: "100%" }}>
-            <BoundsLogger />
-            <ZoomLogger />
+        <MapContainer
+            center={[51.505, -0.09]}
+            zoom={13}
+            style={{ height: "100vh", width: "100%" }}
+            maxBounds={[
+                [-90, -180], // Southwest corner
+                [90, 180],   // Northeast corner
+            ]}
+            maxBoundsViscosity={1.0}
+            minZoom={3}
+            maxZoom={18}
+        >
             <TileLayer
+                noWrap={true}
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
+            <BoundsLogger />
+            <ZoomLogger />
             <LocationMarker />
 
             {/* Display each event as a marker */}

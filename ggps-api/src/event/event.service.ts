@@ -47,7 +47,6 @@ export class EventService {
     }
 
     async getInRadius(dto:MinMaxCoordinatesDto) {
-        console.log(dto);
         const latMin:number =parseFloat(dto.latMin);
         const longMin:number =parseFloat(dto.longMin);
         const latMax:number=parseFloat(dto.latMax);
