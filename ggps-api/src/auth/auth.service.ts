@@ -63,7 +63,6 @@ export class AuthService {
   }
 
   async verifyToken(token: string) {
-    console.log(this.jwtService);
     try {
       return this.jwtService.verifyAsync(token); // Verifies the token's validity
     } catch (error) {

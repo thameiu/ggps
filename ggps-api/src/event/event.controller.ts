@@ -1,6 +1,7 @@
-import { Body, Controller, ParseIntPipe, Post, Req } from "@nestjs/common";
+import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode } from "@nestjs/common";
 import { EventService }from './event.service';
-import { EventDto } from "./dto";
+import { EventDto, MinMaxCoordinatesDto } from "./dto";
+import { AuthGuard } from "src/auth/auth.guard";
 
 @Controller('event')
 export class EventController {
@@ -8,12 +9,24 @@ export class EventController {
     }
 
     @Post('create')
-    login(@Body() dto: EventDto){
+    @UseGuards(AuthGuard)
+    create(@Body() dto: EventDto){
         return this.eventService.create(dto);
     };
+
     @Post('getAll')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
     getAllEvents() {
         return this.eventService.findAll();
     }
 
+    @Post('getInRadius')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getInRadius(@Body() dto:MinMaxCoordinatesDto) {
+        return this.eventService.getInRadius(dto);
+    }
+
 }
+

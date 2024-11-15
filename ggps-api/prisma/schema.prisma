@@ -41,7 +41,7 @@ model Event{
   city String
   zipCode String
   country String  
-  latitude Float?
-  longitude Float?
+  latitude Float
+  longitude Float
   
 }

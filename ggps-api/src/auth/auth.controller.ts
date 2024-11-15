@@ -20,7 +20,6 @@ export class AuthController {
   @HttpCode(200)
   async verifyToken(@Req() req) {
     const token = req.headers['authorization'];
-    console.log({ token });
     if (!token) {
       throw new UnauthorizedException('Token not found');
     }
