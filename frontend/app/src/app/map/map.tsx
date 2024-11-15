@@ -59,10 +59,10 @@ export default function MapComponent() {
             const eventsResponse = await axios.post(
                 "http://localhost:9000/event/getInRadius",
                 {
-                    latMin: currentBounds.getSouthWest().lat.toString(),
-                    longMin: currentBounds.getSouthWest().lng.toString(),
-                    latMax: currentBounds.getNorthEast().lat.toString(),
-                    longMax: currentBounds.getNorthEast().lng.toString(),
+                    latMin: currentBounds.getSouthWest().lat>-90 ? currentBounds.getSouthWest().lat.toString() : '-90',
+                    longMin: currentBounds.getSouthWest().lng>-180 ? currentBounds.getSouthWest().lng.toString() : '-180',
+                    latMax: currentBounds.getNorthEast().lat<90 ? currentBounds.getNorthEast().lat.toString() : '90',
+                    longMax: currentBounds.getNorthEast().lng<180 ? currentBounds.getNorthEast().lng.toString() : '180',
                 },
                 {
                     headers: {
