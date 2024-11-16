@@ -1,20 +1,17 @@
 
-
-.topbar {
-    display: inline-block;
-    justify-content: space-between;
-    align-items: center;
+.topBar {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
     padding: 20px;
     background-color: #333;
-    flex-direction: row;
     color: #fff;
 }
 
 .logo h1 {
     margin: 0;
     font-size: 24px;
-    display: inline-flex;
-
+    display: inline-block;
 }
 
 .nav ul {
@@ -27,7 +24,6 @@
 .nav li {
     margin-left: 20px;
     font-family: var(--font-sofia-pro-medium-az);
-
 }
 
 .nav a {
