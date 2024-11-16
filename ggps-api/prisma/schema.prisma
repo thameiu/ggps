@@ -25,6 +25,13 @@ model User{
   firstName String?
   lastName String?
 
+
+  events Entry[]
+
+  messages Message[]
+
+
+  Access Access[]
 }
 
 model Event{
@@ -43,5 +50,63 @@ model Event{
   country String  
   latitude Float
   longitude Float
+  
+
+  entrants Entry[]
+  chatroom Chatroom?
+}
+
+
+model Entry{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  userId Int
+  eventId Int
+  user User @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  status String
+  message String?
+  rating Int?
+  ratingMessage String?
+}
+
+model Message{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  userId Int
+  chatroomId Int
+  content String
+  user User @relation(fields: [userId], references: [id])
+  chatroom Chatroom @relation(fields: [chatroomId], references: [id])
+}
+
+model Chatroom{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  userId Int
+  eventId Int @unique
+  // user User @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+  messages Message[]
+
+  Access Access[]
+}
+
+model Access{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateddAt DateTime @updatedAt
+
+  userId Int
+  chatroomId Int
+  user User @relation(fields: [userId], references: [id])
+  chatroom Chatroom @relation(fields: [chatroomId], references: [id])
+  role String
   
 }
