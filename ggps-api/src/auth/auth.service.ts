@@ -64,7 +64,14 @@ export class AuthService {
 
   async verifyToken(token: string) {
     try {
-      return this.jwtService.verifyAsync(token); // Verifies the token's validity
+      const decoded = this.jwtService.decode(token) as { userId: number, email: string };
+      const user = await this.prisma.user.findUnique({
+        where: { id: decoded.userId, email: decoded.email },
+      });
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      return this.jwtService.verifyAsync(token);
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
