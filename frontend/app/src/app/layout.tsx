@@ -73,7 +73,7 @@ export default function RootLayout({
       </head>
 
       <body
-        className={`${sofiaProMediumAz.variable} ${geistMono.variable} antialiased`}
+        className={`${sofiaProMediumAz.variable} ${sofiaProBlackAz.variable} antialiased`}
       >
       <Header/>
 

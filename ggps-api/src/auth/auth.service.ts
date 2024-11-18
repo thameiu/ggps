@@ -13,7 +13,6 @@ export class AuthService {
   ) {}
 
   async login(dto: LogDto): Promise<{ token: string, user: any }> {
-    // Find user by email
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -22,20 +21,16 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials');
     }
 
-    // Verify password
     const valid = await argon.verify(user.hash, dto.password);
     if (!valid) {
       throw new ForbiddenException('Invalid credentials');
     }
 
-    // Generate JWT token (the only token issued)
     const payload = { userId: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
-    // Remove the password hash before returning the user data
     const { hash, ...userWithoutHash } = user;
 
-    // Return token and user info
     return { token, user: userWithoutHash };
   }
 

@@ -12,6 +12,7 @@ const Header: React.FC = () => {
             <div className={styles.nav}>
                 <ul>
                     <li><a href="/">Home</a></li>
+                    <li><a href="/map">Map</a></li>
                     <li><a href="/contact">Contact</a></li>
                     <li><a href="/profile"><FontAwesomeIcon icon={faUser} /></a></li>
                 </ul>

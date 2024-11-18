@@ -1,0 +1,14 @@
+.openForm{
+    background-color: #333333;
+    padding:10px;
+    border-radius: 10px;
+    border:none;
+}
+
+
+.createForm input{
+    background-color: #111;
+}
+.createForm textarea{
+    background-color: #111;
+}
