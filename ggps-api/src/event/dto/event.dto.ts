@@ -67,3 +67,19 @@ export class MinMaxCoordinatesDto {
     longMax: string;
 
 }
+
+
+export class EntryDto {
+
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+
+    @IsNotEmpty()
+    eventId: string;
+
+    @IsString()
+    @IsNotEmpty()
+    status: string;
+
+}

@@ -1,6 +1,6 @@
 import { Body, ForbiddenException, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { EventDto, MinMaxCoordinatesDto } from './dto';
+import { EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
@@ -70,32 +70,36 @@ export class EventService {
         }
     }
 
-    async seedEvents(count: number) {
-        for (let i = 0; i < count; i++) {
-            const dto: EventDto = {
-                title: faker.lorem.sentence(),
-                description: faker.lorem.paragraph(),
-                beginDate: faker.date.future().toISOString(),
-                endDate: faker.date.future().toISOString(),
-                street: faker.location.street(),
-                number: faker.location.buildingNumber().toString(),
-                city: faker.location.city(),
-                zipCode: faker.location.zipCode(),
-                country: faker.location.country(),
-                latitude: faker.location.latitude().toString(),
-                longitude: faker.location.longitude().toString(),
-            };
-            try {
-                await this.create(dto);
-               
-            } catch (error) {
-                if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                    if (error.code === 'P2002') {
-                        throw new ForbiddenException('Duplicate entry');
-                    }
+
+    async createEntry(dto: EntryDto) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    email: dto.email
                 }
-                throw error;
+            })
+            const event = await this.prisma.event.findUnique({
+                where: {
+                    id: parseInt(dto.eventId)
+                }
+            })
+            if (!user) {
+                throw new ForbiddenException('User not found');
             }
+            if (!event) {
+                throw new ForbiddenException('Event not found');
+            }
+            const entry = await this.prisma.entry.create({
+                data: {
+                    userId: user.id,
+                    eventId: event.id,
+                    status: dto.status,
+                }
+            });
+            return entry;
+        } catch (error) {
+            throw error;
         }
     }
+
 }

@@ -14,6 +14,7 @@ type RightPanelProps = {
     address: string | null;
 
 };
+// RightPanel Component
 
 export default function RightPanel({
     position,
@@ -52,7 +53,7 @@ export default function RightPanel({
                     description,
                     beginDate,
                     endDate,
-                    latitude: position.lat.toString(), // Use coordinates from LocationMarker
+                    latitude: position.lat.toString(),
                     longitude: position.lng.toString(),
                     street: "a",
                     city: "a",
@@ -82,22 +83,12 @@ export default function RightPanel({
     };
 
     return (
-        <div
+        <div className={styles.rightPanel}
             style={{
-                position: "absolute",
-                top: 0,
                 right: isPanelOpen ? 0 : "-300px",
-                width: "300px",
-                height: "100%",
-                backgroundColor: "#333",
-                boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-                transition: "right 0.3s ease-in-out",
-                zIndex: 1000,
-                padding: "20px",
-                color: "#fff",
             }}
         >
-            <h3>Create Event</h3>
+            <h3 className={styles.createFormTitle}>Create Event</h3>
             {error && <p style={{ color: "red" }}>{error}</p>}
             {success && <p style={{ color: "green" }}>Event created successfully!</p>}
             <form onSubmit={handleSubmit} className={styles.createForm}>
@@ -145,14 +136,8 @@ export default function RightPanel({
             </form>
             <button
                 onClick={() => setIsPanelOpen(false)}
-                style={{
-                    marginTop: "10px",
-                    backgroundColor: "#f44336",
-                    color: "white",
-                    border: "none",
-                    padding: "10px 15px",
-                    cursor: "pointer",
-                }}
+                className={styles.closeForm}
+
             >
                 Close
             </button>

@@ -5,10 +5,45 @@
     border:none;
 }
 
+.createForm{
+    font-family: var(--font-sofia-pro-medium-az);
+
+}
 
 .createForm input{
     background-color: #111;
 }
 .createForm textarea{
     background-color: #111;
+
+}
+
+.createFormTitle{
+    font-family: var(--font-sofia-pro-medium-az);
+
+}
+
+.closeForm{
+    margin-top: 10px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: var(--font-sofia-pro-medium-az);
+}
+
+.rightPanel{
+    position: absolute;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #333;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 20px;
+    color: #fff;
+    overflow-x: hidden;
+    font-size: 1.3em;
 }
