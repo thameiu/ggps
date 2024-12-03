@@ -12,7 +12,7 @@ import styles from "./map.module.css";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
-    const positionRef = useRef<LatLng | null>(null); // Persistent ref for position
+    const positionRef = useRef<LatLng | null>(null); 
     const [address, setAddress] = useState<string | null>(null);
     const [events, setEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -21,7 +21,6 @@ export default function MapComponent() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const router = useRouter();
 
-    // Verify token on load
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -88,20 +87,19 @@ export default function MapComponent() {
         }
     };
 
-    // Handle map click for marker placement
     function LocationMarker() {
         useMapEvents({
             click(e) {
-                // Check if the click originated from the RightPanel
+
                 const panel = document.querySelector(`.${styles.rightPanel}`);
                 const button = document.querySelector(`.${styles.openForm}`);
                 if (panel && panel.contains(e.originalEvent.target as Node) || button && button.contains(e.originalEvent.target as Node)) {
-                    return; // Ignore clicks on the panel
+                    return; 
                 }
 
                 const newPosition = e.latlng;
-                setPosition(newPosition); // Update state
-                positionRef.current = newPosition; // Keep persistent ref updated
+                setPosition(newPosition);
+                positionRef.current = newPosition; 
                 reverseGeocode(newPosition.lat, newPosition.lng);
             },
         });
@@ -189,19 +187,54 @@ export default function MapComponent() {
                 <LocationMarker />
                 <AddPanelButton />
                 {events.map((event) => (
-                    <Marker
-                        key={event.id}
-                        position={[event.latitude || 0, event.longitude || 0]}
-                    >
-                        <Popup>
-                            <strong>{event.title}</strong>
-                            <br />
-                            {event.description}
-                            <br />
-                            Date: {event.beginDate}
-                        </Popup>
-                    </Marker>
-                ))}
+                <Marker
+                    key={event.id}
+                    position={[event.latitude || 0, event.longitude || 0]}
+                >
+                    <Popup>
+                        <button
+                            onClick={async () => {
+                                const token = localStorage.getItem("token");
+                                if (!token) {
+                                    alert("You must be logged in to sign up for events.");
+                                    return;
+                                }
+
+                                try {
+                                    const response = await axios.post(
+                                        "http://localhost:9000/event/addEntry",
+                                        { 
+                                            eventId: event.id,
+                                            email: localStorage.getItem("email"),
+                                            status: "waiting",
+
+                                         },
+                                        { headers: { authorization: token } }
+                                    );
+
+                                    if (response.status === 200) {
+                                        alert("Successfully signed up for the event!");
+                                    } else {
+                                        alert("Failed to sign up for the event.");
+                                    }
+                                } catch (error) {
+                                    console.error("Error signing up for event:", error);
+                                    alert("An error occurred. Please try again.");
+                                }
+                            }}
+                        >
+                            Sign up
+                        </button>
+                        <br />
+                        <strong>{event.title}</strong>
+                        <br />
+                        {event.description}
+                        <br />
+                        Date: {event.beginDate}
+                    </Popup>
+                </Marker>
+            ))}
+
             </MapContainer>
         </>
     );
