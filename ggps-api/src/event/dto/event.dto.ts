@@ -71,9 +71,8 @@ export class MinMaxCoordinatesDto {
 
 export class EntryDto {
 
-    @IsEmail()
     @IsNotEmpty()
-    email: string;
+    token: string;
 
     @IsNotEmpty()
     eventId: string;

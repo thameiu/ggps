@@ -3,11 +3,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class EventService {
 
-    constructor(private prisma: PrismaService){}
+    constructor(private prisma: PrismaService, private auth:AuthService){}
 
     async create(dto: EventDto){
         try {
@@ -73,11 +74,8 @@ export class EventService {
 
     async createEntry(dto: EntryDto) {
         try {
-            const user = await this.prisma.user.findUnique({
-                where: {
-                    email: dto.email
-                }
-            })
+
+            const user = await this.auth.getUserFromToken(dto.token);
             const event = await this.prisma.event.findUnique({
                 where: {
                     id: parseInt(dto.eventId)

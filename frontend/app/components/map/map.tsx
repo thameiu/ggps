@@ -205,10 +205,10 @@ export default function MapComponent() {
                                         "http://localhost:9000/event/addEntry",
                                         { 
                                             eventId: event.id,
-                                            email: localStorage.getItem("email"),
+                                            token: localStorage.getItem("token"),
                                             status: "waiting",
 
-                                         },
+                                        },
                                         { headers: { authorization: token } }
                                     );
 

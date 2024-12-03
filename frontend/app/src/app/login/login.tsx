@@ -39,7 +39,6 @@ export default function Login() {
 
       const { token } = await response.json(); // Get token from response
       localStorage.setItem('token', token); // Store token in localStorage
-      localStorage.setItem('email', formData.email); // Store token in localStorage
 
 
       router.push('/map'); // Redirect to /map
