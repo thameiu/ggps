@@ -79,6 +79,7 @@ model Message{
   userId Int
   chatroomId Int
   content String
+  pinned Boolean
   user User @relation(fields: [userId], references: [id])
   chatroom Chatroom @relation(fields: [chatroomId], references: [id])
 }
@@ -88,9 +89,7 @@ model Chatroom{
   createdAt DateTime @default(now())
   updateddAt DateTime @updatedAt
 
-  userId Int
   eventId Int @unique
-  // user User @relation(fields: [userId], references: [id])
   event Event @relation(fields: [eventId], references: [id])
   messages Message[]
 

@@ -1,34 +1,38 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { CreateMessageDto, CreateChatroomDto } from './dto';
 
-@Controller('message')
+@Controller('chat')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
-  @Post()
-  create(@Body() createMessageDto: CreateMessageDto) {
+  @Post('message')
+  createMessage(@Body() createMessageDto: CreateMessageDto) {
     return this.messageService.create(createMessageDto);
   }
 
-  @Get()
-  findAll() {
-    return this.messageService.findAll();
+  @Post('room')
+  createChatroom(@Body() createChatroomDto: CreateChatroomDto) {
+    return this.messageService.createChatroom(createChatroomDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messageService.findOne(+id);
-  }
+  // @Get()
+  // findAll() {
+  //   return this.messageService.findAll();
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-    return this.messageService.update(+id, updateMessageDto);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.messageService.findOne(+id);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messageService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
+  //   return this.messageService.update(+id, updateMessageDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.messageService.remove(+id);
+  // }
 }

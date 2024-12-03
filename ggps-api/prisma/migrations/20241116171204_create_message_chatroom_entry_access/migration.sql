@@ -41,7 +41,6 @@ CREATE TABLE "Chatroom" (
     "id" SERIAL NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updateddAt" TIMESTAMP(3) NOT NULL,
-    "userId" INTEGER NOT NULL,
     "eventId" INTEGER NOT NULL,
 
     CONSTRAINT "Chatroom_pkey" PRIMARY KEY ("id")
