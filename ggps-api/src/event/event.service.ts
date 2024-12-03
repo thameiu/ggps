@@ -83,11 +83,20 @@ export class EventService {
                     id: parseInt(dto.eventId)
                 }
             })
+            const entryFound = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: user.id,
+                }
+            })
             if (!user) {
                 throw new ForbiddenException('User not found');
             }
             if (!event) {
                 throw new ForbiddenException('Event not found');
+            }
+            if (entryFound) {
+                throw new ForbiddenException('This user has already signed up for this event');
             }
             const entry = await this.prisma.entry.create({
                 data: {
