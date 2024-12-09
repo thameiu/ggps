@@ -32,6 +32,8 @@ CREATE TABLE "Message" (
     "userId" INTEGER NOT NULL,
     "chatroomId" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
+    "pinned" BOOLEAN NOT NULL,
+
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );

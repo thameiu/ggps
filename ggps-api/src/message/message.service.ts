@@ -14,7 +14,7 @@ export class MessageService {
 
     const chatroom = await this.prisma.chatroom.findUnique({
         where: {
-            id: dto.chatroomId
+            id: parseInt(dto.chatroomId)
         }
 
     });
@@ -26,6 +26,26 @@ export class MessageService {
         throw new ForbiddenException('Chatroom not found');
     }
 
+    const message = await this.prisma.message.create({
+      data: {
+        chatroom: {
+          connect: {
+            id: chatroom.id,
+          },
+        },
+        content: dto.content,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+        pinned: false, // Provide a value for `pinned`
+      },
+    });
+    
+  
+
+    return message;
   }
 
   async createChatroom(dto: CreateChatroomDto) {

@@ -7,8 +7,7 @@ export class CreateMessageDto {
     token: string;
 
     @IsNotEmpty()
-    @IsInt()
-    chatroomId: number;
+    chatroomId: string;
 
     @IsNotEmpty()
     @IsString()
