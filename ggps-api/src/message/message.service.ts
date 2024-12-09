@@ -10,6 +10,7 @@ export class MessageService {
   constructor(private prisma: PrismaService, private auth: AuthService){}
 
   async create(dto: CreateMessageDto) {
+
     const user = await this.auth.getUserFromToken(dto.token);
 
     const chatroom = await this.prisma.chatroom.findUnique({
@@ -26,6 +27,14 @@ export class MessageService {
         throw new ForbiddenException('Chatroom not found');
     }
 
+    
+    const existingAccess = await this.checkUserAccess(dto.token, chatroom.id);
+
+
+    if (!existingAccess) {
+      throw new ForbiddenException('User does not have access to this chatroom');
+    }
+
     const message = await this.prisma.message.create({
       data: {
         chatroom: {
@@ -39,7 +48,7 @@ export class MessageService {
             id: user.id,
           },
         },
-        pinned: false, // Provide a value for `pinned`
+        pinned: false, 
       },
     });
     
@@ -71,6 +80,97 @@ export class MessageService {
   
 
     return chatroom;
+  }
+
+  async getChatroomByEvent(eventId: number) {
+    const chatroom = await this.prisma.chatroom.findUnique({
+      where: {
+        eventId: eventId,
+      },
+    });
+
+    if (!chatroom) {
+      throw new ForbiddenException('Chatroom not found for this event');
+    }
+
+    return chatroom;
+  }
+
+  async getMessagesByChatroom(chatroomId: string) {
+    const messages = await this.prisma.message.findMany({
+      where: {
+        chatroomId: parseInt(chatroomId),
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    if (!messages) {
+      throw new ForbiddenException('No messages found for this chatroom');
+    }
+
+    return messages;
+  }
+
+  async giveAccess(token: string, chatroomId: number, role: string) {
+    const user = await this.auth.getUserFromToken(token);
+
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+
+    const chatroom = await this.prisma.chatroom.findUnique({
+      where: {
+        id: chatroomId,
+      },
+    });
+
+    if (!chatroom) {
+      throw new ForbiddenException('Chatroom not found');
+    }
+
+    const existingAccess = await this.checkUserAccess(token, chatroomId);
+
+
+    if (existingAccess) {
+      throw new ForbiddenException('User already has access to this chatroom');
+    }
+
+    const access = await this.prisma.access.create({
+      data: {
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+        chatroom: {
+          connect: {
+            id: chatroom.id,
+          },
+        },
+        role: role,
+      },
+    });
+
+    return access;
+  }
+  
+  async checkUserAccess(token: string, chatroomId: number) {
+    const user = await this.auth.getUserFromToken(token);
+
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+
+    const access = await this.prisma.access.findFirst({
+      where: {
+        userId: user.id,
+        chatroomId: chatroomId,
+      },
+    });
+
+    return access;
   }
 
   findAll() {

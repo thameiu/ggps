@@ -4,11 +4,12 @@ import { EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
+import { MessageService } from "src/message/message.service";
 
 @Injectable()
 export class EventService {
 
-    constructor(private prisma: PrismaService, private auth:AuthService){}
+    constructor(private prisma: PrismaService, private auth:AuthService, private message:MessageService){}
 
     async create(dto: EventDto){
         try {
@@ -103,6 +104,11 @@ export class EventService {
                     status: dto.status,
                 }
             });
+
+            const chatroom = await this.message.getChatroomByEvent(event.id);
+            if (chatroom){
+                await this.message.giveAccess(dto.token, chatroom.id, 'participant');
+            }
             return entry;
         } catch (error) {
             throw error;

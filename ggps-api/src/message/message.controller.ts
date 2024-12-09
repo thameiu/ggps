@@ -16,6 +16,11 @@ export class MessageController {
     return this.messageService.createChatroom(createChatroomDto);
   }
 
+  @Get('room/:roomId/messages')
+  getMessagesByChatroom(@Param('roomId') roomId: string) {
+    return this.messageService.getMessagesByChatroom(roomId);
+  }
+
   // @Get()
   // findAll() {
   //   return this.messageService.findAll();
