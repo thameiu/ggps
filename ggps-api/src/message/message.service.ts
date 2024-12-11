@@ -90,7 +90,7 @@ export class MessageService {
     });
 
     if (!chatroom) {
-      throw new ForbiddenException('Chatroom not found for this event');
+      return null;
     }
 
     return chatroom;

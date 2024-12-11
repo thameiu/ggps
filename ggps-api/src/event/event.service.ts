@@ -1,4 +1,4 @@
-import { Body, ForbiddenException, Injectable, Post } from '@nestjs/common';
+import { Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
@@ -11,7 +11,12 @@ export class EventService {
 
     constructor(private prisma: PrismaService, private auth:AuthService, private message:MessageService){}
 
-    async create(dto: EventDto){
+    async create(dto: EventDto, token:string){
+        const user = await this.auth.getUserFromToken(token);
+        if (!user) {
+            throw new ForbiddenException('User not found');
+        }
+
         try {
             const event = await this.prisma.event.create({
                 data: {
@@ -30,11 +35,12 @@ export class EventService {
                     game: dto.game?dto.game:null,
                 }
             });
+            this.createEntry({eventId:event.id.toString(), status:'organizer', token:token});
             return event;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError ) {
                 if (error.code === 'P2002'){
-                    throw new ForbiddenException('Username or email taken');
+                    throw new ForbiddenException('Error');
                 }
             }  
             throw error;
@@ -97,7 +103,7 @@ export class EventService {
                 throw new ForbiddenException('Event not found');
             }
             if (entryFound) {
-                throw new ForbiddenException('This user has already signed up for this event');
+                throw new HttpException('User already signed up for this event', HttpStatus.BAD_REQUEST);
             }
             const entry = await this.prisma.entry.create({
                 data: {

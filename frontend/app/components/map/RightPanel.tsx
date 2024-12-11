@@ -110,13 +110,18 @@ export default function RightPanel({
                     required
                     style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
                 />
-                <textarea
-                    placeholder="Category"
+                <select
+                    className={styles.select}
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     required
                     style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
-                />
+                >
+                    <option value="" disabled>Select Category</option>
+                    <option value="Lan">Lan</option>
+                    <option value="Tournament">Tournament</option>
+                    <option value="Convention">Convention</option>
+                </select>
                 <input
                     type="datetime-local"
                     value={beginDate}

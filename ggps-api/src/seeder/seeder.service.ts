@@ -28,7 +28,7 @@ export class SeederService {
                 category: faker.lorem.word(),
             };
             try {
-                await this.eventService.create(dto);
+                await this.eventService.create(dto,'');
                
             } catch (error) {
                 if (error instanceof Prisma.PrismaClientKnownRequestError) {

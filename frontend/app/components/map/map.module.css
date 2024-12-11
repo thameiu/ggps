@@ -3,6 +3,7 @@
     padding:10px;
     border-radius: 10px;
     border:none;
+    font-family: var(--font-sofia-pro-medium-az);
 }
 
 .createForm{
@@ -35,15 +36,52 @@
 
 .rightPanel{
     position: absolute;
-    top: 0;
+    top: 11%;
     width: 300px;
     height: 100%;
     background-color: #333;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    box-shadow: 0 10px  rgba(0,0,0,0.5);
     transition: right 0.3s ease-in-out;
     z-index: 1000;
     padding: 20px;
     color: #fff;
     overflow-x: hidden;
     font-size: 1.3em;
+}
+
+.select{
+    background-color: #111;
+    color: #fff;
+    font-family: var(--font-sofia-pro-medium-az);
+}
+.searchBar {
+    position: absolute; /* Use absolute positioning */
+    /* top: 50%; Position at the vertical center */
+    top:3%;
+    left: 40%; /* Position at the horizontal center */
+    z-index: 9999; /* Make sure it's above other components */
+}
+
+.searchInput {
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #111;
+    font-family: var(--font-sofia-pro-black-az);
+}
+
+.searchButton {
+    padding: 5px 10px;
+    font-size: 1rem;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.searchButton:hover {
+    background-color: #777;
 }

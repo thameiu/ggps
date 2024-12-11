@@ -1,9 +1,19 @@
-import React from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import styles from './header.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 const Header: React.FC = () => {
+    const [currentPath, setCurrentPath] = useState<string>('');
+
+    useEffect(() => {
+        
+        if (typeof window !== 'undefined') {
+            setCurrentPath(window.location.pathname);
+        }
+    }, []);
+
     return (
         <div className={styles.topBar}>
             <div className={styles.logo}>
@@ -17,7 +27,8 @@ const Header: React.FC = () => {
                     <li><a href="/profile"><FontAwesomeIcon icon={faUser} /></a></li>
                 </ul>
             </div>
-            
+            {/* Render the search bar only on /map */}
+
         </div>
     );
 };

@@ -1,5 +1,10 @@
-
 .topBar {
+    position: fixed; /* Ensures the header stays at the top even when scrolling */
+    top: 0;          /* Positions it at the very top of the viewport */
+    left: 0;         /* Ensures it stretches from the left edge */
+    height:11%;
+    width: 100%;     /* Makes it span the full width of the page */
+    z-index: 1000;   /* Places it on top of other elements */
     display: flex;
     justify-content: space-between; 
     align-items: center; 
@@ -36,3 +41,32 @@
 .nav a:hover {
     text-decoration: underline;
 }
+
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+.nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+}
+

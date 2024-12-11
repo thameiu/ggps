@@ -11,8 +11,8 @@ export class EventController {
 
     @Post('create')
     @UseGuards(AuthGuard)
-    create(@Body() dto: EventDto){
-        return this.eventService.create(dto);
+    create(@Body() dto: EventDto, token:string){
+        return this.eventService.create(dto,token);
     };
 
     @Get('getAll')
