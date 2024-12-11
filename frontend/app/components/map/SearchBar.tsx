@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styles from './map.module.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 interface SearchBarProps {
     coordinates: {
@@ -55,7 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSe
                 onKeyDown={handleKeyDown} // Listen for Enter key
             />
             <button className={styles.searchButton} onClick={handleSearch}>
-                Search
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
         </div>
     );

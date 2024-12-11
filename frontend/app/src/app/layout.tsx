@@ -46,7 +46,7 @@ const sofiaProExtralightAz = localFont({
 
 const sofiaProUltralighttAz = localFont({
   src: "./fonts/Sofia Pro ExtraLight Az.woff",
-  variable: "--font-sofia-pro-ultralight-az",
+    variable: "--font-sofia-pro-ultralight-az",
 });
 
 

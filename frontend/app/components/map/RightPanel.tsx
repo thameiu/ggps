@@ -63,6 +63,7 @@ export default function RightPanel({
                     country: "a",
                     number: "a",
                     game: "",
+                    token: token,
                 },
                 {
                     headers: {

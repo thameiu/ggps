@@ -17,7 +17,7 @@ const Header: React.FC = () => {
     return (
         <div className={styles.topBar}>
             <div className={styles.logo}>
-                <h1>GGPS</h1>
+                <img className={styles.logo} src="/images/logo.png" alt="Logo" />
             </div>
             <div className={styles.nav}>
                 <ul>

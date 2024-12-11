@@ -21,6 +21,9 @@ export default function MapComponent() {
     const [isTokenValid, setIsTokenValid] = useState(true);
     const [bounds, setBounds] = useState<LatLngBounds | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); // Track zoom-out state
+    
+
     const router = useRouter();
 
     useEffect(() => {
@@ -51,12 +54,13 @@ export default function MapComponent() {
         };
 
         verifyToken();
+
     }, [router]);
+
 
     const fetchEvents = async (currentBounds: LatLngBounds | null) => {
         const token = localStorage.getItem("token");
         if (!token || !currentBounds) return;
-        console.log(searchWord);
         
         try {
             if (searchWord && searchWord.length >= 3){
@@ -73,7 +77,6 @@ export default function MapComponent() {
                         headers: { authorization: token }
                     },
                 );
-                console.log(searchWord);
                 setEvents(eventsResponse.data.slice(0, 50));
             } else {
                 const eventsResponse = await axios.get(
@@ -100,6 +103,7 @@ export default function MapComponent() {
     }, [bounds]);
 
     const reverseGeocode = async (lat: number, lng: number) => {
+        console.log(lat, lng);
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/reverse`, {
                 params: { lat, lon: lng, format: "json" },
@@ -128,7 +132,14 @@ export default function MapComponent() {
         });
 
         return positionRef.current ? (
-            <Marker position={positionRef.current}>
+            <Marker position={positionRef.current}
+            icon={L.icon({
+                iconUrl: '/images/icons8-marker-90.png',
+                iconSize: [40, 40], 
+                iconAnchor: [15, 35], 
+                popupAnchor: [0, -30] 
+            })}
+            >
                 <Popup>{address || "Fetching address..."}</Popup>
             </Marker>
         ) : null;
@@ -145,36 +156,56 @@ export default function MapComponent() {
 
     function AddPanelButton() {
         const map = useMap();
-
+    
         useEffect(() => {
+            // Check if there are multiple buttons with the class `styles.openForm`
+            const existingButtons = document.querySelectorAll(`.${styles.openForm}`);
+            if (existingButtons.length > 1) {
+                // Remove all duplicate buttons except the first one
+                existingButtons.forEach((button, index) => {
+                    if (index > 0) {
+                        button.parentElement?.removeChild(button);
+                    }
+                });
+                return; // Exit if cleanup was performed
+            }
+    
+            // Check if a button already exists and return early if it does
+            if (existingButtons.length === 1) {
+                console.log(existingButtons[0]);
+                return;
+            }
+    
+            // Create a container for the button
             const buttonContainer = L.DomUtil.create("div", "leaflet-bar leaflet-control");
             buttonContainer.style.cursor = "pointer";
             buttonContainer.style.top = "12vh";
             buttonContainer.style.border = "none";
-
+    
+            // Create the React button
             const button = (
                 <button
+                    id="openFormButton"
                     className={styles.openForm}
-                    onClick={() => setIsPanelOpen(!isPanelOpen)}
+                    onClick={() => setIsPanelOpen((prev) => !prev)}
                 >
                     Open Panel
                 </button>
             );
-
+    
+            // Render the button into the container
             const root = createRoot(buttonContainer);
             root.render(button);
-
+    
+            // Add the button to the map
             const control = new L.Control({ position: "topright" });
             control.onAdd = () => buttonContainer;
             control.addTo(map);
-
-            return () => {
-                control.remove();
-            };
-        }, [map]);
-
+        }, [map]); // Dependency array ensures this runs once per map instance
+    
         return null;
     }
+    
 
     function ModifyZoomButtons() {
         const map = useMap();
@@ -188,10 +219,10 @@ export default function MapComponent() {
             if (zoomControl) {
                 zoomControl.style.top = "12vh"; 
                 zoomControl.style.right = "10wh";
-                zoomControl.style.backgroundColor = "#333333";
-                zoomInControl.style.backgroundColor = "#333333";
+                zoomControl.style.backgroundColor = "#111";
+                zoomInControl.style.backgroundColor = "#111";
                 zoomInControl.style.color = "#fff";
-                zoomOutControl.style.backgroundColor = "#333333";
+                zoomOutControl.style.backgroundColor = "#111";
                 zoomOutControl.style.color = "#fff"; 
             }
         }, [map]);
@@ -199,15 +230,61 @@ export default function MapComponent() {
         return null;
     }
 
-    if (loading) return <div>Loading...</div>;
+    function SimulateZoomOut() {
+        const map = useMap();
 
-    if (!isTokenValid) return null;
+        useEffect(() => {
+            if (map && !hasZoomedOutOnce) {
+                const currentZoom = map.getZoom();
+                map.setZoom(currentZoom - 1, { animate: true });
+                setHasZoomedOutOnce(true); 
+            }
+        }, [map, hasZoomedOutOnce]);
+    
+        return null;
+    }
+
+    // function AddLayerButton() {
+    //     const map = useMap();
+
+
+    //     useEffect(() => {
+
+    //         var Thunderforest_SpinalMap = L.tileLayer('https://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png?apikey={apikey}', {
+    //             attribution: '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    //             apikey: '<your apikey>',
+    //             maxZoom: 22
+    //         });
+
+    //         const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    //         });
+    //         map.addLayer(layer);
+
+    //     }, [map]);
+
+    //     return null;
+    // }
+    
+
+
+    if (loading) return <div>Loading...</div>;
+    const existingButtons = document.querySelectorAll(`.${styles.openForm}`);
+    if (existingButtons.length > 1) {
+        // Remove all duplicate buttons except the first one
+        existingButtons.forEach((button, index) => {
+            if (index > 0) {
+                button.parentElement?.removeChild(button);
+            }
+        });
+        return; // Exit if cleanup was performed
+    }
 
     return (
         <>
             <MapContainer
-                center={[51.505, -0.09]}
-                zoom={13}
+                center={[46.58529425166958, 2.7246093750000004]}
+                zoom={7}
                 style={{ height: "100vh", width: "100%" }}
                 maxBounds={[
                     [-90, -180],
@@ -217,6 +294,9 @@ export default function MapComponent() {
                 minZoom={3}
                 maxZoom={18}
             >
+                
+                <AddPanelButton />
+
                 <RightPanel
                     position={positionRef.current}
                     setIsPanelOpen={setIsPanelOpen}
@@ -241,13 +321,33 @@ export default function MapComponent() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
+{/* var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 20,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+    }); */}
+
+                {/* <TileLayer
+                    noWrap
+                    url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+                    attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                /> */}
+
+
                 <BoundsFinder />
                 <LocationMarker />
-                <AddPanelButton />
+                
                 <ModifyZoomButtons />
                 {events.map((event) => (
                     <Marker
                         key={event.id}
+                        icon={L.icon({
+                            iconUrl: '/images/icons8-marker-90.png',
+                            iconSize: [30, 30], 
+                            iconAnchor: [15, 30], 
+                            popupAnchor: [0, -30] 
+                        })}
                         position={[event.latitude || 0, event.longitude || 0]}
                     >
                         <Popup>
@@ -300,6 +400,8 @@ export default function MapComponent() {
                         </Popup>
                     </Marker>
                 ))}
+            <SimulateZoomOut />
+
             </MapContainer>
         </>
     );

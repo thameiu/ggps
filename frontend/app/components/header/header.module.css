@@ -1,17 +1,20 @@
-.topBar {
-    position: fixed; /* Ensures the header stays at the top even when scrolling */
-    top: 0;          /* Positions it at the very top of the viewport */
-    left: 0;         /* Ensures it stretches from the left edge */
-    height:11%;
-    width: 100%;     /* Makes it span the full width of the page */
-    z-index: 1000;   /* Places it on top of other elements */
+
+.navbar {
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.8) 0%, rgba(0, 0, 0, 1) 70%);
+    height: 60px; /* Adjust navbar height */
+    padding: 0 20px;
     display: flex;
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 20px;
-    background-color: #333;
-    color: #fff;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+/* Optional: Hover effect for links inside navbar */
+.navbar a:hover {
+    color: #ff4040;
+}
+
 
 .logo h1 {
     margin: 0;
@@ -43,13 +46,31 @@
 }
 
 .topBar {
+    position: fixed; 
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #333;
+    top: 0;       
+    left: 0;        
+    height: 11%;
+    width: 100%;     
+    z-index: 1000;   
     color: white;
     padding: 10px 20px;
+    background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.9) 70%);
+    
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+
+
+/* Optional: Hover effect for links inside navbar */
+.topbar a:hover {
+    color: #ff4040;
+}
+
 
 .logo h1 {
     margin: 0;
@@ -70,3 +91,7 @@
     font-size: 1rem;
 }
 
+.logo{
+
+    width:30%;
+}
