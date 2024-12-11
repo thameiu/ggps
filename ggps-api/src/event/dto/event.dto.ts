@@ -53,6 +53,9 @@ export class EventDto {
     @IsString()
     game?: string;
     
+    
+    @IsString()
+    token: string;
 }
 
 

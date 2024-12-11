@@ -1,4 +1,4 @@
-import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode, Get, Query } from "@nestjs/common";
+import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode, Get, Query, Head, Param } from "@nestjs/common";
 import { EventService }from './event.service';
 import { EntryDto, EventDto, MinMaxCoordinatesDto } from "./dto";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -11,8 +11,9 @@ export class EventController {
 
     @Post('create')
     @UseGuards(AuthGuard)
-    create(@Body() dto: EventDto, token:string){
-        return this.eventService.create(dto,token);
+
+    create(@Body() dto: EventDto){
+        return this.eventService.create(dto);
     };
 
     @Get('getAll')

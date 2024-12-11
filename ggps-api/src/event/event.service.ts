@@ -11,8 +11,8 @@ export class EventService {
 
     constructor(private prisma: PrismaService, private auth:AuthService, private message:MessageService){}
 
-    async create(dto: EventDto, token:string){
-        const user = await this.auth.getUserFromToken(token);
+    async create(dto: EventDto){
+        const user = await this.auth.getUserFromToken(dto.token);
         if (!user) {
             throw new ForbiddenException('User not found');
         }
@@ -35,7 +35,7 @@ export class EventService {
                     game: dto.game?dto.game:null,
                 }
             });
-            this.createEntry({eventId:event.id.toString(), status:'organizer', token:token});
+            this.createEntry({eventId:event.id.toString(), status:'organizer', token:dto.token});
             return event;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError ) {
@@ -132,7 +132,6 @@ export class EventService {
     async getBySearchWordInRadius(searchWord: string, dto: MinMaxCoordinatesDto) {
         const eventsInRadius = await this.getInRadius(dto);
         const searchWordLower = searchWord.toLowerCase();
-        console.log(searchWordLower);
         const filteredEvents = eventsInRadius.filter(event => 
             event.title.toLowerCase().includes(searchWordLower) || 
             event.description.toLowerCase().includes(searchWordLower)

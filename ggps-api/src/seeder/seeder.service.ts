@@ -26,10 +26,11 @@ export class SeederService {
                 latitude: faker.location.latitude().toString(),
                 longitude: faker.location.longitude().toString(),
                 category: faker.lorem.word(),
+                token: faker.lorem.word()
             };
             try {
-                await this.eventService.create(dto,'');
-               
+                await this.eventService.create(dto);
+
             } catch (error) {
                 if (error instanceof Prisma.PrismaClientKnownRequestError) {
                     if (error.code === 'P2002') {
