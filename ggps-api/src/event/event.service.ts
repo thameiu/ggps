@@ -26,6 +26,8 @@ export class EventService {
                     country: dto.country,
                     latitude: parseFloat(dto.latitude),
                     longitude: parseFloat(dto.longitude),
+                    category: dto.category,
+                    game: dto.game?dto.game:null,
                 }
             });
             return event;

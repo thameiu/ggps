@@ -25,6 +25,7 @@ export class SeederService {
                 country: faker.location.country(),
                 latitude: faker.location.latitude().toString(),
                 longitude: faker.location.longitude().toString(),
+                category: faker.lorem.word(),
             };
             try {
                 await this.eventService.create(dto);

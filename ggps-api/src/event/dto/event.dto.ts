@@ -45,6 +45,13 @@ export class EventDto {
     @IsString()
     @IsNotEmpty()
     country: string;
+        
+    @IsString()
+    @IsNotEmpty()
+    category: string;
+
+    @IsString()
+    game?: string;
     
 }
 
