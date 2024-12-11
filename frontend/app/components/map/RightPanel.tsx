@@ -25,6 +25,7 @@ export default function RightPanel({
 }: RightPanelProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [category, setCategory] = useState("");
     const [beginDate, setBeginDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [address, setAddress] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export default function RightPanel({
                 {
                     title,
                     description,
+                    category,
                     beginDate,
                     endDate,
                     latitude: position.lat.toString(),
@@ -60,6 +62,7 @@ export default function RightPanel({
                     zipCode: "a",
                     country: "a",
                     number: "a",
+                    game: "",
                 },
                 {
                     headers: {
@@ -104,6 +107,13 @@ export default function RightPanel({
                     placeholder="Description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    required
+                    style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
+                />
+                <textarea
+                    placeholder="Category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     required
                     style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
                 />

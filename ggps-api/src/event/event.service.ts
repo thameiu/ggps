@@ -117,4 +117,22 @@ export class EventService {
         }
     }
 
+    async getByCategoryInRadius(category: string, dto: MinMaxCoordinatesDto) {
+        const eventsInRadius = await this.getInRadius(dto);
+        const events = eventsInRadius.filter(event => event.category === category);
+        return events;
+    }
+
+    async getBySearchWordInRadius(searchWord: string, dto: MinMaxCoordinatesDto) {
+        const eventsInRadius = await this.getInRadius(dto);
+        const searchWordLower = searchWord.toLowerCase();
+        console.log(searchWordLower);
+        const filteredEvents = eventsInRadius.filter(event => 
+            event.title.toLowerCase().includes(searchWordLower) || 
+            event.description.toLowerCase().includes(searchWordLower)
+        );
+        return filteredEvents;
+    }
+
+
 }

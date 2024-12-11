@@ -56,15 +56,17 @@ export default function MapComponent() {
         if (!token || !currentBounds) return;
 
         try {
-            const eventsResponse = await axios.post(
+            const eventsResponse = await axios.get(
                 "http://localhost:9000/event/getInRadius",
                 {
-                    latMin: currentBounds.getSouthWest().lat.toString(),
-                    longMin: currentBounds.getSouthWest().lng.toString(),
-                    latMax: currentBounds.getNorthEast().lat.toString(),
-                    longMax: currentBounds.getNorthEast().lng.toString(),
+                    params: {
+                        latMin: currentBounds.getSouthWest().lat.toString(),
+                        longMin: currentBounds.getSouthWest().lng.toString(),
+                        latMax: currentBounds.getNorthEast().lat.toString(),
+                        longMax: currentBounds.getNorthEast().lng.toString(),
+                    },
+                    headers: { authorization: token }
                 },
-                { headers: { authorization: token } }
             );
             setEvents(eventsResponse.data.slice(0, 50));
         } catch (error) {

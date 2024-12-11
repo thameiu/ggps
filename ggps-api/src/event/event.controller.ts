@@ -1,4 +1,4 @@
-import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode } from "@nestjs/common";
+import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode, Get, Query } from "@nestjs/common";
 import { EventService }from './event.service';
 import { EntryDto, EventDto, MinMaxCoordinatesDto } from "./dto";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -15,26 +15,39 @@ export class EventController {
         return this.eventService.create(dto);
     };
 
-    @Post('getAll')
+    @Get('getAll')
     @UseGuards(AuthGuard)
     @HttpCode(200)
     getAllEvents() {
         return this.eventService.findAll();
     }
 
-    @Post('getInRadius')
+    @Get('getInRadius')
     @UseGuards(AuthGuard)
     @HttpCode(200)
-    getInRadius(@Body() dto:MinMaxCoordinatesDto) {
+    getInRadius(@Query() dto:MinMaxCoordinatesDto) {
         return this.eventService.getInRadius(dto);
+    }
+
+    @Get('getByCategoryInRadius')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getByCategoryInRadius(@Query('category') category: string, @Query() dto: MinMaxCoordinatesDto) {
+        return this.eventService.getByCategoryInRadius(category, dto);
+    }
+
+    @Get('getBySearchWordInRadius')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getBySearchWordInRadius(@Query('searchWord') searchWord: string, @Query() dto: MinMaxCoordinatesDto) {
+        return this.eventService.getBySearchWordInRadius(searchWord, dto);
     }
     
     @Post('addEntry')
     @UseGuards(AuthGuard)
     @HttpCode(200)
-    createEntry(@Body() dto:EntryDto){ {
+    createEntry(@Body() dto:EntryDto){ 
         return this.eventService.createEntry(dto);
     }
 
-    }
 }
