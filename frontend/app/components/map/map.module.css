@@ -56,7 +56,16 @@
     background-color: #111;
     color: #fff;
     font-family: var(--font-sofia-pro-medium-az);
+
 }
+
+.option:hover, .option:focus{
+    background-color:red;
+
+}
+/* .select > .option > a:hover, .select > .option > a:focus {
+    background-color:red;
+} */
 .searchBar {
     position: absolute; /* Use absolute positioning */
     /* top: 50%; Position at the vertical center */

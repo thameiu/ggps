@@ -1,0 +1,41 @@
+.subLogo1{
+    font-family: var(--font-sofia-pro-black-az);
+    color:#525250;
+    font-size: 60px;
+    text-shadow: #000 1px 0 10px;
+    margin-top: -15%;
+}
+.subLogo2{
+    font-family: var(--font-sofia-pro-black-az);
+    color:#ec0000;
+    font-size: 46px;
+    text-shadow: #6e0000 1px 0 10px;
+    margin-top: -10%;
+
+}
+.canvas {
+    overflow: hidden;
+}
+
+.button{
+    background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.5) 70%);
+    background-size: fixed;
+    /* background:rgba(0, 0, 0, 0.5); */
+    padding:20px; 
+    width:33vw;
+    /* height:12vh; */
+    text-align:center;
+    font-family: var(--font-sofia-pro-black-az);
+    font-size: 30px;
+    border-radius: 20px;
+    transition: font-size 0.3s ease-in-out;
+    color:#d3d3d3;
+    text-shadow: #6e0000 1px 0 10px;
+
+
+}
+
+.button:hover {
+    font-size: 32px;
+    
+}

@@ -16,7 +16,7 @@ type RightPanelProps = {
 };
 // RightPanel Component
 
-export default function RightPanel({
+export default function ChatroomBar({
     position,
     setIsPanelOpen,
     isPanelOpen,
@@ -119,9 +119,9 @@ export default function RightPanel({
                     style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
                 >
                     <option value="" disabled>Select Category</option>
-                    <option className={styles.option} value="Lan">Lan</option>
-                    <option className={styles.option} value="Tournament">Tournament</option>
-                    <option className={styles.option} value="Convention">Convention</option>
+                    <option value="Lan">Lan</option>
+                    <option value="Tournament">Tournament</option>
+                    <option value="Convention">Convention</option>
                 </select>
                 <input
                     type="datetime-local"

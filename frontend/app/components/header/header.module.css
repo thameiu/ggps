@@ -92,6 +92,13 @@
 }
 
 .logo{
-
+    
     width:30%;
+
+}
+
+.logo img{
+            background: radial-gradient(circle, rgba(120, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.0) 50%);
+            background-size:contain;
+
 }

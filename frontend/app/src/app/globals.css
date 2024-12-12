@@ -32,3 +32,33 @@ body {
 .leaflet-control-attribution {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
+
+
+.topo-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 11%);
+  background-size: 20px 20px;
+  animation: moveTopoLines 8s linear infinite, fadeLines 4s alternate infinite;
+}
+
+@keyframes moveTopoLines {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes fadeLines {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
