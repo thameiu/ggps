@@ -7,7 +7,7 @@
 }
 
 .createForm{
-    font-family: var(--font-sofia-pro-medium-az);
+    font-family: var(--font-sofia-pro-ultralight-az);
 
 }
 
@@ -50,12 +50,14 @@
     color: #fff;
     overflow-x: hidden;
     font-size: 1.3em;
+    /* font-family: var(--font-sofia-pro-ultralight-az); */
+
 }
 
 .select{
     background-color: #111;
     color: #fff;
-    font-family: var(--font-sofia-pro-medium-az);
+    /* font-family: var(--font-sofia-pro-ultralight-az) */
 
 }
 
@@ -81,7 +83,7 @@
     border-radius: 15px;
         width:20vw;
     background-color: #111;
-    font-family: var(--font-sofia-pro-medium-az);
+    font-family: var(--font-sofia-pro-ultralight-az);
 }
 
 .searchButton {
@@ -99,4 +101,8 @@
 
 .searchButton:hover {
     background-color: #777;
+}
+
+.eventPopup{
+    font-family: var(--font-sofia-pro-medium-az);
 }

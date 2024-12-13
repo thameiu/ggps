@@ -1,0 +1,41 @@
+.eventCard{
+
+    /* background-color: rgb(73, 73, 73); */
+    /* display: flex; */
+    align-items: center;
+    justify-content: center;
+    margin-top:12vh;
+    margin-left:auto;
+    margin-right:auto;
+    width:80vw;
+    /* height: 100vh; */
+    font-family: var(--font-sofia-pro-regular-az);
+}
+
+.title{
+    font-size: 4rem;
+    color: white;
+    margin: 0;
+    margin-right: 2%;
+    display: inline;
+    /* text-align: center; */
+
+}
+
+.subtitle{
+    font-size: 2rem;
+    color: white;
+    margin: 0;
+    display: inline;
+    /* text-align: center; */
+}
+
+.username{
+    font-size: 2rem;
+    color: white;
+    margin: 0;
+    display: inline;
+    margin-left: 1%;
+
+    /* text-align: center; */
+}

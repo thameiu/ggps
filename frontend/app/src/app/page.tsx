@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import styles from './home.module.css';
+import 'animate.css';
 
 export default function Home() {
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function Home() {
           alt="GGPS"
           width={400}
           height={200}
-          className="mx-auto"
+          className="mx-auto animate__animated animate__backInDown"
           // style={{
           //   background: 'radial-gradient(circle, rgba(128, 30, 30, 0.8) 0%, rgba(0, 0, 0, 0) 50%)'
           
