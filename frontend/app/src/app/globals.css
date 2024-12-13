@@ -29,10 +29,6 @@ body {
 
 #map { height: 180px; }
 
-.leaflet-control-attribution {
-  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-}
-
 
 .topo-lines {
   position: absolute;
