@@ -47,6 +47,21 @@ export class EventService {
         }
     }
 
+
+    async find(id: number) {
+        try {
+            const event = await this.prisma.event.findUnique({
+                where: { id: id },
+            });
+            if (!event) {
+                throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+            }
+            return event;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async findAll() {
         try {
             const events = await this.prisma.event.findMany();

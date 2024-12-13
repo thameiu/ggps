@@ -11,7 +11,6 @@ export class EventController {
 
     @Post('create')
     @UseGuards(AuthGuard)
-
     create(@Body() dto: EventDto){
         return this.eventService.create(dto);
     };
@@ -21,6 +20,14 @@ export class EventController {
     @HttpCode(200)
     getAllEvents() {
         return this.eventService.findAll();
+    }
+
+    
+    @Get('id/:id')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getEventById(@Param('id', ParseIntPipe) id: number) {
+        return this.eventService.find(id);
     }
 
     @Get('getInRadius')
