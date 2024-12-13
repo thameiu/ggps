@@ -122,6 +122,9 @@ export default function RightPanel({
                     <option className={styles.option} value="Lan">Lan</option>
                     <option className={styles.option} value="Tournament">Tournament</option>
                     <option className={styles.option} value="Convention">Convention</option>
+                    <option className={styles.option} value="Esport Event">E-sport Event</option>
+                    <option className={styles.option} value="Speedrunning event">Speedrunning Event</option>
+
                 </select>
                 <input
                     type="datetime-local"

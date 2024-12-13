@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import EventCard from '../../../components/eventCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
@@ -23,19 +23,24 @@ const EventPage: React.FC = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [event, setEvent] = React.useState<Event | null>(null);
+    const [token, setToken] = useState<string | null>(null);
 
-    const token = localStorage.getItem('token');
-    console.log(token);
-    if (!token) {
-        router.push('/login');
-    }
+    useEffect(() => {
+        // Check for token on mount
+        const savedToken = localStorage.getItem('token');
+        setToken(savedToken);
+
+        if (!savedToken) {
+            router.push('/login');
+        }
+    }, [router]);
 
     const id = searchParams.get('id');
     console.log(id);
 
     useEffect(() => {
         const fetchEvent = async () => {
-            if (id) {
+            if (id && token) {
                 try {
                     const response = await axios.get(`http://localhost:9000/event/id/${id}`, {
                         headers: {
@@ -51,16 +56,103 @@ const EventPage: React.FC = () => {
         fetchEvent();
     }, [id, token]);
 
-    if (!event) {
-        return <div>Loading...</div>;
-    }
 
     const handleSignUp = (eventId: number) => {
         console.log(`Signed up for event ${eventId}`);
     };
+    
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const canvas = document.getElementById("topo-canvas") as HTMLCanvasElement | null;
+
+        // Check if the canvas element exists before proceeding
+        if (!canvas) {
+            console.error("Canvas element not found");
+            return;
+        }
+
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) return;
+
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        const lines: { y: number; speed: number }[] = [];
+        const numLines = 30; // Number of topographical layers
+        const lineSpacing = 40; // Spacing between layers
+
+        // Initialize lines
+        for (let i = 0; i < numLines; i++) {
+            lines.push({
+                y: i * lineSpacing,
+                speed: Math.random() * 0.5 + 0.1, // Slower speeds
+            });
+        }
+
+        // Draw topographical lines
+        function drawLines() {
+            if (!ctx ||!canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (event && event.category.toLowerCase() === 'convention')
+                ctx.strokeStyle = "rgba(100, 0, 200, 0.7)";
+            else if (event && (event.category.toLowerCase() === 'tournament' || event.category.toLowerCase() === 'esport event'))
+                ctx.strokeStyle = "rgba(137, 0, 0, 0.7)";
+            else if (event && event.category.toLowerCase() === 'lan')
+                ctx.strokeStyle = "rgba(0, 0, 137, 0.7)";
+            else if (event && event.category.toLowerCase() === 'speedrunning event')
+                ctx.strokeStyle = "rgba(0, 137, 0, 0.7)";
+            else ctx.strokeStyle = "rgba(86, 86, 84, 0.7)";
+            
+             
+            ctx.lineWidth = 2;
+
+            lines.forEach((line) => {
+                ctx.beginPath();
+                for (let x = 0; x < canvas.width; x += 10) {
+                    const yOffset = Math.sin((x + line.y) / 100) * 20; // Wave-like effect
+                    ctx.lineTo(x, line.y + yOffset);
+                }
+                ctx.stroke();
+
+                // Move the line upwards
+                line.y -= line.speed;
+                if (line.y < -lineSpacing) {
+                    line.y = canvas.height + lineSpacing; // Loop back to the bottom
+                }
+            });
+        }
+
+        function animate() {
+            drawLines();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+        
+        return () => {
+            window.removeEventListener("resize", resizeCanvas);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+    }, [event]); 
+
+    if (!event) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div>
+            <canvas id="topo-canvas" className="fixed inset-0 -z-10"
+                style={{
+                    overflow: "hidden",
+                }}></canvas>
             <EventCard event={event} onSignUp={handleSignUp} />
         </div>
     );

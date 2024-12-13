@@ -118,6 +118,13 @@ export default function MapComponent() {
         useMapEvents({
             click(e) {
 
+                if (!isPanelOpen) {
+                    setPosition(null);
+                    positionRef.current = null; 
+
+                    return;
+                }
+
                 const panel = document.querySelector(`.${styles.rightPanel}`);
                 const button = document.querySelector(`.${styles.openForm}`);
                 if (panel && panel.contains(e.originalEvent.target as Node) || button && button.contains(e.originalEvent.target as Node)) {
@@ -125,7 +132,7 @@ export default function MapComponent() {
                 }
 
                 const newPosition = e.latlng;
-                setPosition(newPosition);
+                setPosition(newPosition);         
                 positionRef.current = newPosition; 
                 reverseGeocode(newPosition.lat, newPosition.lng);
             },
@@ -251,6 +258,28 @@ export default function MapComponent() {
         return; 
     }
 
+    
+                
+
+                
+    const getIconUrl = (category: string) => {
+        switch (category.toLocaleLowerCase()) {
+            case "tournament":
+                return "/images/tournament-marker.png";
+            case "lan":
+                return "/images/lan-marker.png";
+            case "convention":
+                return "/images/convention-marker.png";
+            case "speedrunning event":
+                return "/images/speedrun-marker.png";    
+            case "esport event":
+                return "/images/esport-marker.png"; 
+            default:
+                return "/images/event-marker.png";
+        }
+    };
+
+
     return (
         <>
             <MapContainer
@@ -305,17 +334,17 @@ export default function MapComponent() {
                     attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 /> */}
 
-
                 <BoundsFinder />
                 <LocationMarker />
                 
                 <ModifyZoomButtons />
                 {events.map((event) => (
+                    
                     <Marker
                         key={event.id}
                         icon={L.icon({
-                            iconUrl: '/images/icons8-marker-90.png',
-                            iconSize: [30, 30], 
+                            iconUrl: getIconUrl(event.category),
+                            iconSize: [26.3, 32.42], 
                             iconAnchor: [15, 30], 
                             popupAnchor: [0, -30] 
                         })}

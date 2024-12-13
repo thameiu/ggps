@@ -12,6 +12,7 @@ export class SeederService {
     }
 
     async seedEvents(count: number) {
+        
         for (let i = 0; i < count; i++) {
             const dto: EventDto = {
                 title: faker.lorem.sentence(),
@@ -25,7 +26,7 @@ export class SeederService {
                 country: faker.location.country(),
                 latitude: faker.location.latitude().toString(),
                 longitude: faker.location.longitude().toString(),
-                category: faker.lorem.word(),
+                category: 'Tournament',
                 token: faker.lorem.word()
             };
             try {

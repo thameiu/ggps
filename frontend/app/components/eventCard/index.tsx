@@ -38,12 +38,13 @@ const EventCard: React.FC<EventCardProps> = ({ event, onSignUp }) => {
         <p className="text-gray-300 text-sm">{event.description}</p>
       </div>
 
-      <div className="mb-4">
-        <p><strong>Date:</strong> {new Date(event.beginDate).toLocaleDateString()}</p>
-        {/* <p><strong>Time:</strong> {new Date(event.date).toLocaleTimeString()}</p> */}
-        <p><strong>Location:</strong> {event.number} {event.street} {event.city} {event.zipCode} </p>
-      </div>
-
+      <div className={styles.dates}>
+          <p><strong>From :</strong> {new Date(event.beginDate).toLocaleDateString()}</p>
+          <p><strong>To :</strong> {new Date(event.endDate).toLocaleDateString()}</p>
+        </div>
+        <div>
+          <p><strong>Location:</strong> {event.number} {event.street} {event.city} {event.zipCode} </p>
+        </div>
       <div className="flex justify-between items-center">
         
         <button
