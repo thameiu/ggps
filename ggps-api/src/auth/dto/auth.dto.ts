@@ -12,6 +12,9 @@ export class AuthDto {
     @IsString()
     @IsNotEmpty()
     username: string;
+
+    lastName:string;
+    firstName:string
 }
 
 export class LogDto {

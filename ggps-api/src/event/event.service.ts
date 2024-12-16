@@ -56,7 +56,26 @@ export class EventService {
             if (!event) {
                 throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
             }
-            return event;
+
+            const entry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: event.id,
+                    status: 'organizer'
+                }
+            });
+            const user = await this.prisma.user.findFirst({
+                where: {
+                    id: entry.userId
+                }
+            });
+            if (!user) {
+                return event;
+            }
+            const organizer =  user.username;
+            return {
+                event,
+                organizer,
+            };
         } catch (error) {
             throw error;
         }
