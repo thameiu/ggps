@@ -10,6 +10,12 @@ import RightPanel from "./RightPanel";
 import { createRoot } from "react-dom/client";
 import styles from "./map.module.css";
 import SearchBar from "./SearchBar";
+import { ChatroomBar } from "./ChatroomBar";
+import BoundsFinder from "./BoundsFinder";
+import ModifyZoomButtons from "./ModifyZoomButtons";
+import SimulateZoomOut from "./SimulateZoomOut";
+import LocationMarker from "./LocationMarker";
+import { getIconUrl } from "./EventMarker";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
@@ -22,7 +28,7 @@ export default function MapComponent() {
     const [bounds, setBounds] = useState<LatLngBounds | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); // Track zoom-out state
-    
+    const [isChatOpen, setIsChatOpen] = useState(false); // State for ChatroomBar
 
     const router = useRouter();
 
@@ -102,184 +108,8 @@ export default function MapComponent() {
         if (bounds) fetchEvents(bounds);
     }, [bounds]);
 
-    const reverseGeocode = async (lat: number, lng: number) => {
-        console.log(lat, lng);
-        try {
-            const response = await axios.get(`https://nominatim.openstreetmap.org/reverse`, {
-                params: { lat, lon: lng, format: "json" },
-            });
-            setAddress(response.data.display_name);
-        } catch (error) {
-            console.error("Failed to fetch address:", error);
-        }
-    };
-
-    function LocationMarker() {
-        useMapEvents({
-            click(e) {
-
-                if (!isPanelOpen) {
-                    setPosition(null);
-                    positionRef.current = null; 
-
-                    return;
-                }
-
-                const panel = document.querySelector(`.${styles.rightPanel}`);
-                const button = document.querySelector(`.${styles.openForm}`);
-                if (panel && panel.contains(e.originalEvent.target as Node) || button && button.contains(e.originalEvent.target as Node)) {
-                    return; 
-                }
-
-                const newPosition = e.latlng;
-                setPosition(newPosition);         
-                positionRef.current = newPosition; 
-                reverseGeocode(newPosition.lat, newPosition.lng);
-            },
-        });
-
-        return positionRef.current ? (
-            <Marker position={positionRef.current}
-            icon={L.icon({
-                iconUrl: '/images/icons8-marker-90.png',
-                iconSize: [40, 40], 
-                iconAnchor: [15, 35], 
-                popupAnchor: [0, -30] 
-            })}
-            >
-                <Popup>{address || "Fetching address..."}</Popup>
-            </Marker>
-        ) : null;
-    }
-
-    function BoundsFinder() {
-        const map = useMapEvents({
-            moveend() {
-                setBounds(map.getBounds());
-            },
-        });
-        return null;
-    }
-
-    function AddPanelButton() {
-        const map = useMap();
-    
-        useEffect(() => {
-            
-            const existingButtons = document.querySelectorAll(`.${styles.openForm}`);
-            if (existingButtons.length > 1) {
-                existingButtons.forEach((button, index) => {
-                    if (index > 0) {
-                        button.parentElement?.removeChild(button);
-                    }
-                });
-                return; 
-            }
-    
-            if (existingButtons.length === 1) {
-                console.log(existingButtons[0]);
-                return;
-            }
-    
-            const buttonContainer = L.DomUtil.create("div", "leaflet-bar leaflet-control");
-            buttonContainer.style.cursor = "pointer";
-            buttonContainer.style.top = "12vh";
-            buttonContainer.style.border = "none";
-    
-            const button = (
-                <button
-                    id="openFormButton"
-                    className={styles.openForm}
-                    onClick={() => setIsPanelOpen((prev) => !prev)}
-                >
-                    Open Panel
-                </button>
-            );
-            
-            const root = createRoot(buttonContainer);
-            root.render(button);
-    
-            const control = new L.Control({ position: "topright" });
-            control.onAdd = () => buttonContainer;
-            control.addTo(map);
-        }, [map]); 
-    
-        return null;
-    }
-    
-
-    function ModifyZoomButtons() {
-        const map = useMap();
-    
-        useEffect(() => {
-            // Select the zoom control container dynamically
-            const zoomControl = document.querySelector(".leaflet-control-zoom") as HTMLElement;
-            const zoomInControl = document.querySelector(".leaflet-control-zoom-in") as HTMLElement;
-            const zoomOutControl = document.querySelector(".leaflet-control-zoom-out") as HTMLElement;
-
-            if (zoomControl) {
-                zoomControl.style.top = "12vh"; 
-                zoomControl.style.right = "10wh";
-                zoomControl.style.backgroundColor = "#111";
-                zoomInControl.style.backgroundColor = "#111";
-                zoomInControl.style.color = "#fff";
-                zoomOutControl.style.backgroundColor = "#111";
-                zoomOutControl.style.color = "#fff"; 
-            }
-        }, [map]);
-    
-        return null;
-    }
-
-    function SimulateZoomOut() {
-        const map = useMap();
-
-        useEffect(() => {
-            if (map && !hasZoomedOutOnce) {
-                const currentZoom = map.getZoom();
-                map.setZoom(currentZoom - 1, { animate: true });
-                setHasZoomedOutOnce(true); 
-            }
-        }, [map, hasZoomedOutOnce]);
-    
-        return null;
-    }
-
-
     if (loading) return <div>Loading...</div>;
-    const existingButtons = document.querySelectorAll(`.${styles.openForm}`);
-    if (existingButtons.length > 1) {
-
-        existingButtons.forEach((button, index) => {
-            if (index > 0) {
-                button.parentElement?.removeChild(button);
-            }
-        });
-        return; 
-    }
-
-    
-                
-
-                
-    const getIconUrl = (category: string) => {
-        switch (category.toLocaleLowerCase()) {
-            case "tournament":
-                return "/images/tournament-marker.png";
-            case "lan":
-                return "/images/lan-marker.png";
-            case "convention":
-                return "/images/convention-marker.png";
-            case "speedrunning event":
-                return "/images/speedrun-marker.png";    
-            case "esport event":
-                return "/images/esport-marker.png"; 
-            default:
-                return "/images/event-marker.png";
-        }
-    };
-
-
+ 
     return (
         <>
             <MapContainer
@@ -294,9 +124,6 @@ export default function MapComponent() {
                 minZoom={3}
                 maxZoom={18}
             >
-                
-                <AddPanelButton />
-
                 <RightPanel
                     position={positionRef.current}
                     setIsPanelOpen={setIsPanelOpen}
@@ -305,6 +132,8 @@ export default function MapComponent() {
                     bounds={bounds}
                     address={address}
                 />
+                <ChatroomBar />
+    
                 <SearchBar
                     coordinates={{
                         latMin: bounds?.getSouthWest().lat || 0,
@@ -314,39 +143,32 @@ export default function MapComponent() {
                     }}
                     onResultsFound={(foundEvents) => setEvents(foundEvents)}
                     onSearch={(searchTerm) => setSearchWord(searchTerm)}
-                    
                 />
                 <TileLayer
                     noWrap
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-                {/* var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
-                    minZoom: 0,
-                    maxZoom: 20,
-                    attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    ext: 'png'
-                    }); */}
-
-                {/* <TileLayer
-                    noWrap
-                    url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                /> */}
-
-                <BoundsFinder />
-                <LocationMarker />
                 
+                <BoundsFinder setBounds={setBounds} />
+                
+                <LocationMarker
+                    isPanelOpen={isPanelOpen}
+                    setPosition={setPosition}
+                    positionRef={positionRef}
+                    setAddress={setAddress}
+                    address={address || ""}
+                />
+    
                 <ModifyZoomButtons />
                 {events.map((event) => (
-                    
                     <Marker
                         key={event.id}
                         icon={L.icon({
                             iconUrl: getIconUrl(event.category),
-                            iconSize: [26.3, 32.42], 
-                            iconAnchor: [15, 30], 
-                            popupAnchor: [0, -30] 
+                            iconSize: [26.3, 32.42],
+                            iconAnchor: [10, 30],
+                            popupAnchor: [0, -30],
                         })}
                         position={[event.latitude || 0, event.longitude || 0]}
                         eventHandlers={{
@@ -361,34 +183,33 @@ export default function MapComponent() {
                                         alert("You must be logged in to sign up for events.");
                                         return;
                                     }
-
+    
                                     try {
                                         const response = await axios.post(
                                             "http://localhost:9000/event/addEntry",
-                                            { 
+                                            {
                                                 eventId: event.id,
                                                 token: localStorage.getItem("token"),
                                                 status: "waiting",
                                             },
                                             { headers: { authorization: token } }
                                         );
-
+    
                                         if (response.status === 200) {
                                             alert("Successfully signed up for the event!");
-                                        } else if (response.statusText === 'This user has already signed up for this event'){
+                                        } else if (response.statusText === 'This user has already signed up for this event') {
                                             alert("Failed to sign up for the event.");
                                         } else {
                                             alert(response.statusText);
                                         }
-                                    } catch (error:AxiosError|unknown) {
+                                    } catch (error: AxiosError | unknown) {
                                         if (axios.isAxiosError(error) && error.code === 'ERR_BAD_REQUEST') {
                                             alert("You have already signed up for this event.");
                                             return;
                                         }
-
+    
                                         alert("An error occurred. Please try again.");
                                         console.error("Error signing up for event:", error);
-
                                     }
                                 }}
                             >
@@ -405,8 +226,8 @@ export default function MapComponent() {
                         </Popup>
                     </Marker>
                 ))}
-            <SimulateZoomOut/>
+                <SimulateZoomOut />
             </MapContainer>
         </>
     );
-}
+}    

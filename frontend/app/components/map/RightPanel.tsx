@@ -87,6 +87,17 @@ export default function RightPanel({
     };
 
     return (
+    <>
+        <button
+            className={styles.openForm}
+            onClick={() => setIsPanelOpen(!isPanelOpen)}
+            style={{
+                right: isPanelOpen ? "310px" : "10px",
+            }}
+        >
+            {isPanelOpen ? "Close Panel" : "Create Event"}
+          </button>
+
         <div className={styles.rightPanel}
             style={{
                 right: isPanelOpen ? 0 : "-300px",
@@ -161,5 +172,6 @@ export default function RightPanel({
                 Close
             </button>
         </div>
+    </>
     );
 }

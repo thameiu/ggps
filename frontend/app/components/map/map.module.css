@@ -4,11 +4,52 @@
     border-radius: 10px;
     border:none;
     font-family: var(--font-sofia-pro-medium-az);
+    transition: right 0.3s ease-in-out;
+    position: absolute;
+    bottom: 2%;
+    right: 1%; 
+    z-index: 1000;
+}
+
+.openChat{
+    background-color: #333333;
+    padding:10px;
+    border-radius: 10px;
+    border:none;
+    font-family: var(--font-sofia-pro-medium-az);
+    transition: left 0.3s ease-in-out;
+
+    position: absolute;
+    bottom: 2%;
+    left: 1%; 
+    z-index: 1000;
+
 }
 
 .createForm{
     font-family: var(--font-sofia-pro-ultralight-az);
 
+}
+
+.chatroomBar{
+        position: absolute;
+        top: 11%;
+        width: 300px;
+        height: 100%;
+        background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.9) 70%);
+    
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        box-shadow: 0 10px  rgba(0,0,0,0.5);
+        transition: right 0.3s ease-in-out;
+        z-index: 1000;
+        padding: 20px;
+        color: #fff;
+        overflow-x: hidden;
+        font-size: 1.3em;
+        /* font-family: var(--font-sofia-pro-ultralight-az); */
+    
+    
 }
 
 .createForm input{
@@ -106,3 +147,4 @@
 .eventPopup{
     font-family: var(--font-sofia-pro-medium-az);
 }
+

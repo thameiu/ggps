@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import EventCard from '../../../components/eventCard';
+import EventCard from '../../../components/eventCard/eventCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 
@@ -23,6 +23,8 @@ const EventPage: React.FC = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [event, setEvent] = React.useState<Event | null>(null);
+    const [organizer, setOrganizer] = React.useState<string | null>(null);
+
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
@@ -47,7 +49,9 @@ const EventPage: React.FC = () => {
                             Authorization: token
                         }
                     });
-                    setEvent(response.data); // Set the event state with the fetched data
+                    setEvent(response.data.event); // Set the event state with the fetched data
+                    setOrganizer(response.data.organizer); // Set the event state with the fetched data
+
                 } catch (error: any) {
                     console.error(error);
                 }
@@ -153,7 +157,7 @@ const EventPage: React.FC = () => {
                 style={{
                     overflow: "hidden",
                 }}></canvas>
-            <EventCard event={event} onSignUp={handleSignUp} />
+            <EventCard event={event} organizer={organizer} />
         </div>
     );
 };
