@@ -68,6 +68,7 @@ export class SeederService {
                 Math.floor(Math.random() * 6)
             ], 
             token,
+            createChatroom: true,
             };
 
             try {

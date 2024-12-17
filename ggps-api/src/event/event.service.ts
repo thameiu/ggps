@@ -11,7 +11,6 @@ import { TokenDto } from 'src/auth/dto';
 export class EventService {
 
     constructor(private prisma: PrismaService, private auth:AuthService, private message:MessageService){}
-
     async create(dto: EventDto){
         const user = await this.auth.getUserFromToken(dto.token);
         if (!user) {
@@ -37,6 +36,9 @@ export class EventService {
                 }
             });
             this.createEntry({eventId:event.id.toString(), status:'organizer', token:dto.token});
+            const chatroom = await this.message.createChatroom({eventId:event.id.toString()});
+            this.message.giveAccess(dto.token, chatroom.id, 'organizer');
+
             return event;
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError ) {

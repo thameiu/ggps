@@ -48,8 +48,22 @@
         overflow-x: hidden;
         font-size: 1.3em;
         /* font-family: var(--font-sofia-pro-ultralight-az); */
+
     
-    
+}
+
+.chatroomBar::-webkit-scrollbar {
+    width: 10px !important;
+    padding: 30px;
+
+}
+
+
+.chatroomBar::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color:#fff;
+    margin-right: 10px;
+
 }
 
 .createForm input{
@@ -100,6 +114,22 @@
     color: #fff;
     /* font-family: var(--font-sofia-pro-ultralight-az) */
 
+}
+
+.checkbox{
+    display: flex;
+    margin-top:20px;
+    margin-bottom:20px;
+
+}
+
+.checkLabel{
+    width:100%;
+}
+
+.checkInput{
+    margin-right: 10px;
+    margin-left: -30px;
 }
 
 .option:hover, .option:focus{

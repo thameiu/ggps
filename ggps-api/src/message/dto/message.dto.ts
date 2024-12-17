@@ -7,7 +7,7 @@ export class CreateMessageDto {
     token: string;
 
     @IsNotEmpty()
-    chatroomId: string;
+    eventId: string;
 
     @IsNotEmpty()
     @IsString()
@@ -23,9 +23,8 @@ export class CreateChatroomDto {
     eventId: string;
 
     @IsString()
-    @MinLength(1)
     @MaxLength(150)
-    firstMessageContent: string;
+    firstMessageContent?: string;
 }
 
 export class PinMessageDto {

@@ -27,6 +27,7 @@ export default function RightPanel({
     const [beginDate, setBeginDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [address, setAddress] = useState<string | null>(null);
+    const [createChatroom, setCreateChatroom] = useState<boolean | null>(true);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
@@ -62,6 +63,7 @@ export default function RightPanel({
                     number: "a",
                     game: "",
                     token: token,
+                    createChatroom: true,
                 },
                 {
                     headers: {
@@ -75,6 +77,7 @@ export default function RightPanel({
                 setTitle("");
                 setDescription("");
                 setBeginDate("");
+                setEndDate("");
                 setError(null);
                 setIsPanelOpen(false);
                 if (bounds) {
@@ -152,6 +155,21 @@ export default function RightPanel({
                     required
                     style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
                 />
+                
+                <label className={styles.checkbox} >
+                    <div className={styles.checkLabel}>Create chatroom</div>
+
+                    <input
+                        className={styles.checkInput}
+                        value={createChatroom ? '1':'0'}
+                        type="checkbox"
+                        name="isOnline"
+                        onChange={(e) => setCreateChatroom(e.target.value==="1"?true:false)}
+                        required
+                        style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
+                    />
+                </label>
+
                 <button
                     type="submit"
                     style={{

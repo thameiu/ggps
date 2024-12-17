@@ -168,7 +168,7 @@ export default function MapComponent() {
                                             { headers: { authorization: token } }
                                         );
     
-                                        if (response.status === 200) {
+                                        if (response.status === 201) {
                                             alert("Successfully signed up for the event!");
                                         } else if (response.statusText === 'This user has already signed up for this event') {
                                             alert("Failed to sign up for the event.");

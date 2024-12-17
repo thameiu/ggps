@@ -1,4 +1,4 @@
-import { IsDate, IsEmail, IsISO8601, IsNotEmpty, IsString, Matches } from "class-validator"
+import { IsBoolean, IsDate, IsEmail, IsISO8601, IsNotEmpty, IsString, Matches } from "class-validator"
 
 export class EventDto {
 
@@ -53,9 +53,11 @@ export class EventDto {
     @IsString()
     game?: string;
     
-    
     @IsString()
     token: string;
+
+    @IsBoolean()
+    createChatroom: boolean;
 }
 
 

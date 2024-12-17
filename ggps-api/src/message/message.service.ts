@@ -15,7 +15,7 @@ export class MessageService {
 
     const chatroom = await this.prisma.chatroom.findUnique({
         where: {
-            id: parseInt(dto.chatroomId)
+            eventId: parseInt(dto.eventId)
         }
 
     });
@@ -54,7 +54,7 @@ export class MessageService {
     
   
 
-    return message;
+    return { message, username: user.username };
   }
 
   async createChatroom(dto: CreateChatroomDto) {
@@ -96,22 +96,48 @@ export class MessageService {
     return chatroom;
   }
 
-  async getMessagesByChatroom(chatroomId: string) {
-    const messages = await this.prisma.message.findMany({
-      where: {
-        chatroomId: parseInt(chatroomId),
-      },
-      orderBy: {
-        createdAt: 'asc',
-      },
+  async getMessagesByChatroom(eventId: string) {
+    
+    const chatroom = await this.prisma.chatroom.findFirst({
+        where: {
+            eventId: parseInt(eventId),
+        },
     });
 
-    if (!messages) {
-      throw new ForbiddenException('No messages found for this chatroom');
+    if (!chatroom) {
+        throw new ForbiddenException('No chatroom found for this event');
     }
 
-    return messages;
-  }
+    
+    const messages = await this.prisma.message.findMany({
+        where: {
+            chatroomId: chatroom.id,
+        },
+        orderBy: {
+            createdAt: 'asc',
+        },
+    });
+
+    if (!messages || messages.length === 0) {
+        throw new ForbiddenException('No messages found for this chatroom');
+    }
+
+    const messagesWithUsernames = [];
+    for (const message of messages) {
+        const sender = await this.prisma.user.findUnique({
+            where: { id: message.userId },
+            select: { username: true },
+        });
+
+        messagesWithUsernames.push({
+            message: message,
+            username: sender?.username || "Unknown User", 
+        });
+    }
+
+    return messagesWithUsernames;
+}
+
 
   async giveAccess(token: string, chatroomId: number, role: string) {
     const user = await this.auth.getUserFromToken(token);

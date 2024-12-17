@@ -68,7 +68,7 @@ export class AuthService {
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-      return this.jwtService.verifyAsync(token);
+      return this.jwtService.verifyAsync(token),user;
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }

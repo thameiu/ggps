@@ -1,0 +1,21 @@
+.message{
+    color:black;
+}
+
+.chatroomContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 85%;
+    width: 100vw;
+    background-color: #333333;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-family: var(--font-sofia-pro-medium-az);
+    transition: right 0.3s ease-in-out;
+    position: absolute;
+    bottom: 2%;
+    right: 1%;
+    z-index: 1000;
+}

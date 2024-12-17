@@ -1,24 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { CreateMessageDto, CreateChatroomDto } from './dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('chat')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
+  
   @Post('message')
+  @UseGuards(AuthGuard)
   createMessage(@Body() createMessageDto: CreateMessageDto) {
     return this.messageService.create(createMessageDto);
   }
 
   @Post('room')
+  @UseGuards(AuthGuard)
   createChatroom(@Body() createChatroomDto: CreateChatroomDto) {
     return this.messageService.createChatroom(createChatroomDto);
   }
 
-  @Get('room/:roomId/messages')
-  getMessagesByChatroom(@Param('roomId') roomId: string) {
-    return this.messageService.getMessagesByChatroom(roomId);
+  @Get(':eventId/messages')
+  @UseGuards(AuthGuard)
+  getMessagesByChatroom(@Param('eventId') eventId: string) {
+    return this.messageService.getMessagesByChatroom(eventId);
   }
 
   // @Get()
