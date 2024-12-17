@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios'; 
 import styles from './event.module.css';
 
-type Event = {
+export type Event = {
   id: number;
   title: string;
   description: string;

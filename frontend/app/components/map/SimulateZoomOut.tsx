@@ -5,10 +5,8 @@ function SimulateZoomOut() {
     const map = useMap();
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            map.setZoom(map.getZoom() - 1);
-        }, 1000);
-        return () => clearTimeout(timer);
+        const currentZoom = map.getZoom();
+        map.setZoom(currentZoom - 1, { animate: true });
     }, [map]);
 
     return null;

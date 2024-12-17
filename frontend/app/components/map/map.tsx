@@ -10,12 +10,15 @@ import RightPanel from "./RightPanel";
 import { createRoot } from "react-dom/client";
 import styles from "./map.module.css";
 import SearchBar from "./SearchBar";
-import { ChatroomBar } from "./ChatroomBar";
+import {EventBar
+
+} from "./EventBar";
 import BoundsFinder from "./BoundsFinder";
 import ModifyZoomButtons from "./ModifyZoomButtons";
 import SimulateZoomOut from "./SimulateZoomOut";
 import LocationMarker from "./LocationMarker";
 import { getIconUrl } from "./EventMarker";
+import DisableScroll from "./DisableScroll";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
@@ -29,6 +32,7 @@ export default function MapComponent() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); // Track zoom-out state
     const [isChatOpen, setIsChatOpen] = useState(false); // State for ChatroomBar
+    const [isPanelHovered, setIsPanelHovered] = useState(false); // Track if mouse is over the div
 
     const router = useRouter();
 
@@ -123,7 +127,9 @@ export default function MapComponent() {
                 maxBoundsViscosity={1.0}
                 minZoom={3}
                 maxZoom={18}
+                scrollWheelZoom={isPanelHovered ? false : true}
             >
+                <DisableScroll isPanelHovered={isPanelHovered} />
                 <RightPanel
                     position={positionRef.current}
                     setIsPanelOpen={setIsPanelOpen}
@@ -132,7 +138,17 @@ export default function MapComponent() {
                     bounds={bounds}
                     address={address}
                 />
-                <ChatroomBar />
+
+
+                <div
+                onMouseEnter={() => setIsPanelHovered(true)} // Set hover state
+                onMouseLeave={() => setIsPanelHovered(false)} // Reset hover stat
+                >
+
+                <EventBar
+                />
+                </div>
+                
     
                 <SearchBar
                     coordinates={{
