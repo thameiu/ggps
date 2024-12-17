@@ -6,25 +6,25 @@ import { MapContainer, TileLayer, Marker, useMapEvents, Popup, useMap } from "re
 import L, { LatLngBounds, LatLng, map } from "leaflet";
 import axios, { AxiosError } from "axios";
 import "leaflet/dist/leaflet.css"; // Leaflet default styles
-import RightPanel from "./RightPanel";
+import RightPanel from "./SideBars/RightPanel";
 import { createRoot } from "react-dom/client";
 import styles from "./map.module.css";
 import SearchBar from "./SearchBar";
 import {EventBar
 
-} from "./EventBar";
+} from "./SideBars/EventBar";
 import BoundsFinder from "./BoundsFinder";
 import ModifyZoomButtons from "./ModifyZoomButtons";
 import SimulateZoomOut from "./SimulateZoomOut";
 import LocationMarker from "./LocationMarker";
-import { getIconUrl } from "./EventMarker";
-import DisableScroll from "./DisableScroll";
+import { fetchEvents, getIconUrl } from "./EventMarker";
+import DisableScroll from "./SideBars/DisableScroll";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
     const positionRef = useRef<LatLng | null>(null); 
     const [address, setAddress] = useState<string | null>(null);
-    const [searchWord, setSearchWord] = useState<string | null>(null);
+    const [searchWord, setSearchWord] = useState<string | null>("");
     const [events, setEvents] = useState<any[]>([]); // State to hold events from SearchBar
     const [loading, setLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(true);
@@ -67,50 +67,9 @@ export default function MapComponent() {
 
     }, [router]);
 
-
-    const fetchEvents = async (currentBounds: LatLngBounds | null) => {
-        const token = localStorage.getItem("token");
-        if (!token || !currentBounds) return;
-        
-        try {
-            if (searchWord && searchWord.length >= 3){
-                const eventsResponse = await axios.get(
-                    "http://localhost:9000/event/getBySearchWordInRadius",
-                    {
-                        params: {
-                            latMin: currentBounds.getSouthWest().lat.toString(),
-                            longMin: currentBounds.getSouthWest().lng.toString(),
-                            latMax: currentBounds.getNorthEast().lat.toString(),
-                            longMax: currentBounds.getNorthEast().lng.toString(),
-                            searchWord: searchWord,
-                        },
-                        headers: { authorization: token }
-                    },
-                );
-                setEvents(eventsResponse.data.slice(0, 50));
-            } else {
-                const eventsResponse = await axios.get(
-                    "http://localhost:9000/event/getInRadius",
-                    {
-                        params: {
-                            latMin: currentBounds.getSouthWest().lat.toString(),
-                            longMin: currentBounds.getSouthWest().lng.toString(),
-                            latMax: currentBounds.getNorthEast().lat.toString(),
-                            longMax: currentBounds.getNorthEast().lng.toString(),
-                        },
-                        headers: { authorization: token }
-                    },
-                );
-                setEvents(eventsResponse.data.slice(0, 50));
-            }
-        } catch (error) {
-            console.error("Failed to fetch events:", error);
-        }
-    };
-
     useEffect(() => {
-        if (bounds) fetchEvents(bounds);
-    }, [bounds]);
+        fetchEvents({ bounds, searchWord, setEvents });
+    }, [bounds, searchWord]);
 
     if (loading) return <div>Loading...</div>;
  
@@ -134,19 +93,17 @@ export default function MapComponent() {
                     position={positionRef.current}
                     setIsPanelOpen={setIsPanelOpen}
                     isPanelOpen={isPanelOpen}
-                    fetchEvents={fetchEvents}
                     bounds={bounds}
                     address={address}
                 />
 
 
                 <div
-                onMouseEnter={() => setIsPanelHovered(true)} // Set hover state
-                onMouseLeave={() => setIsPanelHovered(false)} // Reset hover stat
+                onMouseEnter={() => setIsPanelHovered(true)} 
+                onMouseLeave={() => setIsPanelHovered(false)} 
                 >
 
-                <EventBar
-                />
+                <EventBar/>
                 </div>
                 
     

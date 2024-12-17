@@ -2,7 +2,7 @@
 import { useMap } from 'react-leaflet';
 import { useEffect
 
- } from 'react';
+} from 'react';
 function ModifyZoomButtons() {
     const map = useMap();
 

@@ -2,25 +2,23 @@
 
 import { useState } from "react";
 import axios from "axios";
-import styles from './map.module.css';
+import styles from '../map.module.css';
 import L from "leaflet"; 
+import { fetchEvents } from "../EventMarker";
 
 type RightPanelProps = {
     position: L.LatLng | null;
     setIsPanelOpen: (open: boolean) => void;
     isPanelOpen: boolean;
-    fetchEvents: (bounds: L.LatLngBounds | null) => void;
     bounds: L.LatLngBounds | null;
     address: string | null;
 
 };
-// RightPanel Component
 
 export default function RightPanel({
     position,
     setIsPanelOpen,
     isPanelOpen,
-    fetchEvents,
     bounds,
 }: RightPanelProps) {
     const [title, setTitle] = useState("");
@@ -78,8 +76,11 @@ export default function RightPanel({
                 setDescription("");
                 setBeginDate("");
                 setError(null);
-                setIsPanelOpen(false); // Close the panel after successful submission
-                fetchEvents(bounds); // Refresh events on the map
+                setIsPanelOpen(false);
+                if (bounds) {
+                    console.log("eefhdghudfhduehdeidjfhdeujfd")
+                    fetchEvents({ bounds, searchWord: "", setEvents: () => {} });
+                }
             }
         } catch (error) {
             console.error("Failed to create event:", error);
@@ -96,7 +97,7 @@ export default function RightPanel({
             }}
         >
             {isPanelOpen ? "Close Panel" : "Create Event"}
-          </button>
+        </button>
 
         <div className={styles.rightPanel}
             style={{

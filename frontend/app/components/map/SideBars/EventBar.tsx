@@ -1,8 +1,8 @@
 "use client"
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Event } from "../eventCard/eventCard";
-import styles from "./map.module.css";
+import { Event } from "../../eventCard/eventCard";
+import styles from "../map.module.css";
 
 export function EventBar() {
   const [isBarOpen, setIsBarOpen] = useState(false);
@@ -51,6 +51,7 @@ export function EventBar() {
 
               }}
           >
+
         {/* User Events */}
 
         <section>
@@ -79,8 +80,9 @@ export function EventBar() {
           <p>No signed-up events found.</p>
         )}
       </section>
-
+      
       {/* Organized Events */}
+
       <section>
         <h2 className="text-xl font-semibold mb-2">Organized Events</h2>
         {organizedEvents.length > 0 ? (

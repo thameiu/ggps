@@ -2,47 +2,41 @@ import { Marker, Popup } from 'react-leaflet';
 import axios, { AxiosError } from 'axios';
 import { LatLngBounds } from 'leaflet';
 
+interface FetchEventsProps {
+    bounds: LatLngBounds | null; 
+    searchWord: string|null; 
+    setEvents: (events: any[]) => void; 
+    mapInstance?: L.Map; 
+}
 
-
-export const fetchEvents = async (currentBounds: LatLngBounds | null, searchWord: string, setEvents: (events: any[]) => void) => {
+export const fetchEvents = async ({ bounds, searchWord, setEvents }: FetchEventsProps) => {
     const token = localStorage.getItem("token");
-    if (!token || !currentBounds) return;
-    
+    if (!token || !bounds) return;
+
     try {
-        if (searchWord && searchWord.length >= 3){
-            const eventsResponse = await axios.get(
-                "http://localhost:9000/event/getBySearchWordInRadius",
-                {
-                    params: {
-                        latMin: currentBounds.getSouthWest().lat.toString(),
-                        longMin: currentBounds.getSouthWest().lng.toString(),
-                        latMax: currentBounds.getNorthEast().lat.toString(),
-                        longMax: currentBounds.getNorthEast().lng.toString(),
-                        searchWord: searchWord,
-                    },
-                    headers: { authorization: token }
-                },
-            );
-            setEvents(eventsResponse.data.slice(0, 50));
-        } else {
-            const eventsResponse = await axios.get(
-                "http://localhost:9000/event/getInRadius",
-                {
-                    params: {
-                        latMin: currentBounds.getSouthWest().lat.toString(),
-                        longMin: currentBounds.getSouthWest().lng.toString(),
-                        latMax: currentBounds.getNorthEast().lat.toString(),
-                        longMax: currentBounds.getNorthEast().lng.toString(),
-                    },
-                    headers: { authorization: token }
-                },
-            );
-            setEvents(eventsResponse.data.slice(0, 50));
-        }
+        const params = {
+            latMin: bounds.getSouthWest().lat.toString(),
+            longMin: bounds.getSouthWest().lng.toString(),
+            latMax: bounds.getNorthEast().lat.toString(),
+            longMax: bounds.getNorthEast().lng.toString(),
+            ...(searchWord && searchWord.length >= 3 && { searchWord }),
+        };
+
+        const endpoint = searchWord && searchWord.length >= 3
+            ? "http://localhost:9000/event/getBySearchWordInRadius"
+            : "http://localhost:9000/event/getInRadius";
+
+        const eventsResponse = await axios.get(endpoint, {
+            params,
+            headers: { authorization: token },
+        });
+
+        setEvents(eventsResponse.data.slice(0, 50));
     } catch (error) {
         console.error("Failed to fetch events:", error);
     }
 };
+
 
 
 export const getIconUrl = (category: string) => {
