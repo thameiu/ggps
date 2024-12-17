@@ -26,3 +26,9 @@ export class LogDto {
     @IsNotEmpty()
     password: string;
 }
+
+export class TokenDto {
+    @IsString()
+    @IsNotEmpty()
+    token: string;
+}

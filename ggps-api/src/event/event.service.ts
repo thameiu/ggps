@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
 import { MessageService } from "src/message/message.service";
+import { TokenDto } from 'src/auth/dto';
 
 @Injectable()
 export class EventService {
@@ -172,6 +173,41 @@ export class EventService {
         );
         return filteredEvents;
     }
+
+    async getUserEntries(dto: TokenDto) {
+        try{
+            const user = await this.auth.getUserFromToken(dto.token);
+            if (!user) {
+                throw new ForbiddenException('User not found');
+            }
+            const entries = await this.prisma.entry.findMany({
+                where: {
+                    userId: user.id
+                }
+            });
+            const events = [];
+            const organizedEvents = [];
+
+            for (const entry of entries) {
+                const event = await this.prisma.event.findUnique({
+                    where: { id: entry.eventId }
+                });
+                if (event && entry.status === 'organizer') {
+                    organizedEvents.push(event);
+                }
+                else if (event) {
+                    events.push(event);
+                }
+            }
+            return {events, organizedEvents};
+        }catch(error){
+            throw error;
+        }
+
+    }
+
+
+
 
 
 }

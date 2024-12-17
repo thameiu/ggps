@@ -3,6 +3,7 @@ import { EventService }from './event.service';
 import { EntryDto, EventDto, MinMaxCoordinatesDto } from "./dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { ad } from "@faker-js/faker/dist/airline-BLb3y-7w";
+import { TokenDto } from "src/auth/dto";
 
 @Controller('event')
 export class EventController {
@@ -53,9 +54,17 @@ export class EventController {
     
     @Post('addEntry')
     @UseGuards(AuthGuard)
-    @HttpCode(200)
+    @HttpCode(201)
     createEntry(@Body() dto:EntryDto){ 
         return this.eventService.createEntry(dto);
     }
+
+    @Get('userEntries')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getUserEntries(@Query() dto: TokenDto){ 
+        return this.eventService.getUserEntries(dto);
+    }
+
 
 }
