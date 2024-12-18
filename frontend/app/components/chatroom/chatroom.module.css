@@ -6,16 +6,55 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 85%;
-    width: 100vw;
-    background-color: #333333;
-    padding: 10px;
-    border-radius: 10px;
+    height: 75vh;
+    background-color: rgba(86, 86, 84, 0.4);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 25px;
+    padding:2%;
     border: none;
     font-family: var(--font-sofia-pro-medium-az);
     transition: right 0.3s ease-in-out;
-    position: absolute;
-    bottom: 2%;
-    right: 1%;
     z-index: 1000;
+}
+
+.username{
+    font-size: 0.8em;
+}
+
+.messagesContainer{
+    background-color: rgba(0, 0, 0, 0.6);
+
+}
+
+.messagesContainer::-webkit-scrollbar {
+    width: 10px !important;
+    padding: 30px;
+    
+
+}
+
+.eventTitle{
+    font-size: 1.5em;
+    color: white;
+    margin: 0;
+    margin-bottom: 0.6%;
+    display: inline;
+    text-align: center;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color:#fff;
+    margin-right: 10px;
+
+}
+
+.inputField{
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    /* width:80%; */
+    background: black;
 }

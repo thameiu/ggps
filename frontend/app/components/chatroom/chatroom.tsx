@@ -3,9 +3,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import styles from "./chatroom.module.css";
+import { Event } from "../eventCard/eventCard";
 
 interface ChatRoomProps {
-    eventId: string; // Chatroom ID
+    event: Event;
+    color: string | null;
 }
 
 interface Message {
@@ -19,31 +21,28 @@ interface Message {
     username: string;
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [username, setUsername] = useState<string | null>(null);
 
     const token = localStorage.getItem("token");
-    const lastMessageId = useRef<number | null>(null); // To track the last message ID
-    const messageEndRef = useRef<HTMLDivElement>(null); // For auto-scrolling to bottom
+    const lastMessageId = useRef<number | null>(null);
+    const messageEndRef = useRef<HTMLDivElement>(null);
 
-    // Verify token and get user info
     useEffect(() => {
         const initializeChat = async () => {
-            await verifyToken(); // Wait for the username to be set
+            await verifyToken();
             fetchMessages();
         };
-    
+
         initializeChat();
-    
-        // Poll for new messages every 5 seconds
+
         const interval = setInterval(fetchMessages, 5000);
         return () => clearInterval(interval);
-    }, [eventId]);
+    }, [event.id]);
 
-    
     const verifyToken = async () => {
         try {
             const response = await axios.post(
@@ -59,26 +58,29 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
         }
     };
 
-    // Fetch chat messages dynamically
     const fetchMessages = async () => {
         try {
-            const response = await axios.get(`http://localhost:9000/chat/${eventId}/messages`, {
-                headers: { Authorization: token },
-            });
+            const response = await axios.get(
+                `http://localhost:9000/chat/${event.id}/messages`,
+                {
+                    headers: { Authorization: token },
+                }
+            );
 
             const newMessages = response.data.filter((msg: Message) => {
-                // Check if the message is new (based on its ID)
-                return lastMessageId.current === null || msg.message.id > lastMessageId.current;
+                return (
+                    lastMessageId.current === null ||
+                    msg.message.id > lastMessageId.current
+                );
             });
 
             if (newMessages.length > 0) {
                 setMessages((prevMessages) => [...prevMessages, ...newMessages]);
 
-                // Update the lastMessageId to the latest one
-                const latestMessageId = newMessages[newMessages.length - 1].message.id;
+                const latestMessageId =
+                    newMessages[newMessages.length - 1].message.id;
                 lastMessageId.current = latestMessageId;
 
-                // Auto-scroll to the bottom when new messages arrive
                 messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }
         } catch (error) {
@@ -88,14 +90,14 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
 
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
-    
+
         try {
             const response = await axios.post(
                 "http://localhost:9000/chat/message",
-                { token, eventId, content: newMessage },
+                { token, eventId: event.id, content: newMessage },
                 { headers: { Authorization: token } }
             );
-    
+
             const formattedMessage: Message = {
                 message: {
                     id: response.data.message.id,
@@ -106,37 +108,33 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
                 },
                 username: response.data.username || "You",
             };
-    
+
             setMessages((prevMessages) => [...prevMessages, formattedMessage]);
-            lastMessageId.current = response.data.message.id; // Correctly update the last message ID
-            setNewMessage(""); // Clear input field
-    
-            messageEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+            lastMessageId.current = response.data.message.id;
+            setNewMessage("");
+
+            messageEndRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
         } catch (error) {
             console.error("Failed to send message:", error);
         }
     };
-    
 
-    // Initial setup
-    useEffect(() => {
-        verifyToken();
-        fetchMessages();
-
-        // Poll for new messages every 5 seconds
-        const interval = setInterval(fetchMessages, 5000);
-        return () => clearInterval(interval);
-    }, [eventId]);
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    };
 
     return (
-        <div
-            className={styles.chatroomContainer}
-            style={{ border: "1px solid #ccc", borderRadius: "8px", padding: "10px" }}
-        >
-            <h2>Chat Room</h2>
+        <div className={styles.chatroomContainer}>
+            <h2 className={styles.eventTitle}>{event.title} - chat</h2>
 
             {/* Messages List */}
             <div
+                className={styles.messagesContainer}
                 style={{
                     height: "600px",
                     overflowY: "scroll",
@@ -147,6 +145,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
                     display: "flex",
                     flexDirection: "column",
                     gap: "8px",
+                    scrollbarColor: color || "#fff",
                 }}
             >
                 {isLoading ? (
@@ -156,24 +155,32 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
                         <div
                             key={message.message.id}
                             style={{
-                                alignSelf: message.username === username ? "flex-end" : "flex-start",
-                                backgroundColor: message.username === username ? "#565654" : "#000",
+                                alignSelf:
+                                    message.username === username
+                                        ? "flex-end"
+                                        : "flex-start",
+                                backgroundColor:
+                                    message.username === username
+                                        ? "#565654"
+                                        : "#000",
                                 padding: "8px",
                                 borderRadius: "8px",
                                 maxWidth: "70%",
                                 textAlign: "left",
                             }}
                         >
-                            <strong>{message.username}:</strong> {message.message.content} <br />
+                            <p className={styles.username}>{message.username}:</p>
+                            {message.message.content} <br />
                             <small style={{ color: "#888" }}>
-                                {new Date(message.message.createdAt).toLocaleTimeString()}
+                                {new Date(
+                                    message.message.createdAt
+                                ).toLocaleTimeString()}
                             </small>
                         </div>
                     ))
                 ) : (
                     <p>No messages yet.</p>
                 )}
-                {/* Auto-scroll reference */}
                 <div ref={messageEndRef} />
             </div>
 
@@ -183,13 +190,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
-                    style={{
-                        flex: "1",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid #ddd",
-                    }}
+                    className={styles.inputField}
                 />
                 <button
                     onClick={sendMessage}
@@ -197,7 +200,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ eventId }) => {
                         padding: "8px 12px",
                         borderRadius: "4px",
                         border: "none",
-                        backgroundColor: "#007BFF",
+                        backgroundColor: color || "#000",
                         color: "#fff",
                         cursor: "pointer",
                     }}

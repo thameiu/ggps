@@ -63,7 +63,7 @@ export default function RightPanel({
                     number: "a",
                     game: "",
                     token: token,
-                    createChatroom: true,
+                    createChatroom: createChatroom,
                 },
                 {
                     headers: {
@@ -161,11 +161,11 @@ export default function RightPanel({
 
                     <input
                         className={styles.checkInput}
-                        value={createChatroom ? '1':'0'}
+                        checked={createChatroom?true:false}
+                        onChange={(e) => setCreateChatroom(e.target.checked)}
+
                         type="checkbox"
                         name="isOnline"
-                        onChange={(e) => setCreateChatroom(e.target.value==="1"?true:false)}
-                        required
                         style={{ display: "block", margin: "10px 0", padding: "5px", width: "100%" }}
                     />
                 </label>

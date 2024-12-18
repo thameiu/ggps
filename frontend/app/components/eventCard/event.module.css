@@ -3,6 +3,8 @@
     background-color: rgb(0, 0, 0,0.6);
     padding-left : 5%;
     padding-right : 5%;
+    padding-bottom : 0.6%;
+
     border-radius: 25px;
 
     /* display: flex; */
@@ -14,6 +16,7 @@
     width:80vw;
     /* height: 100vh; */
     font-family: var(--font-sofia-pro-regular-az);
+
 }
 
 .title{
@@ -54,3 +57,64 @@
     margin-top: 30px;
     font-size: large;
 }
+
+.tabContainer {
+    display: flex;
+    justify-content: space-evenly;
+    cursor: pointer;
+    margin: 0 auto;
+    position: relative;
+    width: 100%; 
+
+  }
+  
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+  
+  .activeTab {
+    font-weight: bold;
+    transition: color 0.3s ease; /* Transition for the active tab's underline */
+
+  }
+  
+  .tab:hover {
+    color: #000; /* Highlight on hover */
+  }
+  
+  .activeTab {
+    color: #000; /* Active tab color */
+  }
+  
+  .underline {
+    position: absolute;
+    bottom:0;
+    left: 0;
+    height: 3px;
+    width: 50%; /* Width of a single tab */
+    transition: transform 0.5s ease; /* Smooth sliding effect */
+  }
+
+  .eventInfo, .chatroom {
+    padding: 10px;
+  }
+
+  .signUp{
+    background-color: #111;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: var(--font-sofia-pro-regular-az);
+    width : 20%;
+    align-self: center;
+    margin-top: 5%;
+    margin-bottom: 2%;
+
+  }
+  

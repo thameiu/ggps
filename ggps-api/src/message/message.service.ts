@@ -9,7 +9,7 @@ export class MessageService {
 
   constructor(private prisma: PrismaService, private auth: AuthService){}
 
-  async create(dto: CreateMessageDto) {
+  async create(dto: CreateMessageDto): Promise<any> {
 
     const user = await this.auth.getUserFromToken(dto.token);
 
@@ -57,7 +57,7 @@ export class MessageService {
     return { message, username: user.username };
   }
 
-  async createChatroom(dto: CreateChatroomDto) {
+  async createChatroom(dto: CreateChatroomDto): Promise<any> {
     const event = await this.prisma.event.findUnique({
         where: {
             id: parseInt(dto.eventId)
@@ -96,7 +96,7 @@ export class MessageService {
     return chatroom;
   }
 
-  async getMessagesByChatroom(eventId: string) {
+  async getMessagesByChatroom(eventId: string): Promise<any> {
     
     const chatroom = await this.prisma.chatroom.findFirst({
         where: {
@@ -113,12 +113,12 @@ export class MessageService {
         where: {
             chatroomId: chatroom.id,
         },
-        orderBy: {
+        orderBy: { 
             createdAt: 'asc',
         },
     });
 
-    if (!messages || messages.length === 0) {
+    if (!messages) {
         throw new ForbiddenException('No messages found for this chatroom');
     }
 

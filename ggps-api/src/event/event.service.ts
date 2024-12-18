@@ -36,8 +36,10 @@ export class EventService {
                 }
             });
             this.createEntry({eventId:event.id.toString(), status:'organizer', token:dto.token});
-            const chatroom = await this.message.createChatroom({eventId:event.id.toString()});
-            this.message.giveAccess(dto.token, chatroom.id, 'organizer');
+            if (dto.createChatroom){
+                const chatroom = await this.message.createChatroom({eventId:event.id.toString()});
+                this.message.giveAccess(dto.token, chatroom.id, 'organizer');
+            }
 
             return event;
         } catch (error) {

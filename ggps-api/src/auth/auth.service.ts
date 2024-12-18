@@ -13,25 +13,29 @@ export class AuthService {
   ) {}
 
   async login(dto: LogDto): Promise<{ token: string, user: any }> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-
-    if (!user) {
-      throw new ForbiddenException('Invalid credentials');
+    try{
+      const user = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
+  
+      if (!user) {
+        throw new ForbiddenException('Invalid credentials');
+      }
+  
+      const valid = await argon.verify(user.hash, dto.password);
+      if (!valid) {
+        throw new ForbiddenException('Invalid credentials');
+      }
+  
+      const payload = { userId: user.id, email: user.email };
+      const token = this.jwtService.sign(payload);
+  
+      const { hash, ...userWithoutHash } = user;
+  
+      return { token, user: userWithoutHash };
+    }catch(error){
+      throw new ForbiddenException('An error has occured');
     }
-
-    const valid = await argon.verify(user.hash, dto.password);
-    if (!valid) {
-      throw new ForbiddenException('Invalid credentials');
-    }
-
-    const payload = { userId: user.id, email: user.email };
-    const token = this.jwtService.sign(payload);
-
-    const { hash, ...userWithoutHash } = user;
-
-    return { token, user: userWithoutHash };
   }
 
   async signup(dto: AuthDto) {

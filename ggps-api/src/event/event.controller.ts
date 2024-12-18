@@ -52,7 +52,7 @@ export class EventController {
         return this.eventService.getBySearchWordInRadius(searchWord, dto);
     }
     
-    @Post('addEntry')
+    @Post('entry')
     @UseGuards(AuthGuard)
     @HttpCode(201)
     createEntry(@Body() dto:EntryDto){ 

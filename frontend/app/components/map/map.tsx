@@ -159,7 +159,7 @@ export default function MapComponent() {
     
                                     try {
                                         const response = await axios.post(
-                                            "http://localhost:9000/event/addEntry",
+                                            "http://localhost:9000/event/entry",
                                             {
                                                 eventId: event.id,
                                                 token: localStorage.getItem("token"),
