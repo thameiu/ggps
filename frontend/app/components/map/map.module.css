@@ -143,7 +143,7 @@
     position: absolute; /* Use absolute positioning */
     /* top: 50%; Position at the vertical center */
     top:3%;
-    left: 40%; /* Position at the horizontal center */
+    left: 30%; /* Position at the horizontal center */
     z-index: 9999; /* Make sure it's above other components */
 }
 
@@ -152,7 +152,7 @@
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 15px;
-        width:20vw;
+    width:20vw;
     background-color: #111;
     font-family: var(--font-sofia-pro-ultralight-az);
 }
@@ -178,3 +178,14 @@
     font-family: var(--font-sofia-pro-medium-az);
 }
 
+
+.categorySelector {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    font-size: 16px;
+    background-color: #111;
+    font-family: var(--font-sofia-pro-ultralight-az);
+    margin-right: 10px;
+}

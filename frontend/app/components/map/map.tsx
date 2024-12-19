@@ -3,16 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { MapContainer, TileLayer, Marker, useMapEvents, Popup, useMap } from "react-leaflet";
-import L, { LatLngBounds, LatLng, map } from "leaflet";
+import L, { LatLngBounds, LatLng } from "leaflet";
 import axios, { AxiosError } from "axios";
 import "leaflet/dist/leaflet.css"; // Leaflet default styles
 import RightPanel from "./SideBars/RightPanel";
 import { createRoot } from "react-dom/client";
 import styles from "./map.module.css";
 import SearchBar from "./SearchBar";
-import {EventBar
-
-} from "./SideBars/EventBar";
+import { EventBar } from "./SideBars/EventBar";
 import BoundsFinder from "./BoundsFinder";
 import ModifyZoomButtons from "./ModifyZoomButtons";
 import SimulateZoomOut from "./SimulateZoomOut";
@@ -25,6 +23,7 @@ export default function MapComponent() {
     const positionRef = useRef<LatLng | null>(null); 
     const [address, setAddress] = useState<string | null>(null);
     const [searchWord, setSearchWord] = useState<string | null>("");
+    const [category, setCategory] = useState<string | null>("");
     const [events, setEvents] = useState<any[]>([]); // State to hold events from SearchBar
     const [loading, setLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(true);
@@ -68,11 +67,11 @@ export default function MapComponent() {
     }, [router]);
 
     useEffect(() => {
-        fetchEvents({ bounds, searchWord, setEvents });
-    }, [bounds, searchWord]);
+        fetchEvents({ bounds, searchWord, category, setEvents });
+    }, [bounds, searchWord, category]);
 
     if (loading) return <div>Loading...</div>;
- 
+
     return (
         <>
             <MapContainer
@@ -97,16 +96,13 @@ export default function MapComponent() {
                     address={address}
                 />
 
-
                 <div
-                onMouseEnter={() => setIsPanelHovered(true)} 
-                onMouseLeave={() => setIsPanelHovered(false)} 
+                    onMouseEnter={() => setIsPanelHovered(true)} 
+                    onMouseLeave={() => setIsPanelHovered(false)} 
                 >
-
-                <EventBar/>
+                    <EventBar />
                 </div>
-                
-    
+
                 <SearchBar
                     coordinates={{
                         latMin: bounds?.getSouthWest().lat || 0,
@@ -116,15 +112,17 @@ export default function MapComponent() {
                     }}
                     onResultsFound={(foundEvents) => setEvents(foundEvents)}
                     onSearch={(searchTerm) => setSearchWord(searchTerm)}
+                    onCategoryChange={(selectedCategory) => setCategory(selectedCategory)} // Handle category change
                 />
+
                 <TileLayer
                     noWrap
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-                
+
                 <BoundsFinder setBounds={setBounds} />
-                
+
                 <LocationMarker
                     isPanelOpen={isPanelOpen}
                     setPosition={setPosition}
@@ -132,7 +130,7 @@ export default function MapComponent() {
                     setAddress={setAddress}
                     address={address || ""}
                 />
-    
+
                 <ModifyZoomButtons />
                 {events.map((event) => (
                     <Marker
@@ -156,7 +154,7 @@ export default function MapComponent() {
                                         alert("You must be logged in to sign up for events.");
                                         return;
                                     }
-    
+
                                     try {
                                         const response = await axios.post(
                                             "http://localhost:9000/event/entry",
@@ -167,7 +165,7 @@ export default function MapComponent() {
                                             },
                                             { headers: { authorization: token } }
                                         );
-    
+
                                         if (response.status === 201) {
                                             alert("Successfully signed up for the event!");
                                         } else if (response.statusText === 'This user has already signed up for this event') {
@@ -180,7 +178,7 @@ export default function MapComponent() {
                                             alert("You have already signed up for this event.");
                                             return;
                                         }
-    
+
                                         alert("An error occurred. Please try again.");
                                         console.error("Error signing up for event:", error);
                                     }
@@ -203,4 +201,4 @@ export default function MapComponent() {
             </MapContainer>
         </>
     );
-}    
+}

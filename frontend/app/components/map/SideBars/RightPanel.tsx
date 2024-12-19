@@ -82,7 +82,7 @@ export default function RightPanel({
                 setIsPanelOpen(false);
                 if (bounds) {
                     console.log("eefhdghudfhduehdeidjfhdeujfd")
-                    fetchEvents({ bounds, searchWord: "", setEvents: () => {} });
+                    fetchEvents({ bounds, searchWord: "", category: null, setEvents: () => {} });
                 }
             }
         } catch (error) {

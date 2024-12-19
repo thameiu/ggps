@@ -5,11 +5,12 @@ import { LatLngBounds } from 'leaflet';
 interface FetchEventsProps {
     bounds: LatLngBounds | null; 
     searchWord: string|null; 
+    category: string|null;
     setEvents: (events: any[]) => void; 
     mapInstance?: L.Map; 
 }
 
-export const fetchEvents = async ({ bounds, searchWord, setEvents }: FetchEventsProps) => {
+export const fetchEvents = async ({ bounds, searchWord, category, setEvents }: FetchEventsProps) => {
     const token = localStorage.getItem("token");
     if (!token || !bounds) return;
 
@@ -20,6 +21,8 @@ export const fetchEvents = async ({ bounds, searchWord, setEvents }: FetchEvents
             latMax: bounds.getNorthEast().lat.toString(),
             longMax: bounds.getNorthEast().lng.toString(),
             ...(searchWord && searchWord.length >= 3 && { searchWord }),
+            ...(category && { category }),
+
         };
 
         const endpoint = "http://localhost:9000/event/"
