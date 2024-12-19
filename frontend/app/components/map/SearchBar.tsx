@@ -20,7 +20,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSe
 
     const handleSearch = async () => {
         try {
-            const response = await axios.get('http://localhost:9000/event/getBySearchWordInRadius', {
+            const response = await axios.get('http://localhost:9000/event', {
                 params: {
                     searchWord: searchWord,
                     latMin: coordinates.latMin,
@@ -32,7 +32,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSe
                     authorization: localStorage.getItem('token')
                 }
             });
-            console.log(response.data);
             onResultsFound(response.data); // Pass the found events to the parent component
             onSearch(searchWord);
         } catch (error) {

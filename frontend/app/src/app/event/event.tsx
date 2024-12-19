@@ -59,11 +59,6 @@ const EventPage: React.FC = () => {
         };
         fetchEvent();
     }, [id, token]);
-
-
-    const handleSignUp = (eventId: number) => {
-        console.log(`Signed up for event ${eventId}`);
-    };
     
 
     useEffect(() => {

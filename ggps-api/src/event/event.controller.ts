@@ -10,19 +10,11 @@ export class EventController {
     constructor(private eventService : EventService){
     }
 
-    @Post('create')
+    @Post()
     @UseGuards(AuthGuard)
     create(@Body() dto: EventDto){
         return this.eventService.create(dto);
     };
-
-    @Get('getAll')
-    @UseGuards(AuthGuard)
-    @HttpCode(200)
-    getAllEvents() {
-        return this.eventService.findAll();
-    }
-
     
     @Get('id/:id')
     @UseGuards(AuthGuard)
@@ -31,25 +23,11 @@ export class EventController {
         return this.eventService.find(id);
     }
 
-    @Get('getInRadius')
+    @Get()
     @UseGuards(AuthGuard)
     @HttpCode(200)
     getInRadius(@Query() dto:MinMaxCoordinatesDto) {
-        return this.eventService.getInRadius(dto);
-    }
-
-    @Get('getByCategoryInRadius')
-    @UseGuards(AuthGuard)
-    @HttpCode(200)
-    getByCategoryInRadius(@Query('category') category: string, @Query() dto: MinMaxCoordinatesDto) {
-        return this.eventService.getByCategoryInRadius(category, dto);
-    }
-
-    @Get('getBySearchWordInRadius')
-    @UseGuards(AuthGuard)
-    @HttpCode(200)
-    getBySearchWordInRadius(@Query('searchWord') searchWord: string, @Query() dto: MinMaxCoordinatesDto) {
-        return this.eventService.getBySearchWordInRadius(searchWord, dto);
+        return this.eventService.getBySearchWordAndOrCategoryInRadius(dto);
     }
     
     @Post('entry')

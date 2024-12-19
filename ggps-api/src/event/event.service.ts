@@ -162,18 +162,44 @@ export class EventService {
         }
     }
 
-    async getByCategoryInRadius(category: string, dto: MinMaxCoordinatesDto) {
+    async getByCategoryInRadius(dto: MinMaxCoordinatesDto) {
         const eventsInRadius = await this.getInRadius(dto);
-        const events = eventsInRadius.filter(event => event.category === category);
+        const events = eventsInRadius.filter(event => event.category === dto.category);
         return events;
     }
 
-    async getBySearchWordInRadius(searchWord: string, dto: MinMaxCoordinatesDto) {
+    async getBySearchWordInRadius(dto: MinMaxCoordinatesDto) {
         const eventsInRadius = await this.getInRadius(dto);
-        const searchWordLower = searchWord.toLowerCase();
+        const searchWordLower = dto.searchWord.toLowerCase();
         const filteredEvents = eventsInRadius.filter(event => 
             event.title.toLowerCase().includes(searchWordLower) || 
             event.description.toLowerCase().includes(searchWordLower)
+        );
+        return filteredEvents;
+    }
+
+    async getBySearchWordAndOrCategoryInRadius(dto: MinMaxCoordinatesDto) {
+        if (!dto.latMax || !dto.latMin || !dto.longMax || !dto.longMin){
+            return this.findAll();
+        }
+
+        else if (!dto.category && !dto.searchWord) {
+            return this.getInRadius(dto);
+        }
+
+        else if (!dto.category ) {
+            return this.getBySearchWordInRadius(dto);
+        }
+
+        else if (!dto.searchWord ) {
+            return this.getByCategoryInRadius(dto);
+        }
+        const eventsInRadius = await this.getInRadius(dto);
+            const searchWordLower = dto.searchWord.toLowerCase();
+        const filteredEvents = eventsInRadius.filter(event => 
+            (event.title.toLowerCase().includes(searchWordLower) || 
+            event.description.toLowerCase().includes(searchWordLower)) &&
+            event.category === dto.category
         );
         return filteredEvents;
     }

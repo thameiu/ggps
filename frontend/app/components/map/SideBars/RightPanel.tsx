@@ -47,7 +47,7 @@ export default function RightPanel({
 
         try {
             const response = await axios.post(
-                "http://localhost:9000/event/create",
+                "http://localhost:9000/event",
                 {
                     title,
                     description,

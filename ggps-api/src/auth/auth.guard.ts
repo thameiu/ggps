@@ -6,6 +6,7 @@ export class AuthGuard implements CanActivate {
     constructor(private authService: AuthService) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        try{
         const request = context.switchToHttp().getRequest();
         const token = request.headers['authorization'];
 
@@ -13,11 +14,16 @@ export class AuthGuard implements CanActivate {
             return false;
         }
 
+
+        
         const isValid = await this.authService.verifyToken(token);
         if (!isValid) {
             return false;
         }
 
-        return true;
+            return true;
+        }catch(error){
+            return false;
+        }
     }
 }

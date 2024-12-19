@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsEmail, IsISO8601, IsNotEmpty, IsString, Matches } from "class-validator"
+import { IsBoolean, IsDate, IsEmail, IsISO8601, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator"
 
 export class EventDto {
 
@@ -62,21 +62,34 @@ export class EventDto {
 
 
 export class MinMaxCoordinatesDto {
+
+    @IsOptional()
     @IsNotEmpty()
     @Matches(/^(\+|-)?(?:90(?:(?:\.0{1,30})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,30})?))$/)
     latMin: string;
 
+    @IsOptional()
     @IsNotEmpty()
     @Matches(/^(\+|-)?(?:180(?:\.0{1,16})?|(?:1[0-7][0-9]|[1-9]?[0-9])(?:\.[0-9]{1,30})?)$/)
     longMin: string;
 
+    @IsOptional()
     @IsNotEmpty()
     @Matches(/^(\+|-)?(?:90(?:(?:\.0{1,30})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,30})?))$/)
     latMax: string; 
 
+    @IsOptional()
     @IsNotEmpty()
     @Matches(/^(\+|-)?(?:180(?:\.0{1,30})?|(?:1[0-7][0-9]|[1-9]?[0-9])(?:\.[0-9]{1,30})?)$/)
     longMax: string;
+    
+    @IsString()
+    @IsOptional()
+    searchWord?: string;
+
+    @IsString()
+    @IsOptional()
+    category?: string;
 
 }
 

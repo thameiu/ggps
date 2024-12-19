@@ -22,9 +22,7 @@ export const fetchEvents = async ({ bounds, searchWord, setEvents }: FetchEvents
             ...(searchWord && searchWord.length >= 3 && { searchWord }),
         };
 
-        const endpoint = searchWord && searchWord.length >= 3
-            ? "http://localhost:9000/event/getBySearchWordInRadius"
-            : "http://localhost:9000/event/getInRadius";
+        const endpoint = "http://localhost:9000/event/"
 
         const eventsResponse = await axios.get(endpoint, {
             params,

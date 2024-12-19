@@ -1,0 +1,10 @@
+.login{
+    margin-top: 11vh;
+    height:89vh;
+}
+
+.rightSide{
+
+    background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.5) 70%);
+
+}
