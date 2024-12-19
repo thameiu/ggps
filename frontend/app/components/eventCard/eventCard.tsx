@@ -2,26 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styles from './event.module.css';
 import Chatroom from '../chatroom/chatroom';
-
-export type Event = {
-  id: number;
-  title: string;
-  description: string;
-  beginDate: string;
-  endDate: string;
-  street: string;
-  number: string;
-  city: string;
-  zipCode: string;
-  latitude: number;
-  longitude: number;
-  category: string;
-};
-
-type EventCardProps = {
-  event: Event;
-  organizer: string | null;
-};
+import { EventCardProps } from './types';
 
 const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [loading, setLoading] = useState(false);
@@ -83,6 +64,43 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       setLoading(false);
     }
   };
+
+  const handleDeleteEvent = async (eventId: number) => {
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('User not authenticated.');
+      }
+  
+      // Delete event
+      await axios.delete(`http://localhost:9000/event`, {
+        data: {
+          token,
+          eventId,
+        },
+        headers: {
+          Authorization: token,
+        },
+      });
+  
+      console.log('Event deleted successfully');
+      setSuccess(true);
+
+  
+      // Optionally redirect or remove the event card from the list
+      // e.g., if you have a parent component, inform it to refresh the events list
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      setError('Failed to delete the event. Please try again later.');
+    } finally {
+      setLoading(false);
+      window.location.href = '/map';
+    }
+  };
+  
 
   const checkSignUpStatus = async (eventId: number) => {
     try {
@@ -215,41 +233,49 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            {/* Render Sign-Up button only if user is not the organizer */}
-            {!isOrganizer && (
-              <button
-                onClick={() => handleEntryAction(event.id)}
-                className={styles.signUp}
-                style={{
-                  backgroundColor: isSignedUp ? '#535352' : color || '#000',
-                }}
-              >
-                {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
-              </button>
-            )}
+          {isOrganizer ? (
+            <button
+              onClick={() => handleDeleteEvent(event.id)}
+              className={styles.deleteButton}
 
-            {success && (
-              <p className="text-green-500" style={{ animation: 'fadeOut 3s forwards' }}>
-                {isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
-              </p>
-            )}
-            {error && (
-              <p className="text-red-500" style={{ animation: 'fadeOut 3s forwards' }}>
-                {error}
-              </p>
-            )}
+            >
+              {loading ? 'Processing...' : 'Delete Event'}
+            </button>
+          ) : (
+            <button
+              onClick={() => handleEntryAction(event.id)}
+              className={styles.signUp}
+              style={{
+                backgroundColor: isSignedUp ? '#535352' : color || '#000',
+              }}
+            >
+              {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
+            </button>
+          )}
 
-            <style jsx>{`
-              @keyframes fadeOut {
-                0% {
-                  opacity: 1;
-                }
-                100% {
-                  opacity: 0;
-                }
+          {success && (
+            <p className="text-green-500" style={{ animation: 'fadeOut 3s forwards' }}>
+              {isOrganizer ? 'Event deleted successfully!' : isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
+            </p>
+          )}
+          {error && (
+            <p className="text-red-500" style={{ animation: 'fadeOut 3s forwards' }}>
+              {error}
+            </p>
+          )}
+
+          <style jsx>{`
+            @keyframes fadeOut {
+              0% {
+                opacity: 1;
               }
-            `}</style>
-          </div>
+              100% {
+                opacity: 0;
+              }
+            }
+          `}</style>
+        </div>
+
         </div>
       }
 

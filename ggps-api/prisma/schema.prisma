@@ -64,8 +64,8 @@ model Entry{
 
   userId Int
   eventId Int
-  user User @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   status String
   message String?
   rating Int?
@@ -81,8 +81,8 @@ model Message{
   chatroomId Int
   content String
   pinned Boolean
-  user User @relation(fields: [userId], references: [id])
-  chatroom Chatroom @relation(fields: [chatroomId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatroom Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
 }
 
 model Chatroom{
@@ -91,7 +91,7 @@ model Chatroom{
   updateddAt DateTime @updatedAt
 
   eventId Int @unique
-  event Event @relation(fields: [eventId], references: [id])
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   messages Message[]
 
   Access Access[]
@@ -104,8 +104,8 @@ model Access{
 
   userId Int
   chatroomId Int
-  user User @relation(fields: [userId], references: [id])
-  chatroom Chatroom @relation(fields: [chatroomId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatroom Chatroom @relation(fields: [chatroomId], references: [id], onDelete: Cascade)
   role String
   
 }

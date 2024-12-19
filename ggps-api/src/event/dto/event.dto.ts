@@ -60,6 +60,16 @@ export class EventDto {
     createChatroom: boolean;
 }
 
+export class DeleteDto {
+
+    @IsNotEmpty()
+    token: string;
+
+    @IsNotEmpty()
+    eventId: string;
+
+}
+
 
 export class MinMaxCoordinatesDto {
 
@@ -105,15 +115,5 @@ export class EntryDto {
     @IsString()
     @IsNotEmpty()
     status: string;
-
-}
-
-export class DeleteEntryDto {
-
-    @IsNotEmpty()
-    token: string;
-
-    @IsNotEmpty()
-    eventId: string;
 
 }

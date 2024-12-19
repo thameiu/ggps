@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Event } from "../../eventCard/eventCard";
+import { Event } from "../../eventCard/types";
 import styles from "../map.module.css";
 
 export function EventBar() {

@@ -118,3 +118,16 @@
 
   }
   
+  .deleteButton{
+    background-color: #c12626;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: var(--font-sofia-pro-regular-az);
+    width : 20%;
+    align-self: center;
+    margin-top: 5%;
+    margin-bottom: 2%;
+  }

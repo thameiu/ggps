@@ -1,6 +1,6 @@
 import { Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DeleteEntryDto, EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
+import { DeleteDto, EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
@@ -86,6 +86,37 @@ export class EventService {
         }
     }
 
+    async delete(dto: DeleteDto){
+        
+        try {
+            const user = await this.auth.getUserFromToken(dto.token);
+            if (!user) {
+                throw new ForbiddenException('User not found');
+            }
+            const event = await this.prisma.event.findUnique({
+                where: { id: parseInt(dto.eventId) }
+            });
+            if (!event) {
+                throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+            }
+            const entry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: event.id,
+                    userId: user.id,
+                }
+            });
+            if (!entry || entry.status !== 'organizer') {
+                throw new HttpException('User not authorized to delete event', HttpStatus.FORBIDDEN);
+            }
+            await this.prisma.event.delete({
+                where: { id: parseInt(dto.eventId) }
+            });
+            return event;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async findAll() {
         try {
             const events = await this.prisma.event.findMany();
@@ -162,7 +193,7 @@ export class EventService {
         }
     }
 
-    async deleteEntry(dto: DeleteEntryDto) {
+    async deleteEntry(dto: DeleteDto) {
         try {
             const user = await this.auth.getUserFromToken(dto.token);
             const entry = await this.prisma.entry.findFirst({

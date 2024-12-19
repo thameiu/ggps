@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import styles from "./chatroom.module.css";
-import { Event } from "../eventCard/eventCard";
+import { Event } from "../eventCard/types";
 
 interface ChatRoomProps {
     event: Event;
