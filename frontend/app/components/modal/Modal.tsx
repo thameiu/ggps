@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 import styles from './modal.module.css';
+import 'animate.css';
 
 interface ModalProps {
   title: string;
@@ -21,7 +22,7 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   return (
     <div className={styles.modalBackdrop}>
-      <div className={styles.modalContent}>
+      <div className={`${styles.modalContent} animate__animated animate__zoomIn`}>
         <h2 className={styles.modalTitle}>{title}</h2>
         <p className={styles.modalMessage}>{message}</p>
         <div className={styles.modalActions}>
