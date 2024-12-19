@@ -1,6 +1,6 @@
 import { Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
+import { DeleteEntryDto, EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
@@ -156,6 +156,32 @@ export class EventService {
             if (chatroom){
                 await this.message.giveAccess(dto.token, chatroom.id, 'participant');
             }
+            return entry;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async deleteEntry(dto: DeleteEntryDto) {
+        try {
+            const user = await this.auth.getUserFromToken(dto.token);
+            const entry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: user.id
+                }
+            });
+            if (!entry) {
+                throw new HttpException('Entry not found', HttpStatus.NOT_FOUND);
+            }
+            if (entry.status === 'organizer') {
+                throw new HttpException('Organizer cannot delete entry', HttpStatus.FORBIDDEN);
+            }
+            await this.prisma.entry.delete({
+                where: {
+                    id: entry.id
+                }
+            });
             return entry;
         } catch (error) {
             throw error;

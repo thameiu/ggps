@@ -107,3 +107,13 @@ export class EntryDto {
     status: string;
 
 }
+
+export class DeleteEntryDto {
+
+    @IsNotEmpty()
+    token: string;
+
+    @IsNotEmpty()
+    eventId: string;
+
+}

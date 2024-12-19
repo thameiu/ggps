@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styles from './event.module.css';
-import ChatRoom from '../chatroom/chatroom';
+import Chatroom from '../chatroom/chatroom';
 
 export type Event = {
   id: number;
@@ -27,36 +27,58 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSignedUp, setIsSignedUp] = useState(false); 
-  const [hasChatroom, setHasChatroom] = useState(false); 
+  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [hasChatroom, setHasChatroom] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [color, setColor] = useState<string | null>('');
+  const [isOrganizer, setIsOrganizer] = useState(false);
 
-  const handleSignUp = async (eventId: number) => {
+  const handleEntryAction = async (eventId: number) => {
     setLoading(true);
     setSuccess(false);
     setError(null);
 
     try {
-      const response = await axios.post(
-        'http://localhost:9000/event/entry',
-        {
-          eventId,
-          token: localStorage.getItem('token'),
-          status: 'accepted',
-        },
-        {
-          headers: {
-            Authorization: localStorage.getItem('token'),
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('User not authenticated.');
+      }
+
+      if (isSignedUp) {
+        // Remove entry
+        await axios.delete('http://localhost:9000/event/entry', {
+          data: {
+            eventId,
+            token,
           },
-        }
-      );
+          headers: {
+            Authorization: token,
+          },
+        });
+        setIsSignedUp(false);
+        console.log('Entry removed successfully');
+      } else {
+        // Sign up for event
+        await axios.post(
+          'http://localhost:9000/event/entry',
+          {
+            eventId,
+            token,
+            status: 'accepted',
+          },
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        setIsSignedUp(true);
+        console.log('Sign-up successful');
+      }
       setSuccess(true);
-      setIsSignedUp(true); 
-      console.log('Sign-up successful:', response.data);
     } catch (err) {
-      console.error('Error signing up:', err);
-      setError('Failed to sign up. Please try again later.');
+      console.error('Error updating entry:', err);
+      setError('Failed to update entry. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -70,7 +92,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           token: token,
         },
         headers: {
-          Authorization:  token,
+          Authorization: token,
         },
       });
 
@@ -78,10 +100,27 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       const isUserSignedUp =
         events.some((e: { id: number }) => e.id === eventId) ||
         organizedEvents.some((e: { id: number }) => e.id === eventId);
-      
+
       setIsSignedUp(isUserSignedUp);
     } catch (err) {
       console.error('Error checking sign-up status:', err);
+    }
+  };
+
+  const checkOrganizerStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:9000/auth/verify-token',
+        {},
+        { headers: { authorization: token } }
+      );
+
+      const loggedInUser = response.data.user.username;
+      if (loggedInUser === organizer) {
+        setIsOrganizer(true);
+      }
+    } catch (err) {
+      console.error('Error verifying organizer status:', err);
     }
   };
 
@@ -99,7 +138,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     }
   };
 
-  
   function selectColor() {
     if (event && event.category.toLowerCase() === 'convention') setColor('rgba(100, 0, 200, 1)');
     else if (event && (event.category.toLowerCase() === 'tournament' || event.category.toLowerCase() === 'esport event'))
@@ -113,6 +151,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     selectColor();
     checkSignUpStatus(event.id);
     checkChatroomAvailability(event.id);
+    checkOrganizerStatus();
   }, [event.id, event.category]);
 
   return (
@@ -176,25 +215,46 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <button
-              onClick={() => handleSignUp(event.id)}
-              disabled={loading || isSignedUp}
-              className={styles.signUp}
-              style={{
-                backgroundColor: isSignedUp ? '#535352' : color || '#000',
-              }}
-            >
-              {loading ? 'Signing Up...' : isSignedUp ? 'Signed Up  ✓' : 'Sign Up'}
-            </button>
+            {/* Render Sign-Up button only if user is not the organizer */}
+            {!isOrganizer && (
+              <button
+                onClick={() => handleEntryAction(event.id)}
+                className={styles.signUp}
+                style={{
+                  backgroundColor: isSignedUp ? '#535352' : color || '#000',
+                }}
+              >
+                {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
+              </button>
+            )}
 
-            {success && <p className="text-green-500">You have successfully signed up!</p>}
-            {error && <p className="text-red-500">{error}</p>}
+            {success && (
+              <p className="text-green-500" style={{ animation: 'fadeOut 3s forwards' }}>
+                {isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
+              </p>
+            )}
+            {error && (
+              <p className="text-red-500" style={{ animation: 'fadeOut 3s forwards' }}>
+                {error}
+              </p>
+            )}
+
+            <style jsx>{`
+              @keyframes fadeOut {
+                0% {
+                  opacity: 1;
+                }
+                100% {
+                  opacity: 0;
+                }
+              }
+            `}</style>
           </div>
         </div>
       }
 
       {/* Chatroom display */}
-      {showChat && hasChatroom && isSignedUp && <ChatRoom event={event} color={color} />}
+      {showChat && hasChatroom && isSignedUp && <Chatroom event={event} color={color} />}
     </div>
   );
 };

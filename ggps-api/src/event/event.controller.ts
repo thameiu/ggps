@@ -1,6 +1,6 @@
-import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode, Get, Query, Head, Param } from "@nestjs/common";
+import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode, Get, Query, Head, Param, Delete } from "@nestjs/common";
 import { EventService }from './event.service';
-import { EntryDto, EventDto, MinMaxCoordinatesDto } from "./dto";
+import { DeleteEntryDto, EntryDto, EventDto, MinMaxCoordinatesDto } from "./dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { ad } from "@faker-js/faker/dist/airline-BLb3y-7w";
 import { TokenDto } from "src/auth/dto";
@@ -29,13 +29,21 @@ export class EventController {
     getInRadius(@Query() dto:MinMaxCoordinatesDto) {
         return this.eventService.getBySearchWordAndOrCategoryInRadius(dto);
     }
-    
+
     @Post('entry')
     @UseGuards(AuthGuard)
     @HttpCode(201)
     createEntry(@Body() dto:EntryDto){ 
         return this.eventService.createEntry(dto);
     }
+
+    @Delete('entry')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    deleteEntry(@Body() dto:DeleteEntryDto) {
+        return this.eventService.deleteEntry(dto);
+    }
+    
 
     @Get('userEntries')
     @UseGuards(AuthGuard)
