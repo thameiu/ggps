@@ -3,6 +3,7 @@ import axios from 'axios';
 import styles from './event.module.css';
 import Chatroom from '../chatroom/chatroom';
 import { EventCardProps } from './types';
+import Modal from '../modal/Modal';
 
 const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,16 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [showChat, setShowChat] = useState(false);
   const [color, setColor] = useState<string | null>('');
   const [isOrganizer, setIsOrganizer] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showRemoveEntryModal, setShowRemoveEntryModal] = useState(false);
+
+  const confirmDeleteEvent = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmRemoveEntry = () => {
+    setShowRemoveEntryModal(true);
+  };
 
   const handleEntryAction = async (eventId: number) => {
     setLoading(true);
@@ -26,6 +37,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       }
 
       if (isSignedUp) {
+        setShowRemoveEntryModal(false);
         // Remove entry
         await axios.delete('http://localhost:9000/event/entry', {
           data: {
@@ -66,6 +78,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   };
 
   const handleDeleteEvent = async (eventId: number) => {
+    setShowDeleteModal(false);
     setLoading(true);
     setError(null);
   
@@ -235,7 +248,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           <div className="flex flex-col space-y-2">
           {isOrganizer ? (
             <button
-              onClick={() => handleDeleteEvent(event.id)}
+              onClick={() => confirmDeleteEvent()}
               className={styles.deleteButton}
 
             >
@@ -243,7 +256,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             </button>
           ) : (
             <button
-              onClick={() => handleEntryAction(event.id)}
+              onClick={() => isSignedUp ? confirmRemoveEntry() : handleEntryAction(event.id)}
               className={styles.signUp}
               style={{
                 backgroundColor: isSignedUp ? '#535352' : color || '#000',
@@ -278,6 +291,27 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
         </div>
       }
+      {showDeleteModal && (
+        <Modal
+          title="Delete Event"
+          message="Are you sure you want to delete this event? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={() => handleDeleteEvent(event.id)}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
+
+      {showRemoveEntryModal && (
+        <Modal
+          title="Remove Entry"
+          message="Are you sure you want to remove your entry for this event?"
+          confirmText="Remove"
+          cancelText="Cancel"
+          onConfirm={() => handleEntryAction(event.id)}
+          onCancel={() => setShowRemoveEntryModal(false)}
+        />
+      )}
 
       {/* Chatroom display */}
       {showChat && hasChatroom && isSignedUp && <Chatroom event={event} color={color} />}
