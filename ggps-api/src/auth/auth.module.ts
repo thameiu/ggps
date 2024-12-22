@@ -6,7 +6,7 @@ import { AuthController } from './auth.controller';
 @Module({
   imports: [
     JwtModule.register({
-      secret: 'your_secret_key', 
+      secret: 'njbuy5zsfejghe_sfhcvejsdfe**$^pdfeczighvyhfjgvhb huhv zeif*$^$ù!:^;o;h234567890982=+KJxbétyz  fd"èiyd gèz-  tdn zgzufd yt -(-fyt "oéédy67_ç', 
       signOptions: { expiresIn: '1d' },
     }),
   ],

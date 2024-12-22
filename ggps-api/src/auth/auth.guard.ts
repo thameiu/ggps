@@ -13,14 +13,10 @@ export class AuthGuard implements CanActivate {
         if (!token) {
             return false;
         }
-
-
-        
         const isValid = await this.authService.verifyToken(token);
         if (!isValid) {
             return false;
         }
-
             return true;
         }catch(error){
             return false;

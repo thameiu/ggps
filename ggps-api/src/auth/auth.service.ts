@@ -63,20 +63,26 @@ export class AuthService {
     }
   }
 
+
   async verifyToken(token: string) {
     try {
-      const decoded = this.jwtService.decode(token) as { userId: number, email: string };
+      const decoded = await this.jwtService.verifyAsync(token);
       const user = await this.prisma.user.findUnique({
         where: { id: decoded.userId, email: decoded.email },
       });
+  
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-      return this.jwtService.verifyAsync(token),user;
+      return { valid: true, user };
     } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token has expired');
+      }
       throw new UnauthorizedException('Invalid token');
     }
   }
+  
 
   async getUserFromToken(token: string) {
     try {

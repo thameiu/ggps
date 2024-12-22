@@ -49,6 +49,10 @@ const sofiaProUltralighttAz = localFont({
     variable: "--font-sofia-pro-ultralight-az",
 });
 
+const agero = localFont({
+  src: "./fonts/agero.ttf",
+    variable: "--agero",
+});
 
 
 export const metadata: Metadata = {
@@ -79,7 +83,7 @@ export default function RootLayout({
       </head>
 
       <body
-        className={`${sofiaProMediumAz.variable} ${sofiaProBlackAz.variable} ${sofiaProRegularAz.variable} ${sofiaProUltralighttAz.variable} antialiased`}
+        className={`${sofiaProMediumAz.variable} ${sofiaProBlackAz.variable} ${sofiaProRegularAz.variable} ${sofiaProUltralighttAz.variable} ${agero.variable} antialiased`}
       >
       <Header/>
 

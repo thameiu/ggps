@@ -267,12 +267,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           )}
 
           {success && (
-            <p className="text-green-500" style={{ animation: 'fadeOut 3s forwards' }}>
+            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
               {isOrganizer ? 'Event deleted successfully!' : isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
             </p>
           )}
           {error && (
-            <p className="text-red-500" style={{ animation: 'fadeOut 3s forwards' }}>
+            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
               {error}
             </p>
           )}

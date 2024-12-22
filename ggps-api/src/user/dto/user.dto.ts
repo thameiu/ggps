@@ -1,0 +1,23 @@
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator"
+
+export class UpdateProfileDto {
+
+    @IsString()
+    @IsNotEmpty()
+    token: string;
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    username: string;
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    lastName:string;
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    firstName:string
+}
