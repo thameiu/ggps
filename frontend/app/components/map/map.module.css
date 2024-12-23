@@ -141,40 +141,6 @@
 /* .select > .option > a:hover, .select > .option > a:focus {
     background-color:red;
 } */
-.searchBar {
-    position: absolute; /* Use absolute positioning */
-    /* top: 50%; Position at the vertical center */
-    top:3%;
-    left: 30%; /* Position at the horizontal center */
-    z-index: 9999; /* Make sure it's above other components */
-}
-
-.searchInput {
-    padding: 5px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 15px;
-    width:20vw;
-    background-color: #111;
-    font-family: var(--font-sofia-pro-ultralight-az);
-}
-
-.searchButton {
-    padding: 5px 10px;
-    font-size: 1rem;
-    background-color: #111;
-    color: white;
-    border: 1px solid #ccc;
-    
-    
-    border-radius: 25px;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.searchButton:hover {
-    background-color: #777;
-}
 
 .eventPopup{
     font-family: var(--font-sofia-pro-medium-az);
@@ -205,4 +171,98 @@
 
 .eventBarCardTitle{
     font-family: var(--font-sofia-pro-medium-az);
+}
+
+
+.searchBar {
+    position: absolute;
+    display: flex;
+    top:3%;
+    left: 25%; 
+    z-index: 9999; 
+}
+
+.searchInput {
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    width:20vw;
+    background-color: #111;
+    font-family: var(--font-sofia-pro-ultralight-az);
+}
+
+.searchButton {
+    padding: 5px 10px;
+    font-size: 1rem;
+    background-color: #111;
+    color: white;
+    border: 1px solid #ccc;
+    
+    
+    border-radius: 25px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.searchButton:hover {
+    background-color: #777;
+}
+
+
+.filterToggle {
+    border: 1px solid #ccc;
+    padding: 2px;
+    padding-right:10px ;
+    border-radius: 25px;
+    margin-right: 10px;
+    display: flex; 
+    align-items: center; 
+    font-family: var(--font-sofia-pro-ultralight-az);
+    gap: 10px;
+}
+
+.filterToggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute; 
+}
+
+.slider {
+    position: relative;
+    cursor: pointer;
+    width: 60px;
+    height: 34px;
+    background-color: #565654;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #BD0000;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #BD0000;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.sliderText{
+    font-size:16px;
 }

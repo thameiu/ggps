@@ -14,29 +14,36 @@ interface SearchBarProps {
     onResultsFound: (events: any[]) => void;
     onSearch: (searchTerm: string) => void;
     onCategoryChange: (category: string) => void;
-
+    onDateFilterToggle: (dateFilter: boolean) => void; // New prop for date filtering
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSearch, onCategoryChange }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+    coordinates,
+    onResultsFound,
+    onSearch,
+    onCategoryChange,
+    onDateFilterToggle,
+}) => {
     const [searchWord, setSearchWord] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [dateFilter, setDateFilter] = useState(false); 
 
     const handleSearch = async () => {
         try {
             const response = await axios.get('http://localhost:9000/event', {
                 params: {
                     searchWord: searchWord,
-                    category: selectedCategory || undefined, 
+                    category: selectedCategory || undefined,
                     latMin: coordinates.latMin,
                     latMax: coordinates.latMax,
                     longMin: coordinates.longMin,
                     longMax: coordinates.longMax,
                 },
                 headers: {
-                    authorization: localStorage.getItem('token')
-                }
+                    authorization: localStorage.getItem('token'),
+                },
             });
-            onResultsFound(response.data); 
+            onResultsFound(response.data);
             onSearch(searchWord);
             onCategoryChange(selectedCategory);
         } catch (error) {
@@ -46,12 +53,27 @@ const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSe
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            handleSearch(); 
+            handleSearch();
         }
+    };
+
+    const toggleDateFilter = () => {
+        const newFilterState = !dateFilter;
+        setDateFilter(newFilterState);
+        onDateFilterToggle(newFilterState); 
     };
 
     return (
         <div className={styles.searchBar}>
+            <label className={styles.filterToggle}>
+                <input
+                    type="checkbox"
+                    checked={dateFilter}
+                    onChange={toggleDateFilter} 
+                />
+                <span className={styles.slider}></span>
+                <span className={styles.sliderText}>Past events</span>
+            </label>
             <select
                 className={styles.categorySelector}
                 value={selectedCategory}
@@ -63,7 +85,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSe
                 <option value="Convention">Convention</option>
                 <option value="Esport Event">E-sport Event</option>
                 <option value="Speedrunning event">Speedrunning Event</option>
-
             </select>
             <input
                 type="text"
@@ -71,12 +92,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ coordinates, onResultsFound, onSe
                 placeholder="Search..."
                 value={searchWord}
                 onChange={(e) => setSearchWord(e.target.value)}
-                onKeyDown={handleKeyDown} 
+                onKeyDown={handleKeyDown}
             />
-
             <button className={styles.searchButton} onClick={handleSearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
+
+
         </div>
     );
 };

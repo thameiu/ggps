@@ -26,6 +26,7 @@ export default function MapComponent() {
     const [address, setAddress] = useState<string | null>(null);
     const [searchWord, setSearchWord] = useState<string | null>("");
     const [category, setCategory] = useState<string | null>("");
+    const [dateFilter, setDateFilter] = useState<boolean | null>(false); 
     const [events, setEvents] = useState<any[]>([]); // State to hold events from SearchBar
     const [loading, setLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(true);
@@ -69,8 +70,8 @@ export default function MapComponent() {
     }, [router]);
 
     useEffect(() => {
-        fetchEvents({ bounds, searchWord, category, setEvents });
-    }, [bounds, searchWord, category]);
+            fetchEvents({ bounds, searchWord, category, setEvents, dateFilter });
+    }, [bounds, searchWord, category, dateFilter]);
 
     if (loading) 
         return (
@@ -117,7 +118,8 @@ export default function MapComponent() {
                     }}
                     onResultsFound={(foundEvents) => setEvents(foundEvents)}
                     onSearch={(searchTerm) => setSearchWord(searchTerm)}
-                    onCategoryChange={(selectedCategory) => setCategory(selectedCategory)} // Handle category change
+                    onCategoryChange={(selectedCategory) => setCategory(selectedCategory)}
+                    onDateFilterToggle={(dateFilter) => setDateFilter(dateFilter)} 
                 />
 
                 <TileLayer

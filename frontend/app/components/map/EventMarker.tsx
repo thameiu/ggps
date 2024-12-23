@@ -3,14 +3,21 @@ import axios, { AxiosError } from 'axios';
 import { LatLngBounds } from 'leaflet';
 
 interface FetchEventsProps {
-    bounds: LatLngBounds | null; 
-    searchWord: string|null; 
-    category: string|null;
-    setEvents: (events: any[]) => void; 
-    mapInstance?: L.Map; 
+    bounds: LatLngBounds | null;
+    searchWord: string | null;
+    category: string | null;
+    setEvents: (events: any[]) => void;
+    dateFilter?: boolean|null; 
+    mapInstance?: L.Map;
 }
 
-export const fetchEvents = async ({ bounds, searchWord, category, setEvents }: FetchEventsProps) => {
+export const fetchEvents = async ({
+    bounds,
+    searchWord,
+    category,
+    setEvents,
+    dateFilter = true, 
+}: FetchEventsProps) => {
     const token = localStorage.getItem("token");
     if (!token || !bounds) return;
 
@@ -22,22 +29,29 @@ export const fetchEvents = async ({ bounds, searchWord, category, setEvents }: F
             longMax: bounds.getNorthEast().lng.toString(),
             ...(searchWord && searchWord.length >= 3 && { searchWord }),
             ...(category && { category }),
-
         };
 
-        const endpoint = "http://localhost:9000/event/"
+        const endpoint = "http://localhost:9000/event/";
 
         const eventsResponse = await axios.get(endpoint, {
             params,
             headers: { authorization: token },
         });
 
-        setEvents(eventsResponse.data.slice(0, 50));
+        let events = eventsResponse.data;
+
+        if (!dateFilter) {
+            const now = new Date();
+            events = events.filter(
+                (event: any) => new Date(event.beginDate) > now
+            );
+        }
+
+        setEvents(events.slice(0, 50));
     } catch (error) {
         console.error("Failed to fetch events:", error);
     }
 };
-
 
 
 export const getIconUrl = (category: string) => {
