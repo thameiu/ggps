@@ -68,6 +68,7 @@ export class EventService {
                     status: 'organizer'
                 }
             });
+            
             const user = await this.prisma.user.findFirst({
                 where: {
                     id: entry.userId
@@ -213,6 +214,10 @@ export class EventService {
                     id: entry.id
                 }
             });
+            const chatroom = await this.message.getChatroomByEvent(parseInt(dto.eventId));
+            if (chatroom){
+                await this.message.removeAccess(dto.token, chatroom.id);
+            }
             return entry;
         } catch (error) {
             throw error;

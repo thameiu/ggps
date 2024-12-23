@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import EventCard from '../../../components/eventCard/eventCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import Loader from '../../../components/loader/loader';
 
 type Event = {
     id: number;
@@ -28,7 +29,6 @@ const EventPage: React.FC = () => {
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
-        // Check for token on mount
         const savedToken = localStorage.getItem('token');
         setToken(savedToken);
 
@@ -38,7 +38,6 @@ const EventPage: React.FC = () => {
     }, [router]);
 
     const id = searchParams.get('id');
-    console.log(id);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -143,7 +142,7 @@ const EventPage: React.FC = () => {
     }, [event]); 
 
     if (!event) {
-        return <div>Loading...</div>;
+        return <Loader/>;
     }
 
     return (

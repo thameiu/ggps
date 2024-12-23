@@ -31,7 +31,7 @@
 
 }
 
-.chatroomBar{
+.eventBar{
         position: absolute;
         top: 11%;
         width: 300px;
@@ -44,22 +44,24 @@
         transition: right 0.3s ease-in-out;
         z-index: 1000;
         padding: 20px;
+        padding-bottom: 100px;
         color: #fff;
         overflow-x: hidden;
         font-size: 1.3em;
-        /* font-family: var(--font-sofia-pro-ultralight-az); */
+        font-family: var(--font-sofia-pro-medium-az);
+
 
     
 }
 
-.chatroomBar::-webkit-scrollbar {
+.eventBar::-webkit-scrollbar {
     width: 10px !important;
     padding: 30px;
 
 }
 
 
-.chatroomBar::-webkit-scrollbar-thumb {
+.eventBar::-webkit-scrollbar-thumb {
     border-radius: 20px;
     background-color:#fff;
     margin-right: 10px;
@@ -188,4 +190,19 @@
     background-color: #111;
     font-family: var(--font-sofia-pro-ultralight-az);
     margin-right: 10px;
+}
+
+
+.eventCard{
+    background-color: #111;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 10px;
+    font-family: var(--font-sofia-pro-ultralight-az);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+.eventBarCardTitle{
+    font-family: var(--font-sofia-pro-medium-az);
 }

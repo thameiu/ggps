@@ -147,10 +147,11 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       );
 
       const loggedInUser = response.data.user.username;
-      if (loggedInUser === organizer) {
+      console.log(loggedInUser, organizer);
+      if (loggedInUser == organizer) {
         setIsOrganizer(true);
       }
-    } catch (err) {
+      } catch (err) {
       console.error('Error verifying organizer status:', err);
     }
   };

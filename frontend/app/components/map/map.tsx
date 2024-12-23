@@ -18,6 +18,7 @@ import LocationMarker from "./LocationMarker";
 import { fetchEvents, getIconUrl } from "./EventMarker";
 import DisableScroll from "./SideBars/DisableScroll";
 import Image from "next/image";
+import Loader from "../loader/loader";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
@@ -73,14 +74,7 @@ export default function MapComponent() {
 
     if (loading) 
         return (
-            <div>
-                <Image src="/images/logo.png" alt="Loading" width={900} height={100} style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                }}/>
-            </div>
+            <Loader />
         );
 
     return (

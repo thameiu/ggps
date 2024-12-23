@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import styles from './profile.module.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import styles from "./profile.module.css";
+import Loader from "../loader/loader";
 
 interface ProfileData {
   username: string;
@@ -15,39 +16,45 @@ const Profile: React.FC = () => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({
-    username: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    bio: '',
+    username: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    bio: "",
   });
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isFetchingProfile, setIsFetchingProfile] = useState(true);
 
   const fetchProfileData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('User not authenticated.');
+      setIsFetchingProfile(true);
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated.");
 
-      const response = await axios.get('http://localhost:9000/user', {
+      const response = await axios.get("http://localhost:9000/user", {
         params: {
-            token: token,
-          },
-        headers: { 
-            Authorization: token 
+          token: token,
+        },
+        headers: {
+          Authorization: token,
         },
       });
 
       setProfileData(response.data);
       setFormData(response.data);
     } catch (err) {
-      console.error('Error fetching profile data:', err);
-      setErrorMessage('Failed to load profile data.');
+      console.error("Error fetching profile data:", err);
+      setErrorMessage("Failed to load profile data.");
+    } finally {
+      setIsFetchingProfile(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -59,41 +66,44 @@ const Profile: React.FC = () => {
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
-  
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('User not authenticated.');
-  
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated.");
+
       // Include the token in both the request body and headers
       const data = { ...formData, token };
-  
-      await axios.put(
-        'http://localhost:9000/user',
-        data,
-        { headers: { Authorization: token } }
-      );
-  
-      setSuccessMessage('Profile updated successfully!');
+
+      await axios.put("http://localhost:9000/user", data, {
+        headers: { Authorization: token },
+      });
+
+      setSuccessMessage("Profile updated successfully!");
       setProfileData(formData);
       setEditMode(false);
     } catch (err) {
-      console.error('Error saving profile data:', err);
-      setErrorMessage('Failed to update profile. Please try again.');
+      console.error("Error saving profile data:", err);
+      setErrorMessage("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     fetchProfileData();
   }, []);
 
+  if (isFetchingProfile) {
+    return <Loader />;
+  }
+
   return (
     <div className={styles.profileContainer}>
       <h1 className={styles.header}>My Profile</h1>
 
-      {profileData ? (
+      {isFetchingProfile ? (
+        <Loader /> // Replace "Loading profile data..." with your Loader component
+      ) : profileData ? (
         <div className={styles.profileCard}>
           {editMode ? (
             <div className={styles.form}>
@@ -152,10 +162,17 @@ const Profile: React.FC = () => {
               </label>
 
               <div className={styles.actions}>
-                <button onClick={handleSaveChanges} className={styles.saveButton} disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Changes'}
+                <button
+                  onClick={handleSaveChanges}
+                  className={styles.saveButton}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
                 </button>
-                <button onClick={() => setEditMode(false)} className={styles.cancelButton}>
+                <button
+                  onClick={() => setEditMode(false)}
+                  className={styles.cancelButton}
+                >
                   Cancel
                 </button>
               </div>
@@ -169,26 +186,31 @@ const Profile: React.FC = () => {
                 <strong>Email:</strong> {profileData.email}
               </p>
               <p>
-                <strong>First Name:</strong> {profileData.firstName || 'John'}
+                <strong>First Name:</strong> {profileData.firstName || "John"}
               </p>
               <p>
-                <strong>Last Name:</strong> {profileData.lastName || 'Doe'}
+                <strong>Last Name:</strong> {profileData.lastName || "Doe"}
               </p>
               <p>
-                <strong>Bio:</strong> {profileData.bio || 'No bio provided.'}
+                <strong>Bio:</strong> {profileData.bio || "No bio provided."}
               </p>
 
-              <button onClick={() => setEditMode(true)} className={styles.editButton}>
+              <button
+                onClick={() => setEditMode(true)}
+                className={styles.editButton}
+              >
                 Edit Profile
               </button>
             </div>
           )}
         </div>
       ) : (
-        <p>Loading profile data...</p>
+        <p>No profile data found.</p>
       )}
 
-      {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
+      {successMessage && (
+        <p className={styles.successMessage}>{successMessage}</p>
+      )}
       {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
     </div>
   );

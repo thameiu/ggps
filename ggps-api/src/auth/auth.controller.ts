@@ -25,8 +25,7 @@ export class AuthController {
     }
 
     try {
-      const payload = await this.authService.verifyToken(token);
-      return { valid: true, user: payload };
+      return await this.authService.verifyToken(token);
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
