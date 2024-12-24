@@ -43,6 +43,7 @@ export default function RightPanel({
     const [createChatroom, setCreateChatroom] = useState<boolean | null>(true);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [validateAddress, setValidateAddress] = useState(false);
 
     useEffect(() => {
         if (position && !placeFromAddress) {
@@ -75,7 +76,7 @@ export default function RightPanel({
         try {
             const query = `${number} ${street}, ${city}, ${zipCode}, ${country}`.trim();
             if (!query) {
-                // setError("Please provide a valid address.");
+                setValidateAddress(false);
                 return;
             }
             const response = await axios.get(
@@ -84,7 +85,8 @@ export default function RightPanel({
                 )}&format=json`
             );
             if (response.data.length === 0) {
-                // setError("Address not found. Please check the details.");
+                setValidateAddress(false);
+                setError("Address not found. Please check the details.");
                 return;
             }
             const result = response.data[0];
@@ -92,19 +94,25 @@ export default function RightPanel({
             const newPosition = new L.LatLng(parseFloat(result.lat), parseFloat(result.lon));
             setAddress(result.display_name);
             setPosition(newPosition);
+            setValidateAddress(true);
+
 
             setPlaceFromAddress(true);
             setError(null); 
-
         } catch (error) {
             console.error("Failed to geocode address:", error);
-            // setError("Failed to find address. Please try again.");
+            setError("Failed to find address. Please try again.");
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        handleGeocodeAddress();
         e.preventDefault();
+
+        await handleGeocodeAddress();
+        if (!validateAddress){
+            setError("Address not found. Please check the details.");
+            return;
+        }
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -180,7 +188,6 @@ export default function RightPanel({
             }}
         >
             <h3 className={styles.createFormTitle}>Create Event</h3>
-            {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
             {success && <p style={{ color: "green" }}>Event created successfully!</p>}
             <form onSubmit={handleSubmit} className={styles.createForm}>
                 <input
@@ -318,6 +325,8 @@ export default function RightPanel({
                     </button>
                 </div>
             </form>
+            {error && <p className={styles.error}>{error}</p>}
+
         </div>
 
     </>

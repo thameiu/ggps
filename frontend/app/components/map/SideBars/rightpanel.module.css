@@ -246,3 +246,11 @@ input:checked + .slider:before {
 .number, .street, .city, .state, .zip{
     display:inline-flex;
 }
+
+.error{
+    color:rgb(255, 0, 0);
+    margin-top:12px;
+    margin-left:4px;
+    font-family: var(--font-sofia-pro-ultralight-az);
+    font-size:1.2em;
+}
