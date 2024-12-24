@@ -103,6 +103,7 @@ export default function RightPanel({
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        handleGeocodeAddress();
         e.preventDefault();
         const token = localStorage.getItem("token");
 
@@ -220,6 +221,7 @@ export default function RightPanel({
                             value={number}
                             className={styles.addressNumber}
                             onChange={(e) => setNumber(e.target.value)}
+                            required
                         />
                         <input
                             type="text"
@@ -227,6 +229,8 @@ export default function RightPanel({
                             value={street}
                             className={styles.street}
                             onChange={(e) => setStreet(e.target.value)}
+                            required
+
                         />
                     </div>
                     <div className={styles.addressLine}>
@@ -236,6 +240,8 @@ export default function RightPanel({
                             value={zipCode}
                             className={styles.addressNumber}
                             onChange={(e) => setZipCode(e.target.value)}
+                            required
+
                         />
                         <input
                             type="text"
@@ -243,6 +249,8 @@ export default function RightPanel({
                             value={city}
                             className={styles.city}
                             onChange={(e) => setCity(e.target.value)}
+                            required
+
                         />
                     </div>
                     <div className={styles.addressLine}>
@@ -252,6 +260,7 @@ export default function RightPanel({
                             value={country}
                             className={styles.country}
                             onChange={(e) => setCountry(e.target.value)}
+                            required
                         />
                         <button
                             type="button"
