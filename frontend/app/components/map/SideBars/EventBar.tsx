@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Event } from "../../eventCard/types";
-import styles from "../map.module.css";
+import styles from "./eventbar.module.css";
 import { selectColor } from "../../eventCard/eventUtils";
 
 export function EventBar() {
@@ -19,14 +19,12 @@ export function EventBar() {
           params: { token },
           headers: { Authorization: token },
         });
-
         setUserEvents(response.data.events);
         setOrganizedEvents(response.data.organizedEvents);
       } catch (err) {
         console.error(err);
       }
     };
-
     fetchEvents();
   }, []);
 
@@ -54,13 +52,11 @@ export function EventBar() {
         className={styles.eventBar}
         style={{
           left: isBarOpen ? 0 : "-300px",
-          transition: "left 0.3s ease-in-out",
-          zIndex: 1000,
         }}
       >
         {/* User Events */}
         <section>
-          <h2 className="text-xl font-semibold mb-2">Signed-Up Events</h2>
+          <h2 className={styles.eventBarSectionTitle}>Signed-Up Events</h2>
           {userEvents.length > 0 ? (
             userEvents.map((event: Event) => (
               <div
@@ -95,7 +91,7 @@ export function EventBar() {
 
         {/* Organized Events */}
         <section>
-          <h2 className="text-xl font-semibold mb-2">Organized Events</h2>
+          <h2 className={styles.eventBarSectionTitle} style={{marginTop:'13px'}}>Organized Events</h2>
           {organizedEvents.length > 0 ? (
             organizedEvents.map((event: Event) => (
               <div

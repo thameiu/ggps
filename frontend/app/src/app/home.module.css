@@ -4,6 +4,7 @@
     font-size: 60px;
     text-shadow: #000 1px 0 10px;
     margin-top: -15%;
+    text-align: center;
 }
 .subLogo2{
     font-family: var(--font-sofia-pro-black-az);
@@ -11,6 +12,8 @@
     font-size: 46px;
     text-shadow: #6e0000 1px 0 10px;
     margin-top: -10%;
+    text-align: center;
+
 
 }
 .canvas {

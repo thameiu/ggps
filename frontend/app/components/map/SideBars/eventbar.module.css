@@ -1,0 +1,72 @@
+.openChat{
+    background-color: #333333;
+    padding:10px;
+    border-radius: 10px;
+    border:none;
+    font-family: var(--font-sofia-pro-medium-az);
+    transition: left 0.3s ease-in-out;
+
+    position: absolute;
+    bottom: 2%;
+    left: 1%; 
+    z-index: 1000;
+
+}
+
+
+.eventBar{
+    position: absolute;
+    top: 11%;
+    width: 300px;
+    height: 89vh;
+
+    background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.9) 70%);
+
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    box-shadow: 0 10px  rgba(0,0,0,0.5);
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 20px;
+    color: #fff;
+    overflow-x: hidden;
+    font-size: 1.3em;
+    font-family: var(--font-sofia-pro-medium-az);
+}
+
+.eventBar::-webkit-scrollbar {
+width: 10px !important;
+padding: 30px;
+
+}
+
+
+.eventBar::-webkit-scrollbar-thumb {
+border-radius: 20px;
+background-color:#fff;
+margin-right: 10px;
+
+}
+
+.eventCard{
+    background-color: #111;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 10px;
+    font-family: var(--font-sofia-pro-ultralight-az);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.eventBarCardTitle{
+    font-family: var(--font-sofia-pro-medium-az);
+}
+
+.eventBarSectionTitle{
+    font-family: var(--font-sofia-pro-medium-az);
+    font-size: 1.5em;
+    text-align: center;
+    margin-bottom: 13px;
+}

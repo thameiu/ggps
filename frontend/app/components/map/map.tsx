@@ -9,7 +9,7 @@ import "leaflet/dist/leaflet.css"; // Leaflet default styles
 import RightPanel from "./SideBars/RightPanel";
 import { createRoot } from "react-dom/client";
 import styles from "./map.module.css";
-import SearchBar from "./SearchBar";
+import SearchBar from "./SearchBar/SearchBar";
 import { EventBar } from "./SideBars/EventBar";
 import BoundsFinder from "./BoundsFinder";
 import ModifyZoomButtons from "./ModifyZoomButtons";
@@ -24,18 +24,19 @@ export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
     const positionRef = useRef<LatLng | null>(null); 
     const [address, setAddress] = useState<string | null>(null);
+    const [placeFromAddress, setPlaceFromAddress] = useState(false); 
     const [searchWord, setSearchWord] = useState<string | null>("");
     const [category, setCategory] = useState<string | null>("");
     const [dateFilter, setDateFilter] = useState<boolean | null>(false); 
-    const [events, setEvents] = useState<any[]>([]); // State to hold events from SearchBar
+    const [events, setEvents] = useState<any[]>([]); 
     const [loading, setLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(true);
     const [bounds, setBounds] = useState<LatLngBounds | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); // Track zoom-out state
-    const [isChatOpen, setIsChatOpen] = useState(false); // State for ChatroomBar
-    const [isPanelHovered, setIsPanelHovered] = useState(false); // Track if mouse is over the div
-
+    const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); 
+    const [isChatOpen, setIsChatOpen] = useState(false); 
+    const [isPanelHovered, setIsPanelHovered] = useState(false); 
+    console.log(address);
     const router = useRouter();
 
     useEffect(() => {
@@ -94,19 +95,23 @@ export default function MapComponent() {
                 scrollWheelZoom={isPanelHovered ? false : true}
             >
                 <DisableScroll isPanelHovered={isPanelHovered} />
-                <RightPanel
-                    position={positionRef.current}
-                    setIsPanelOpen={setIsPanelOpen}
-                    isPanelOpen={isPanelOpen}
-                    bounds={bounds}
-                    address={address}
-                />
 
                 <div
                     onMouseEnter={() => setIsPanelHovered(true)} 
                     onMouseLeave={() => setIsPanelHovered(false)} 
                 >
                     <EventBar />
+                    
+                    <RightPanel
+                    position={positionRef.current}
+                    setIsPanelOpen={setIsPanelOpen}
+                    setPosition={setPosition}
+                    isPanelOpen={isPanelOpen}
+                    bounds={bounds}
+                    setAddress={setAddress}
+                    setPlaceFromAddress={setPlaceFromAddress}
+                    placeFromAddress={placeFromAddress}
+                />
                 </div>
 
                 <SearchBar
@@ -130,12 +135,16 @@ export default function MapComponent() {
 
                 <BoundsFinder setBounds={setBounds} />
 
+
+
                 <LocationMarker
                     isPanelOpen={isPanelOpen}
                     setPosition={setPosition}
                     positionRef={positionRef}
                     setAddress={setAddress}
                     address={address || ""}
+                    setPlaceFromAddress={setPlaceFromAddress}
+                    placeFromAddress={placeFromAddress}
                 />
 
                 <ModifyZoomButtons />

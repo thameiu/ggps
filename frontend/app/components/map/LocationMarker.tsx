@@ -1,9 +1,9 @@
-// LocationMarker.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import axios from "axios";
 import styles from "./map.module.css";
+import rightPanelStyles from "./SideBars/rightpanel.module.css";
 
 type LocationMarkerProps = {
     isPanelOpen: boolean;
@@ -11,6 +11,8 @@ type LocationMarkerProps = {
     positionRef: React.MutableRefObject<L.LatLng | null>;
     setAddress: React.Dispatch<React.SetStateAction<string | null>>;
     address: string;
+    setPlaceFromAddress: React.Dispatch<React.SetStateAction<boolean>>;
+    placeFromAddress: boolean;
 };
 
 const LocationMarker: React.FC<LocationMarkerProps> = ({
@@ -19,6 +21,8 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
     positionRef,
     setAddress,
     address,
+    setPlaceFromAddress,
+    placeFromAddress,
 }) => {
     const reverseGeocode = async (lat: number, lng: number) => {
         try {
@@ -31,6 +35,30 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
         }
     };
 
+    const geocodeAddress = async (address: string) => {
+        try {
+            const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+                params: { q: address, format: "json" },
+            });
+            if (response.data.length > 0) {
+                const { lat, lon } = response.data[0];
+                const newPosition = L.latLng(parseFloat(lat), parseFloat(lon));
+                setPosition(newPosition);
+                positionRef.current = newPosition;
+            } else {
+                console.warn("Address not found.");
+            }
+        } catch (error) {
+            console.error("Failed to geocode address:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (placeFromAddress && address) {
+            geocodeAddress(address);
+        }
+    }, [placeFromAddress, address]);
+
     useMapEvents({
         click(e) {
             if (!isPanelOpen) {
@@ -39,8 +67,8 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
                 return;
             }
 
-            const panel = document.querySelector(`.${styles.rightPanel}`);
-            const button = document.querySelector(`.${styles.openForm}`);
+            const panel = document.querySelector(`.${rightPanelStyles.rightPanel}`);
+            const button = document.querySelector(`.${rightPanelStyles.openForm}`);
             if (
                 (panel && panel.contains(e.originalEvent.target as Node)) ||
                 (button && button.contains(e.originalEvent.target as Node))
@@ -52,6 +80,8 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
             setPosition(newPosition);
             positionRef.current = newPosition;
             reverseGeocode(newPosition.lat, newPosition.lng);
+            setPlaceFromAddress(false);
+            placeFromAddress = false;
         },
     });
 
@@ -71,9 +101,3 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
 };
 
 export default LocationMarker;
-
-
-
-
-
-

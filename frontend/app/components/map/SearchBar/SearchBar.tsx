@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import styles from './map.module.css';
+import styles from './searchbar.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
@@ -14,7 +14,7 @@ interface SearchBarProps {
     onResultsFound: (events: any[]) => void;
     onSearch: (searchTerm: string) => void;
     onCategoryChange: (category: string) => void;
-    onDateFilterToggle: (dateFilter: boolean) => void; // New prop for date filtering
+    onDateFilterToggle: (dateFilter: boolean) => void; 
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -97,8 +97,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <button className={styles.searchButton} onClick={handleSearch}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
-
-
         </div>
     );
 };

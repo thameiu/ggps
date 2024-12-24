@@ -1,0 +1,248 @@
+.openForm{
+    background-color: #333333;
+    border: 1px solid #565654;
+    padding:10px;
+    border-radius: 10px;
+    border:none;
+    font-family: var(--font-sofia-pro-medium-az);
+    transition: right 0.3s ease-in-out;
+    position: absolute;
+    bottom: 2%;
+    right: 1%; 
+    z-index: 1000;
+}
+
+
+.createForm{
+    font-family: var(--font-sofia-pro-ultralight-az);
+
+}
+.createForm input{
+    background-color: #111;
+    border: 1px solid #565654;
+    border-radius: 10px;
+
+}
+.createForm textarea{
+    background-color: #111;
+    border: 1px solid #565654;
+    border-radius: 10px;
+}
+
+.createFormTitle{
+    font-family: var(--font-sofia-pro-medium-az);
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.closeForm{
+    display: inline;
+    /* margin-top: 10px; */
+    background-color: #111;
+    color: white;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: var(--font-sofia-pro-medium-az);
+    width:5vw;
+}
+
+.locateButton{
+    display: inline;
+    margin-left: 5%;
+    background-color: #111;
+    border-radius: 25px;
+    color: white;
+    border: 1px solid #ccc;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: var(--font-sofia-pro-medium-az);
+}
+
+.submitButton{
+    display: inline;
+    margin-left: 5%;
+    background-color: #4CAF50;
+    border-radius: 25px;
+    color: white;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: var(--font-sofia-pro-medium-az);
+}
+
+.rightPanel{
+    position: absolute;
+    top: 11%;
+    width: 300px;
+    height: 89vh;
+    background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.9) 70%);
+
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    box-shadow: 0 10px  rgba(0,0,0,0.5);
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    padding: 20px;
+    color: #fff;
+    overflow-x: hidden;
+    /* overflow-y: auto;  */
+    font-size: 1.3em;
+}
+
+
+.select{
+    background-color: #111;
+    color: #fff;
+    width: 100%;
+    padding:5px;
+    margin: 10px 0;
+    border: 1px solid #565654;
+    border-radius: 10px;
+}
+
+
+.rightPanel::-webkit-scrollbar {
+    width: 10px !important;
+    padding: 30px; 
+}
+
+
+.rightPanel::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color:#fff;
+    margin-right: 10px;
+}
+
+    
+.checkbox{
+    display: flex;
+    margin-top:20px;
+    margin-bottom:20px;
+
+}
+
+.checkLabel{
+    width:100%;
+}
+
+.checkInput{
+    margin-right: 10px;
+    margin-left: -30px;
+}
+
+.addressContainer{
+    margin-top: 25px;
+    margin-bottom: 25px;
+
+}
+
+.addressLine{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+
+}
+
+.addressNumber{
+    flex: 1;
+    width:50%;
+    padding: 5px;
+
+}
+
+.street{
+    flex:2;
+    padding: 5px;
+}
+
+
+.city{
+    flex:2;
+    padding: 5px;
+}
+
+.country{
+    flex:1;
+    padding: 5px;
+}
+
+.dateLine{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items:center;
+}
+
+.dateLabel{
+    margin:0;
+}
+
+.dateInput{
+    flex:1;
+    padding: 5px;
+}
+
+.createChatroomToggle {
+    padding: 2px;
+    padding-right:10px ;
+    border-radius: 25px;
+    margin-right: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    display: flex; 
+    align-items: center; 
+    font-family: var(--font-sofia-pro-ultralight-az);
+    gap: 10px;
+}
+
+.createChatroomToggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute; 
+}
+
+.slider {
+    position: relative;
+    cursor: pointer;
+    width: 60px;
+    height: 34px;
+    background-color: #565654;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #BD0000;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #BD0000;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.sliderText{
+    font-size:16px;
+}
+
+.number, .street, .city, .state, .zip{
+    display:inline-flex;
+}

@@ -82,7 +82,7 @@ export default function Home() {
         overflow: "hidden",
       }}></canvas>
       
-      <main className="flex flex-col gap-8 row-start-1 items-center sm:items-start">
+      <main className="flex flex-col gap-8 row-start-1 items-center">
   
         <Image
           src="/images/logo.png"
@@ -95,7 +95,8 @@ export default function Home() {
           
           // }}
         />
-        <div className={styles.subLogo1}>GAMER'S GLOBAL</div><div className={styles.subLogo2}> POSITIONNING SYSTEM </div>
+        <div className={styles.subLogo1}>GAMER'S GLOBAL</div>
+          <div className={styles.subLogo2}>POSITIONNING SYSTEM </div>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
