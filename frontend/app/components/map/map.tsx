@@ -16,9 +16,9 @@ import ModifyZoomButtons from "./ModifyZoomButtons";
 import SimulateZoomOut from "./SimulateZoomOut";
 import LocationMarker from "./LocationMarker";
 import { fetchEvents, getIconUrl } from "./EventMarker";
-import DisableScroll from "./SideBars/DisableScroll";
 import Image from "next/image";
 import Loader from "../loader/loader";
+import DisableZoom from "./SideBars/DisableZoom";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
@@ -92,9 +92,8 @@ export default function MapComponent() {
                 maxBoundsViscosity={1.0}
                 minZoom={3}
                 maxZoom={18}
-                scrollWheelZoom={isPanelHovered ? false : true}
             >
-                <DisableScroll isPanelHovered={isPanelHovered} />
+                <DisableZoom isPanelHovered={isPanelHovered} />
 
                 <div
                     onMouseEnter={() => setIsPanelHovered(true)} 
@@ -103,29 +102,32 @@ export default function MapComponent() {
                     <EventBar />
                     
                     <RightPanel
-                    position={positionRef.current}
-                    setIsPanelOpen={setIsPanelOpen}
-                    setPosition={setPosition}
-                    isPanelOpen={isPanelOpen}
-                    bounds={bounds}
-                    setAddress={setAddress}
-                    setPlaceFromAddress={setPlaceFromAddress}
-                    placeFromAddress={placeFromAddress}
-                />
+                        position={positionRef.current}
+                        setIsPanelOpen={setIsPanelOpen}
+                        setPosition={setPosition}
+                        isPanelOpen={isPanelOpen}
+                        bounds={bounds}
+                        setAddress={setAddress}
+                        setPlaceFromAddress={setPlaceFromAddress}
+                        placeFromAddress={placeFromAddress}
+                    />
+
+                    <SearchBar
+                        coordinates={{
+                            latMin: bounds?.getSouthWest().lat || 0,
+                            longMin: bounds?.getSouthWest().lng || 0,
+                            latMax: bounds?.getNorthEast().lat || 0,
+                            longMax: bounds?.getNorthEast().lng || 0,
+                        }}
+                        onResultsFound={(foundEvents) => setEvents(foundEvents)}
+                        onSearch={(searchTerm) => setSearchWord(searchTerm)}
+                        onCategoryChange={(selectedCategory) => setCategory(selectedCategory)}
+                        onDateFilterToggle={(dateFilter) => setDateFilter(dateFilter)} 
+                    />
+
                 </div>
 
-                <SearchBar
-                    coordinates={{
-                        latMin: bounds?.getSouthWest().lat || 0,
-                        longMin: bounds?.getSouthWest().lng || 0,
-                        latMax: bounds?.getNorthEast().lat || 0,
-                        longMax: bounds?.getNorthEast().lng || 0,
-                    }}
-                    onResultsFound={(foundEvents) => setEvents(foundEvents)}
-                    onSearch={(searchTerm) => setSearchWord(searchTerm)}
-                    onCategoryChange={(selectedCategory) => setCategory(selectedCategory)}
-                    onDateFilterToggle={(dateFilter) => setDateFilter(dateFilter)} 
-                />
+
 
                 <TileLayer
                     noWrap
