@@ -102,9 +102,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       console.log('Event deleted successfully');
       setSuccess(true);
 
-  
-      // Optionally redirect or remove the event card from the list
-      // e.g., if you have a parent component, inform it to refresh the events list
     } catch (err) {
       console.error('Error deleting event:', err);
       setError('Failed to delete the event. Please try again later.');
@@ -225,9 +222,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
         <div className={styles.eventInfo}>
           <h2 className={styles.title}>{event.title}</h2>
           <div className={styles.subtitle}>
-            {event.category} {organizer ? 'created by ' + organizer : ''}
+            {event.category}{" "}
+            {organizer ? (
+              <>
+                created by{" "}
+                <a href={`/profile?username=${organizer}`}>
+                  <span className={styles.organizerLink}>{organizer}</span>
+                </a>
+              </>
+            ) : (
+              ""
+            )}
           </div>
-
           <div className="mb-4">
             <p className={styles.description}>{event.description}</p>
           </div>

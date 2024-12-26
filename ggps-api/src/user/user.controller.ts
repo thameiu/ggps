@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Put, Query, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, Req, UnauthorizedException, UseGuards } from "@nestjs/common";
 // import { AuthDto, LogDto } from "./dto";
 import { AuthService } from "src/auth/auth.service";
 import { TokenDto } from "src/auth/dto";
@@ -21,6 +21,14 @@ export class UserController {
     @UseGuards(AuthGuard)
     updateProfile(@Body() dto: UpdateProfileDto) {
         return this.userService.updateProfile(dto);
+    }
+
+
+    @Get('/:username')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getEventByUsername(@Param('username',) username: string) {
+        return this.userService.findByUsername(username);
     }
 
 }

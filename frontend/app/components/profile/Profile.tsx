@@ -6,26 +6,55 @@ import Loader from "../loader/loader";
 
 interface ProfileData {
   username: string;
-  email: string;
   firstName: string;
   lastName: string;
   bio?: string;
+  eventsOrganized?: Array<{ id: number; name: string; date: string }>;
+  eventsParticipated?: Array<{ id: number; name: string; date: string }>;
 }
 
-const Profile: React.FC = () => {
+interface ProfileProps {
+  username: string; 
+}
+
+const Profile: React.FC<ProfileProps> = ({ username }) => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({
     username: "",
-    email: "",
     firstName: "",
     lastName: "",
     bio: "",
+    eventsOrganized: [],
+    eventsParticipated: [],
   });
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFetchingProfile, setIsFetchingProfile] = useState(true);
+  const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLoggedInUsername = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("User not authenticated.");
+
+        const response = await axios.post(
+          "http://localhost:9000/auth/verify-token",
+          {},
+          { headers: { Authorization: token } }
+        );
+
+        setLoggedInUsername(response.data.user.username);
+      } catch (err) {
+        console.error("Error verifying token:", err);
+        setErrorMessage("Failed to verify user authentication.");
+      }
+    };
+
+    fetchLoggedInUsername();
+  }, []);
 
   const fetchProfileData = async () => {
     try {
@@ -33,13 +62,8 @@ const Profile: React.FC = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated.");
 
-      const response = await axios.get("http://localhost:9000/user", {
-        params: {
-          token: token,
-        },
-        headers: {
-          Authorization: token,
-        },
+      const response = await axios.get(`http://localhost:9000/user/${username}`, {
+        headers: { Authorization: token },
       });
 
       setProfileData(response.data);
@@ -71,10 +95,9 @@ const Profile: React.FC = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated.");
 
-      // Include the token in both the request body and headers
       const data = { ...formData, token };
 
-      await axios.put("http://localhost:9000/user", data, {
+      await axios.put(`http://localhost:9000/user`, data, {
         headers: { Authorization: token },
       });
 
@@ -91,7 +114,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     fetchProfileData();
-  }, []);
+  }, [username]);
 
   if (isFetchingProfile) {
     return <Loader />;
@@ -99,13 +122,13 @@ const Profile: React.FC = () => {
 
   return (
     <div className={styles.profileContainer}>
-      <h1 className={styles.header}>My Profile</h1>
+      <h1 className={styles.header}>
+        {profileData?.username}'s Profile
+      </h1>
 
-      {isFetchingProfile ? (
-        <Loader /> // Replace "Loading profile data..." with your Loader component
-      ) : profileData ? (
+      {profileData ? (
         <div className={styles.profileCard}>
-          {editMode ? (
+          {editMode && loggedInUsername === username ? (
             <div className={styles.form}>
               <label>
                 <span>Username:</span>
@@ -113,17 +136,6 @@ const Profile: React.FC = () => {
                   type="text"
                   name="username"
                   value={formData.username}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                />
-              </label>
-
-              <label>
-                <span>Email:</span>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
                   onChange={handleInputChange}
                   className={styles.input}
                 />
@@ -182,27 +194,59 @@ const Profile: React.FC = () => {
               <p>
                 <strong>Username:</strong> {profileData.username}
               </p>
+
               <p>
-                <strong>Email:</strong> {profileData.email}
+                <strong>First Name:</strong> {profileData.firstName || "N/A"}
               </p>
               <p>
-                <strong>First Name:</strong> {profileData.firstName || "John"}
-              </p>
-              <p>
-                <strong>Last Name:</strong> {profileData.lastName || "Doe"}
+                <strong>Last Name:</strong> {profileData.lastName || "N/A"}
               </p>
               <p>
                 <strong>Bio:</strong> {profileData.bio || "No bio provided."}
               </p>
 
-              <button
-                onClick={() => setEditMode(true)}
-                className={styles.editButton}
-              >
-                Edit Profile
-              </button>
+              {loggedInUsername === username && (
+                <button
+                  onClick={() => setEditMode(true)}
+                  className={styles.editButton}
+                >
+                  Edit Profile
+                </button>
+              )}
             </div>
           )}
+
+          <div className={styles.events}>
+            <div>
+              <h2>Events Organized</h2>
+              {profileData.eventsOrganized?.length ? (
+                <ul>
+                  {profileData.eventsOrganized.map((event) => (
+                    <li key={event.id}>
+                      {event.name} - {event.date}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No events organized.</p>
+              )}
+            </div>
+
+            <div>
+              <h2>Events Participated</h2>
+              {profileData.eventsParticipated?.length ? (
+                <ul>
+                  {profileData.eventsParticipated.map((event) => (
+                    <li key={event.id}>
+                      {event.name} - {event.date}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No events participated in.</p>
+              )}
+            </div>
+          </div>
         </div>
       ) : (
         <p>No profile data found.</p>
@@ -217,3 +261,4 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
+  

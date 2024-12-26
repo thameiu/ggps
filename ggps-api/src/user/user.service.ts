@@ -25,4 +25,21 @@ export class UserService {
         });
         return updatedUser;
     }
+
+    async findByUsername(username: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { username },
+            select: {
+                hash: false,
+                email: false,
+                id: false,
+                updateddAt: false,
+                username: true,
+                firstName: true,
+                lastName: true,
+                createdAt: true,
+            },
+        });
+        return user;
+    }
 }

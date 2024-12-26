@@ -4,16 +4,38 @@ import styles from './header.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
+import axios from 'axios';
 
 const Header: React.FC = () => {
     const [currentPath, setCurrentPath] = useState<string>('');
+    const [username, setUsername] = useState<string | null>(null);
 
     useEffect(() => {
-        
         if (typeof window !== 'undefined') {
             setCurrentPath(window.location.pathname);
         }
     }, []);
+
+    useEffect(() => {
+        const fetchUsername = async () => {
+          try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("User not authenticated.");
+    
+            const response = await axios.post(
+              "http://localhost:9000/auth/verify-token",
+              {},
+              { headers: { Authorization: token } }
+            );
+    
+            setUsername(response.data.user.username);
+          } catch (err) {
+            console.error("Error verifying token:", err);
+          }
+        };
+    
+        fetchUsername();
+      }, []);
 
     return (
         <div className={styles.topBar}>
@@ -25,8 +47,7 @@ const Header: React.FC = () => {
                     <li><a href="/">Home</a></li>
                     <li><a href="/map">Map</a></li>
                     <li><a href="/contact">Contact</a></li>
-                    {/* <li><a href="/profile"><FontAwesomeIcon icon={faUser} /></a></li> */}
-                    <li><a href="/profile">
+                    <li><a  href={username?`/profile?username=${username}`:'/login'}>
                     <Image
                     className={styles.userIcon}
                     src="/images/user.png"
@@ -38,8 +59,6 @@ const Header: React.FC = () => {
 
                 </ul>
             </div>
-            {/* Render the search bar only on /map */}
-
         </div>
     );
 };
