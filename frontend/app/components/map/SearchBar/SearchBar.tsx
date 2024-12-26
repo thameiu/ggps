@@ -28,12 +28,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const [selectedCategory, setSelectedCategory] = useState('');
     const [dateFilter, setDateFilter] = useState(false); 
 
-    const handleSearch = async () => {
+    const handleSearch = async (category?: string) => {
         try {
             const response = await axios.get('http://localhost:9000/event', {
                 params: {
-                    searchWord: searchWord,
-                    category: selectedCategory || undefined,
+                    searchWord,
+                    category: (category ?? selectedCategory) || undefined,
                     latMin: coordinates.latMin,
                     latMax: coordinates.latMax,
                     longMin: coordinates.longMin,
@@ -45,7 +45,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             });
             onResultsFound(response.data);
             onSearch(searchWord);
-            onCategoryChange(selectedCategory);
+            onCategoryChange(category ?? selectedCategory);
         } catch (error) {
             console.error('Error fetching events:', error);
         }
@@ -63,6 +63,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         onDateFilterToggle(newFilterState); 
     };
 
+    const handleCategoryChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newCategory = e.target.value;
+        setSelectedCategory(newCategory);
+        onCategoryChange(newCategory); 
+        handleSearch(newCategory);
+    };
+
     return (
         <div className={styles.searchBar}>
             <label className={styles.filterToggle}>
@@ -77,7 +84,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <select
                 className={styles.categorySelector}
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={handleCategoryChange}
             >
                 <option value="">All Categories</option>
                 <option value="Lan">Lan</option>
@@ -94,7 +101,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 onChange={(e) => setSearchWord(e.target.value)}
                 onKeyDown={handleKeyDown}
             />
-            <button className={styles.searchButton} onClick={handleSearch}>
+            <button className={styles.searchButton} onClick={() => handleSearch()}>
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
         </div>
