@@ -4,6 +4,8 @@ import L from "leaflet";
 import axios from "axios";
 import styles from "./map.module.css";
 import rightPanelStyles from "./SideBars/rightpanel.module.css";
+import headerStyles from "../header/header.module.css";
+import eventBarStyles from "./SideBars/eventbar.module.css";
 
 type LocationMarkerProps = {
     isPanelOpen: boolean;
@@ -59,7 +61,7 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
         }
     }, [placeFromAddress, address]);
 
-    useMapEvents({
+    const map = useMapEvents({
         click(e) {
             if (!isPanelOpen) {
                 setPosition(null);
@@ -69,9 +71,15 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
 
             const panel = document.querySelector(`.${rightPanelStyles.rightPanel}`);
             const button = document.querySelector(`.${rightPanelStyles.openForm}`);
+            const header = document.querySelector(`.${headerStyles.topBar}`);
+            const eventbar = document.querySelector(`.${eventBarStyles.eventBar}`);
+
+
             if (
                 (panel && panel.contains(e.originalEvent.target as Node)) ||
-                (button && button.contains(e.originalEvent.target as Node))
+                (button && button.contains(e.originalEvent.target as Node)) ||
+                (header && header.contains(e.originalEvent.target as Node)) ||
+                (eventbar && eventbar.contains(e.originalEvent.target as Node)) 
             ) {
                 return;
             }
@@ -80,10 +88,16 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
             setPosition(newPosition);
             positionRef.current = newPosition;
             reverseGeocode(newPosition.lat, newPosition.lng);
+            map.setView(newPosition, map.getZoom()); // Center the map on the marker
             setPlaceFromAddress(false);
-            placeFromAddress = false;
         },
     });
+
+    useEffect(() => {
+        if (positionRef.current) {
+            map.setView(positionRef.current, map.getZoom()); // Center the map when the marker is updated
+        }
+    }, [positionRef.current, map]);
 
     return positionRef.current ? (
         <Marker
