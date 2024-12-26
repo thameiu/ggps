@@ -35,11 +35,11 @@ export class EventService {
                     game: dto.game?dto.game:null,
                 }
             });
-            this.createEntry({eventId:event.id.toString(), status:'organizer', token:dto.token});
             if (dto.createChatroom){
                 const chatroom = await this.message.createChatroom({eventId:event.id.toString()});
-                this.message.giveAccess(dto.token, chatroom.id, 'organizer');
             }
+            this.createEntry({eventId:event.id.toString(), status:'organizer', token:dto.token});
+
 
             return event;
         } catch (error) {
@@ -185,8 +185,9 @@ export class EventService {
             });
 
             const chatroom = await this.message.getChatroomByEvent(event.id);
-            if (chatroom){
-                await this.message.giveAccess(dto.token, chatroom.id, 'participant');
+            const existingAccess = await this.message.checkUserAccess(dto.token, chatroom.id);
+            if (chatroom && !existingAccess){
+                await this.message.giveAccess(dto.token, chatroom.id,dto.status);
             }
             return entry;
         } catch (error) {
@@ -297,9 +298,4 @@ export class EventService {
         }
 
     }
-
-
-
-
-
 }
