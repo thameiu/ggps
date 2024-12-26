@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreateMessageDto, CreateChatroomDto } from './dto';
+import { CreateMessageDto, CreateChatroomDto, PinMessageDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from 'src/auth/auth.service';
 // import { UpdateMessageDto } from './dto/update-message.dto';
@@ -55,6 +55,55 @@ export class MessageService {
   
 
     return { message, username: user.username };
+  }
+
+  async pinMessage(dto: PinMessageDto) {
+    const user = await this.auth.getUserFromToken(dto.token);
+
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+
+    const message = await this.prisma.message.findUnique({
+      where: {
+        id: dto.messageId,
+      },
+    });
+
+    
+    if (!message) {
+      throw new ForbiddenException('Message not found');
+    }
+
+    const chatroom = await this.prisma.chatroom.findUnique({
+      where: {
+        id: message.chatroomId,
+      },
+    });
+
+    if (!chatroom) {
+      throw new ForbiddenException('Chatroom not found');
+    }
+
+    const access = await this.checkUserAccess(dto.token, chatroom.eventId);
+
+    if (!access) {
+      throw new ForbiddenException('User does not have access to this chatroom');
+    }
+    if (access.access.role !== 'organizer' && access.access.role !== 'admin') {
+      throw new ForbiddenException('User does not have access to this chatroom');
+    }
+
+    const updatedMessage = await this.prisma.message.update({
+      where: {
+        id: message.id,
+      },
+      data: {
+        pinned: message.pinned ? false : true,
+      },
+    });
+
+    return updatedMessage;
   }
 
   async createChatroom(dto: CreateChatroomDto): Promise<any> {
@@ -159,7 +208,7 @@ export class MessageService {
     const existingAccess = await this.checkUserAccess(token, chatroomId);
 
 
-    if (existingAccess) {
+    if (existingAccess.access) {
       throw new ForbiddenException('User already has access to this chatroom');
     }
 
@@ -220,21 +269,35 @@ export class MessageService {
     return { message: 'Access removed successfully' };
   }
   
-  async checkUserAccess(token: string, chatroomId: number) {
+  async checkUserAccess(token: string, eventId: number) {
     const user = await this.auth.getUserFromToken(token);
 
     if (!user) {
       throw new ForbiddenException('User not found');
     }
 
+    const event = await this.prisma.event.findUnique({
+      where: {
+        id: eventId,
+      },
+    });
+    if (!event){
+      throw new ForbiddenException('Event not found');
+    }
+
+    const chatroom = await this.getChatroomByEvent(eventId);
+    if (!chatroom) {
+      throw new ForbiddenException('Chatroom not found');
+    }
+
     const access = await this.prisma.access.findFirst({
       where: {
         userId: user.id,
-        chatroomId: chatroomId,
+        chatroomId: chatroom.id,
       },
     });
 
-    return access;
+    return {username:user.username,access};
   }
 
   findAll() {

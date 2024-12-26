@@ -28,6 +28,9 @@ export class CreateChatroomDto {
 }
 
 export class PinMessageDto {
+    @IsString()
+    @IsNotEmpty()
+    token: string;
 
     @IsNotEmpty()
     @IsInt()

@@ -58,3 +58,46 @@
     /* width:80%; */
     background: black;
 }
+
+.pinButton{
+    margin-left: 5px;
+    display: none;
+}
+
+
+.messageContainer {
+    position: relative;
+    padding: 8px;
+    border-radius: 8px;
+    max-width: 70%;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.messageContainer:hover {
+    background-color: rgba(255, 255, 255, 0.1); 
+}
+
+.pinButton {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #eee;
+    display: none;
+}
+
+.messageContainer:hover .pinButton {
+    display: inline; 
+}
+
+.showPinnedButton{
+    padding: 6px 10px;
+    border:none;
+    border-radius: 4px;
+    color:#fff;
+    margin-bottom: 5px;
+
+}

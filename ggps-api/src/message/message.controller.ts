@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { CreateMessageDto, CreateChatroomDto } from './dto';
+import { CreateMessageDto, CreateChatroomDto, PinMessageDto } from './dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('chat')
@@ -24,6 +24,19 @@ export class MessageController {
   @UseGuards(AuthGuard)
   getMessagesByChatroom(@Param('eventId') eventId: string) {
     return this.messageService.getMessagesByChatroom(eventId);
+  }
+
+  @Put('pin')
+  @UseGuards(AuthGuard)
+  pinMessage(@Body() pinMessageDto: PinMessageDto) {
+    return this.messageService.pinMessage(pinMessageDto);
+  }
+
+  @Get('access')
+  @UseGuards(AuthGuard)
+  getUserAccess(@Query('token') token: string, @Query('eventId') eventId: string) {
+    return this.messageService.checkUserAccess(token, parseInt(eventId));
+
   }
 
   // @Get()

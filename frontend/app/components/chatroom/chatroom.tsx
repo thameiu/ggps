@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import styles from "./chatroom.module.css";
 import { Event } from "../eventCard/types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faThumbtack, faThumbTackSlash } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatRoomProps {
     event: Event;
@@ -23,40 +25,46 @@ interface Message {
 
 const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [messages, setMessages] = useState<Message[]>([]);
+    const [filteredMessages, setFilteredMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState<string>("");
+    const [showPinnedOnly, setShowPinnedOnly] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [username, setUsername] = useState<string | null>(null);
+    const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
 
     const token = localStorage.getItem("token");
     const lastMessageId = useRef<number | null>(null);
     const messageEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const initializeChat = async () => {
-            await verifyToken();
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(
+                    "http://localhost:9000/chat/access", {
+                    params: {
+                        token: token,
+                        eventId: event.id,
+                    },
+                    headers: { authorization: token }
+                    }
+                );
+                if (response.status === 200) {
+                    setUsername(response.data.username);
+                    setIsOrganizer(
+                        response.data.access.role === "organizer" || response.data.access.role === "admin"
+                    );
+                }
+            } catch (error) {
+                console.error("Token verification failed:", error);
+            }
             fetchMessages();
         };
 
-        initializeChat();
+        fetchData();
 
         const interval = setInterval(fetchMessages, 5000);
         return () => clearInterval(interval);
     }, [event.id]);
-
-    const verifyToken = async () => {
-        try {
-            const response = await axios.post(
-                "http://localhost:9000/auth/verify-token",
-                {},
-                { headers: { authorization: token } }
-            );
-            if (response.data.valid) {
-                setUsername(response.data.user.username);
-            }
-        } catch (error) {
-            console.error("Token verification failed:", error);
-        }
-    };
 
     const fetchMessages = async () => {
         try {
@@ -76,6 +84,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
 
             if (newMessages.length > 0) {
                 setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+                setFilteredMessages((prevMessages) => [...prevMessages, ...newMessages]);
 
                 const latestMessageId =
                     newMessages[newMessages.length - 1].message.id;
@@ -110,6 +119,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             };
 
             setMessages((prevMessages) => [...prevMessages, formattedMessage]);
+            setFilteredMessages((prevMessages) => [...prevMessages, formattedMessage]);
             lastMessageId.current = response.data.message.id;
             setNewMessage("");
 
@@ -122,6 +132,42 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         }
     };
 
+    const pinMessage = async (messageId: number) => {
+        try {
+            await axios.put(
+                `http://localhost:9000/chat/pin`,
+                { token, messageId },
+                { headers: { Authorization: token } }
+            );
+
+            setMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.message.id === messageId
+                        ? { ...msg, message: { ...msg.message, pinned: msg.message.pinned==true?false:true } }
+                        : msg
+                )
+            );
+            setFilteredMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.message.id === messageId
+                        ? { ...msg, message: { ...msg.message, pinned : msg.message.pinned==true?false:true } }
+                        : msg
+                )
+            );
+        } catch (error) {
+            console.error("Failed to pin message:", error);
+        }
+    };
+
+    const toggleShowPinned = () => {
+        setShowPinnedOnly(!showPinnedOnly);
+        if (showPinnedOnly) {
+            setFilteredMessages(messages);
+        } else {
+            setFilteredMessages(messages.filter((msg) => msg.message.pinned));
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             sendMessage();
@@ -130,7 +176,18 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
 
     return (
         <div className={styles.chatroomContainer}>
-            <h2 className={styles.eventTitle}>{event.title} - chat</h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <h2 className={styles.eventTitle}>{event.title} - chat</h2>
+                <button
+                className={styles.showPinnedButton}
+                    onClick={toggleShowPinned}
+                    style={{
+                        backgroundColor: color || "#000",
+                    }}
+                >
+                    {showPinnedOnly ? "Show All" : "Show Pinned"}
+                </button>
+            </div>
 
             {/* Messages List */}
             <div
@@ -150,41 +207,50 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             >
                 {isLoading ? (
                     <p>Loading messages...</p>
-                ) : messages.length > 0 ? (
-                    messages.map((message) => (
+                ) : filteredMessages.length > 0 ? (
+                    filteredMessages.map((message) => (
                         <div
                             key={message.message.id}
+                            className={styles.messageContainer}
                             style={{
                                 alignSelf:
-                                    message.username === username
-                                        ? "flex-end"
-                                        : "flex-start",
+                                    message.username === username ? "flex-end" : "flex-start",
                                 backgroundColor:
-                                    message.username === username
-                                        ? "#565654"
-                                        : "#000",
-                                padding: "8px",
-                                borderRadius: "8px",
-                                maxWidth: "70%",
-                                textAlign: "left",
+                                    message.username === username ? "#565654" : "#000",
                             }}
                         >
                             <p className={styles.username}>{message.username}:</p>
                             {message.message.content} <br />
                             <small style={{ color: "#888" }}>
-                                {new Date(
-                                    message.message.createdAt
-                                ).toLocaleTimeString()}
+                                {new Date(message.message.createdAt).toLocaleTimeString()}
                             </small>
+                            {isOrganizer && (
+                                <button
+                                    onClick={() => pinMessage(message.message.id)}
+                                    className={styles.pinButton}
+                                >
+                                    {message.message.pinned ? (
+                                        <FontAwesomeIcon icon={faThumbTackSlash} />
+                                    ) : (
+                                        <FontAwesomeIcon icon={faThumbtack} />
+                                    )}
+                                </button>
+                            )}
                         </div>
+
                     ))
                 ) : (
-                    <p>No messages yet.</p>
+                    showPinnedOnly ? (
+                        <p>No pinned messages yet.</p>
+                    ) : (
+                        <p>No messages yet.</p>
+                    )
+                    
                 )}
                 <div ref={messageEndRef} />
             </div>
 
-            {/* Input Field and Send Button */}
+
             <div style={{ display: "flex", gap: "10px" }}>
                 <input
                     type="text"
