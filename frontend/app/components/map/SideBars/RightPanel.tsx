@@ -90,7 +90,6 @@ export default function RightPanel({
                 return;
             }
             const result = response.data[0];
-            console.log(result);
             const newPosition = new L.LatLng(parseFloat(result.lat), parseFloat(result.lon));
             setAddress(result.display_name);
             setPosition(newPosition);

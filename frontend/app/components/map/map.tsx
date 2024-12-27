@@ -36,7 +36,6 @@ export default function MapComponent() {
     const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); 
     const [isChatOpen, setIsChatOpen] = useState(false); 
     const [isPanelHovered, setIsPanelHovered] = useState(false); 
-    console.log(address);
     const router = useRouter();
 
     useEffect(() => {

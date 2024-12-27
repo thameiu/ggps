@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import axios from "axios";
+import axios, { Canceler } from "axios";
 import styles from "./map.module.css";
 import rightPanelStyles from "./SideBars/rightpanel.module.css";
 import headerStyles from "../header/header.module.css";
@@ -26,14 +26,37 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
     setPlaceFromAddress,
     placeFromAddress,
 }) => {
+    const cancelTokenSource = useRef<Canceler | null>(null);
+    const lastRequestTime = useRef<number>(0); 
+
     const reverseGeocode = async (lat: number, lng: number) => {
+        const currentTime = Date.now();
+
+        if (currentTime - lastRequestTime.current < 1000) {
+            console.log("Request throttled: Too soon since the last request.");
+            return;
+        }
+
+        lastRequestTime.current = currentTime;
+        if (cancelTokenSource.current) {
+            cancelTokenSource.current();
+        }
+
+        const cancelToken = axios.CancelToken.source();
+        cancelTokenSource.current = cancelToken.cancel; 
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/reverse`, {
                 params: { lat, lon: lng, format: "json" },
+                cancelToken: cancelToken.token,
             });
             setAddress(response.data.display_name);
-        } catch (error) {
-            console.error("Failed to fetch address:", error);
+            cancelTokenSource.current = null;
+        } catch (error: any) {
+            if (axios.isCancel(error)) {
+                console.log("Request canceled:", error.message);
+            } else {
+                console.error("Failed to fetch address:", error);
+            }
         }
     };
 
@@ -74,12 +97,11 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
             const header = document.querySelector(`.${headerStyles.topBar}`);
             const eventbar = document.querySelector(`.${eventBarStyles.eventBar}`);
 
-
             if (
                 (panel && panel.contains(e.originalEvent.target as Node)) ||
                 (button && button.contains(e.originalEvent.target as Node)) ||
                 (header && header.contains(e.originalEvent.target as Node)) ||
-                (eventbar && eventbar.contains(e.originalEvent.target as Node)) 
+                (eventbar && eventbar.contains(e.originalEvent.target as Node))
             ) {
                 return;
             }
@@ -88,14 +110,14 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
             setPosition(newPosition);
             positionRef.current = newPosition;
             reverseGeocode(newPosition.lat, newPosition.lng);
-            map.setView(newPosition, map.getZoom()); // Center the map on the marker
+            map.setView(newPosition, map.getZoom()); 
             setPlaceFromAddress(false);
         },
     });
 
     useEffect(() => {
         if (positionRef.current) {
-            map.setView(positionRef.current, map.getZoom()); // Center the map when the marker is updated
+            map.setView(positionRef.current, map.getZoom()); 
         }
     }, [positionRef.current, map]);
 

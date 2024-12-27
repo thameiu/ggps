@@ -49,6 +49,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     }
                 );
                 if (response.status === 200) {
+                    console.log("Token verified:", response.data);
                     setUsername(response.data.username);
                     setIsOrganizer(
                         response.data.access.role === "organizer" || response.data.access.role === "admin"

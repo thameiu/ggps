@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateProfileDto } from './dto/user.dto';
+import { Multer } from 'multer';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from '@prisma/client';
@@ -42,4 +43,31 @@ export class UserService {
         });
         return user;
     }
+
+    async updateProfilePictureAsBlob(token: string, file: Multer.File) {
+        const user = await this.auth.getUserFromToken(token);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        return await this.prisma.user.update({
+            where: { id: user.id },
+            data: { profilePicture: file.buffer }, 
+        });
+        }
+        
+        async getProfilePictureAsBlob(username: string): Promise<Buffer> {
+        const user = await this.prisma.user.findUnique({
+            where: { username },
+            select: { profilePicture: true },
+        });
+        
+        if (!user || !user.profilePicture) {
+            // throw new Error('Profile picture not found');
+            return null;
+        }
+        
+        return user.profilePicture;
+        }
+        
 }

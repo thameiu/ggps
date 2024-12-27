@@ -24,7 +24,7 @@ model User{
 
   firstName String?
   lastName String?
-
+  profilePicture Bytes?
 
   events Entry[]
 

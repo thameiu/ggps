@@ -186,7 +186,9 @@ export class EventService {
 
             const chatroom = await this.message.getChatroomByEvent(event.id);
             const existingAccess = await this.message.checkUserAccess(dto.token, chatroom.id);
-            if (chatroom && !existingAccess){
+
+
+            if (chatroom && !existingAccess.access){
                 await this.message.giveAccess(dto.token, chatroom.id,dto.status);
             }
             return entry;

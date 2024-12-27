@@ -6,7 +6,7 @@ import { SeederService } from './seeder/seeder.service';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService, private seeder: SeederService) {
-    // this.seeder.seedUsers(99);  
+    // this.seeder.seedUsers(99);   
     // this.seeder.seedEvents(99);   
   }
 
