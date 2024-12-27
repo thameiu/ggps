@@ -30,6 +30,13 @@ export class EventController {
         return this.eventService.getBySearchWordAndOrCategoryInRadius(dto);
     }
 
+    @Get('entries/:id')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getEntriesByEventId(@Param('id', ParseIntPipe) id: number) {
+        return this.eventService.getEntriesByEventId(id);
+    }
+
     @Delete()
     @UseGuards(AuthGuard)
     @HttpCode(204)

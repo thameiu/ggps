@@ -300,7 +300,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
 
           <div className={styles.events}>
             <div>
-              <h2>Events Organized</h2>
+              {/* <h2>Events Organized</h2> */}
               {profileData.eventsOrganized?.length ? (
                 <ul>
                   {profileData.eventsOrganized.map((event) => (
@@ -310,12 +310,12 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   ))}
                 </ul>
               ) : (
-                <p>No events organized.</p>
+                ''
               )}
             </div>
 
             <div>
-              <h2>Events Participated</h2>
+              {/* <h2>Events Participated</h2> */}
               {profileData.eventsParticipated?.length ? (
                 <ul>
                   {profileData.eventsParticipated.map((event) => (
@@ -325,7 +325,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   ))}
                 </ul>
               ) : (
-                <p>No events participated.</p>
+                ' '
               )}
             </div>
           </div>

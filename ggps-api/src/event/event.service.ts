@@ -300,4 +300,39 @@ export class EventService {
         }
 
     }
+
+    async getEntriesByEventId(id: number) {
+        try {
+            const entries = await this.prisma.entry.findMany({
+                where: {
+                    eventId: id
+                }
+            });
+            const userIds = entries.map(entry => entry.userId);
+
+            const users = await this.prisma.user.findMany({
+                where: {
+                    id: { in: userIds }
+                },
+                select: {
+                    id: true,
+                    username: true,
+                    firstName: true,
+                    lastName: true
+                }
+            });
+            const userEntries = entries.map(entry => {
+                const user = users.find(user => user.id === entry.userId);
+                return {
+                    ...user,
+                    status: entry.status
+                };
+            });
+
+            return userEntries;
+            
+        } catch (error) {
+            throw error;
+        }
+    }
 }

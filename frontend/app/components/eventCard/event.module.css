@@ -148,3 +148,77 @@
     height: 40px;
     width: 40px;
   }
+  .participantsSection {
+    background-color: rgba(255, 255, 255, 0.1); /* Lighter, semi-transparent background for better contrast */
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 5%;
+    padding: 20px; /* Add padding for spacing inside the section */
+    border-radius: 15px; /* Match the rounded corners style */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3); /* Add a subtle shadow for depth */
+    font-family: var(--font-sofia-pro-regular-az);
+    color: white;
+}
+
+.participantTitle {
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 10px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Add an underline for separation */
+    padding-bottom: 10px;
+}
+
+.participantList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between participants */
+}
+
+.participantItem {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05); /* Subtle background for each item */
+    padding: 10px 15px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.participantLink{
+  display: flex;
+}
+
+.participantItem:hover {
+    background-color: rgba(255, 255, 255, 0.15); /* Slightly darker on hover */
+}
+
+.participantAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.participantUsername {
+    font-size: 1.2em;
+    color: white;
+}
+
+
+.participantName {
+  margin-left: 12px;
+  color: #bbb;
+
+}
+
+.participantStatus {
+    color: #bbb;
+    margin-left: 12px;
+
+}

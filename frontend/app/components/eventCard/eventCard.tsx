@@ -6,6 +6,7 @@ import { EventCardProps } from './types';
 import Modal from '../modal/Modal';
 import { handleEntryAction, checkChatroomAvailability, checkOrganizerStatus, checkSignUpStatus,selectColor } from './eventUtils';
 import Image from 'next/image';
+import 'animate.css';
 
 const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [loading, setLoading] = useState(false);
@@ -19,6 +20,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRemoveEntryModal, setShowRemoveEntryModal] = useState(false);
   const [organizerProfilePicture, setOrganizerProfilePicture] = useState<string | null>(null);
+  const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string }[]>([]);
+  const [showParticipants, setShowParticipants] = useState(false);
 
   const confirmDeleteEvent = () => {
     setShowDeleteModal(true);
@@ -95,15 +98,41 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   };
   
 
+  const fetchParticipants = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('User not authenticated.');
+
+      const response = await axios.get(
+        `http://localhost:9000/event/entries/${event.id}`,
+        { headers: { Authorization: token } }
+      );
+
+      setParticipants(response.data);
+    } catch (err) {
+      console.error('Failed to fetch participants:', err);
+    }
+  };
+
+  const toggleParticipants = () => {
+    if (!showParticipants) {
+      fetchParticipants();
+    }
+    setShowParticipants(!showParticipants);
+  };
+
+
 
   useEffect(() => {
     selectColor(event, setColor);
     checkOrganizerStatus(organizer, setIsOrganizer);
     checkSignUpStatus(event.id, setIsSignedUp);
     checkChatroomAvailability(event.id, setHasChatroom);
+    fetchParticipants();
     if (organizer) {
       fetchOrganizerProfilePicture(organizer);
     }
+
   }, [event.id, event.category]);
 
   return (
@@ -181,6 +210,34 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             <p>
               <strong>Location:</strong> {event.number} {event.street} {event.city} {event.zipCode}
             </p>
+          </div>
+
+          {/* Participants Section */}
+          <div className={styles.participantsSection}>
+            <button
+              className={styles.toggleParticipantsButton}
+              onClick={toggleParticipants}
+            >
+              <div className={styles.participantTitle}>
+              {showParticipants
+                ? 'Hide Participants'
+                : `Show Participants (${participants.length})`}
+                </div>
+            </button>
+
+            {showParticipants && (
+              <ul className={`${styles.participantsList} animate__animated animate__fadeIn`}>
+                {participants.map((participant) => (
+                  <li className={styles.participantItem} key={participant.id}>
+                    <a className={styles.participantLink} href={`/profile?username=${participant.username}`}>
+                      <div className={styles.participantUsername}>{participant.username}</div>
+                      <div className={styles.participantName}>{participant.firstName} {participant.lastName} </div>{' '}
+                      <div className={styles.participantStatus}>({participant.status})</div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="flex flex-col space-y-2">
