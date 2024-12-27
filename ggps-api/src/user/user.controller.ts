@@ -23,8 +23,8 @@ export class UserController {
 
     @Put('')
     @UseGuards(AuthGuard)
-    updateProfile(@Body() dto: UpdateProfileDto) {
-        return this.userService.updateProfile(dto);
+    updateProfile(@Body() dto: UpdateProfileDto, @Headers('authorization') token: string) {
+        return this.userService.updateProfile(dto,token);
     }
 
 

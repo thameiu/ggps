@@ -151,7 +151,7 @@ const EventPage: React.FC = () => {
                 style={{
                     overflow: "hidden",
                 }}></canvas>
-            <EventCard event={event} organizer={organizer} />
+            <EventCard event={event} organizer={organizer?organizer:''} />
         </div>
     );
 };

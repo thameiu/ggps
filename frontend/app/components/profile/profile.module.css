@@ -1,23 +1,4 @@
-.profileContainer {
 
-  background-color: rgb(0, 0, 0,0.6);
-  padding-left : 5%;
-  padding-right : 5%;
-  padding-bottom : 0.6%;
-
-  border-radius: 25px;
-
-  /* display: flex; */
-  align-items: center;
-  justify-content: center;
-  margin-top:15vh;
-  margin-left:auto;
-  margin-right:auto;
-  width:80vw;
-  /* height: 100vh; */
-  font-family: var(--font-sofia-pro-regular-az);
-
-  }
   
   .header {
     font-size: 1.5rem;
@@ -77,10 +58,7 @@
     cursor: pointer;
   }
   
-  .editButton {
-    background-color: #007bff;
-    color: #fff;
-  }
+
   
   .saveButton {
     background-color: #28a745;
@@ -102,3 +80,96 @@
     margin-top: 1rem;
   }
   
+
+.profileContainer {
+  background-color: rgb(0, 0, 0, 0.6);
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-bottom: 0.6%;
+  border-radius: 25px;
+  align-items: left;
+  justify-content: left;
+  margin-top: 15vh;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80vw;
+  font-family: var(--font-sofia-pro-regular-az);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+  margin-bottom: 1rem;
+}
+
+.profilePicture {
+  border-radius: 50%;
+  border: 1px solid #fff;
+  object-fit: cover;
+  margin-right: 20px;
+  height: 150px;
+  width: 150px;
+}
+
+.username {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0;
+  font-family: var(--font-sofia-pro-medium-az);
+}
+
+.nameRow {
+  display: flex;
+  gap: 5px;
+  font-family: var(--font-sofia-pro-regular-az);
+
+}
+
+.firstName,
+.lastName {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.bio {
+  margin: 20px 0;
+  font-size: 1rem;
+  color: #ccc;
+  /* text-align: center; */
+}
+
+.events {
+  margin-top: 20px;
+  color: #fff;
+}
+
+.events h2 {
+  margin-bottom: 10px;
+}
+
+.editButton {
+  background-color: #007bff;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+  width:10vw;
+}
+
+/* .fileInput{
+  width:80px;
+  height:80px;
+  border-radius: 50%;
+
+} */

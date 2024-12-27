@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./profile.module.css";
 import Loader from "../loader/loader";
+import Image from "next/image";
 
 interface ProfileData {
   username: string;
@@ -14,7 +15,7 @@ interface ProfileData {
 }
 
 interface ProfileProps {
-  username: string; 
+  username: string;
 }
 
 const Profile: React.FC<ProfileProps> = ({ username }) => {
@@ -33,6 +34,8 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFetchingProfile, setIsFetchingProfile] = useState(true);
   const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchLoggedInUsername = async () => {
@@ -76,6 +79,35 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
     }
   };
 
+  const fetchProfilePicture = async (username: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated.");
+
+      const response = await axios.get(
+        `http://localhost:9000/user/${username}/profile-picture`,
+        {
+          headers: { Authorization: token },
+          responseType: "arraybuffer",
+        }
+      );
+
+      if (response.data.byteLength == 0) {
+        setProfilePicture("/images/usericon.png");
+        return;
+      }
+
+      const base64Image = Buffer.from(response.data, "binary").toString("base64");
+      const mimeType = response.headers["content-type"];
+
+      const profilePictureData = `data:${mimeType};base64,${base64Image}`;
+      setProfilePicture(profilePictureData);
+    } catch (err) {
+      console.error("Failed to fetch profile picture:", err);
+      setProfilePicture("/images/usericon.png");
+    }
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -86,24 +118,49 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
   const handleSaveChanges = async () => {
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
-
+  
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated.");
-
-      const data = { ...formData, token };
-
+  
+      const data = new FormData();
+      data.append("username", formData.username);
+      data.append("firstName", formData.firstName);
+      data.append("lastName", formData.lastName);
+      data.append("bio", formData.bio || "");
+  
       await axios.put(`http://localhost:9000/user`, data, {
-        headers: { Authorization: token },
+        headers: { Authorization: token, "Content-Type": 	"application/json" },
       });
+  
+      if (selectedFile) {
+        const pictureData = new FormData();
+        pictureData.append("file", selectedFile);
+  
+        await axios.post(`http://localhost:9000/user/profile-picture`, pictureData, {
+          headers: { Authorization: token, "Content-Type": "multipart/form-data" },
+        });
+        const newProfilePictureURL = URL.createObjectURL(selectedFile);
+        setProfilePicture(newProfilePictureURL);
+ 
+        localStorage.setItem("profilePicture", newProfilePictureURL);
 
+      }
+  
       setSuccessMessage("Profile updated successfully!");
       setProfileData(formData);
       setEditMode(false);
+ 
     } catch (err) {
       console.error("Error saving profile data:", err);
       setErrorMessage("Failed to update profile. Please try again.");
@@ -111,9 +168,11 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchProfileData();
+    fetchProfilePicture(username);
   }, [username]);
 
   if (isFetchingProfile) {
@@ -122,14 +181,25 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
 
   return (
     <div className={styles.profileContainer}>
-      <h1 className={styles.header}>
-        {profileData?.username}'s Profile
-      </h1>
+      <h1 className={styles.header}>{profileData?.username}'s Profile</h1>
 
       {profileData ? (
         <div className={styles.profileCard}>
           {editMode && loggedInUsername === username ? (
+            
             <div className={styles.form}>
+              <label>
+                <span>Profile Picture:</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className={styles.fileInput}
+                  
+                  
+                />
+              </label>
+
               <label>
                 <span>Username:</span>
                 <input
@@ -138,6 +208,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   value={formData.username}
                   onChange={handleInputChange}
                   className={styles.input}
+                  disabled
                 />
               </label>
 
@@ -191,17 +262,28 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
             </div>
           ) : (
             <div className={styles.details}>
-              <p>
-                <strong>Username:</strong> {profileData.username}
-              </p>
+              <div className={styles.profileHeader}>
+                <Image
+                  src={profilePicture || "/images/usericon.png"}
+                  alt={`${username}'s profile picture`}
+                  className={styles.profilePicture}
+                  width={150}
+                  height={150}
+                />
+                <div className={styles.username}>
+                  {profileData.username}
+                  <div className={styles.nameRow}>
+                    <p className={styles.firstName}>
+                      {profileData.firstName || "N/A"}
+                    </p>
+                    <p className={styles.lastName}>
+                      {profileData.lastName || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              <p>
-                <strong>First Name:</strong> {profileData.firstName || "N/A"}
-              </p>
-              <p>
-                <strong>Last Name:</strong> {profileData.lastName || "N/A"}
-              </p>
-              <p>
+              <p className={styles.bio}>
                 <strong>Bio:</strong> {profileData.bio || "No bio provided."}
               </p>
 
@@ -243,22 +325,19 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   ))}
                 </ul>
               ) : (
-                <p>No events participated in.</p>
+                <p>No events participated.</p>
               )}
             </div>
           </div>
         </div>
       ) : (
-        <p>No profile data found.</p>
+        <p>Error: Unable to load profile data.</p>
       )}
 
-      {successMessage && (
-        <p className={styles.successMessage}>{successMessage}</p>
-      )}
-      {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
+      {successMessage && <p className={styles.success}>{successMessage}</p>}
+      {errorMessage && <p className={styles.error}>{errorMessage}</p>}
     </div>
   );
 };
 
 export default Profile;
-  

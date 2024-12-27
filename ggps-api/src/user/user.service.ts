@@ -11,8 +11,8 @@ export class UserService {
     
     constructor(private prisma: PrismaService, private auth:AuthService){}
    
-    async updateProfile(dto: UpdateProfileDto) {
-        const user = await this.auth.getUserFromToken(dto.token);
+    async updateProfile(dto: UpdateProfileDto, token:string) {
+        const user = await this.auth.getUserFromToken(token);
         if (!user) {
             return null;
         }
