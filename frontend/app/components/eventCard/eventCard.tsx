@@ -4,6 +4,8 @@ import styles from './event.module.css';
 import Chatroom from '../chatroom/chatroom';
 import { EventCardProps } from './types';
 import Modal from '../modal/Modal';
+import { handleEntryAction, checkChatroomAvailability, checkOrganizerStatus, checkSignUpStatus,selectColor } from './eventUtils';
+import Image from 'next/image';
 
 const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +18,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [isOrganizer, setIsOrganizer] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRemoveEntryModal, setShowRemoveEntryModal] = useState(false);
+  const [organizerProfilePicture, setOrganizerProfilePicture] = useState<string | null>(null);
 
   const confirmDeleteEvent = () => {
     setShowDeleteModal(true);
@@ -25,57 +28,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     setShowRemoveEntryModal(true);
   };
 
-  const handleEntryAction = async (eventId: number) => {
-    setLoading(true);
-    setSuccess(false);
-    setError(null);
-
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('User not authenticated.');
-      }
-
-      if (isSignedUp) {
-        setShowRemoveEntryModal(false);
-        // Remove entry
-        await axios.delete('http://localhost:9000/event/entry', {
-          data: {
-            eventId,
-            token,
-          },
-          headers: {
-            Authorization: token,
-          },
-        });
-        setIsSignedUp(false);
-        console.log('Entry removed successfully');
-      } else {
-        // Sign up for event
-        await axios.post(
-          'http://localhost:9000/event/entry',
-          {
-            eventId,
-            token,
-            status: 'accepted',
-          },
-          {
-            headers: {
-              Authorization: token,
-            },
-          }
-        );
-        setIsSignedUp(true);
-        console.log('Sign-up successful');
-      }
-      setSuccess(true);
-    } catch (err) {
-      console.error('Error updating entry:', err);
-      setError('Failed to update entry. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDeleteEvent = async (eventId: number) => {
     setShowDeleteModal(false);
@@ -88,7 +40,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
         throw new Error('User not authenticated.');
       }
   
-      // Delete event
       await axios.delete(`http://localhost:9000/event`, {
         data: {
           token,
@@ -110,77 +61,49 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       window.location.href = '/map';
     }
   };
-  
 
-  const checkSignUpStatus = async (eventId: number) => {
+  const fetchOrganizerProfilePicture = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:9000/event/userEntries', {
-        params: {
-          token: token,
-        },
-        headers: {
-          Authorization: token,
-        },
-      });
+      if (!token) throw new Error('User not authenticated.');
 
-      const { events, organizedEvents } = response.data;
-      const isUserSignedUp =
-        events.some((e: { id: number }) => e.id === eventId) ||
-        organizedEvents.some((e: { id: number }) => e.id === eventId);
 
-      setIsSignedUp(isUserSignedUp);
-    } catch (err) {
-      console.error('Error checking sign-up status:', err);
-    }
-  };
-
-  const checkOrganizerStatus = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:9000/auth/verify-token',
-        {},
-        { headers: { authorization: token } }
+      const response = await axios.get(
+        `http://localhost:9000/user/${username}/profile-picture`,
+        {
+          headers: { Authorization: token },
+          responseType: 'arraybuffer',
+        }
       );
 
-      const loggedInUser = response.data.user.username;
-      console.log(loggedInUser, organizer);
-      if (loggedInUser == organizer) {
-        setIsOrganizer(true);
+      
+      if (response.data.byteLength == 0) {
+        setOrganizerProfilePicture('/images/usericon.png');
+        return;
       }
-      } catch (err) {
-      console.error('Error verifying organizer status:', err);
-    }
-  };
 
-  const checkChatroomAvailability = async (eventId: number) => {
-    try {
-      await axios.get(`http://localhost:9000/chat/${eventId}/messages`, {
-        headers: {
-          Authorization: localStorage.getItem('token'),
-        },
-      });
-      setHasChatroom(true);
+      const base64Image = Buffer.from(response.data, 'binary').toString('base64');
+      const mimeType = response.headers['content-type'];
+
+      const profilePictureData = `data:${mimeType};base64,${base64Image}`;
+      setOrganizerProfilePicture(profilePictureData);
+
     } catch (err) {
-      console.error('No chatroom found for this event.');
-      setHasChatroom(false);
+      console.error('Failed to fetch organizer profile picture:', err);
+      setOrganizerProfilePicture('/images/usericon.png');
     }
   };
+  
 
-  function selectColor() {
-    if (event && event.category.toLowerCase() === 'convention') setColor('rgba(100, 0, 200, 1)');
-    else if (event && (event.category.toLowerCase() === 'tournament' || event.category.toLowerCase() === 'esport event'))
-      setColor('rgba(219, 39, 39, 1)');
-    else if (event && event.category.toLowerCase() === 'lan') setColor('rgba(80, 80, 255, 0.7)');
-    else if (event && event.category.toLowerCase() === 'speedrunning event') setColor('rgba(39, 219, 39, 0.7)');
-    else setColor('rgba(86, 86, 84, 0.7)');
-  }
 
   useEffect(() => {
-    selectColor();
-    checkSignUpStatus(event.id);
-    checkChatroomAvailability(event.id);
-    checkOrganizerStatus();
+    selectColor(event, setColor);
+    checkOrganizerStatus(organizer, setIsOrganizer);
+    checkSignUpStatus(event.id, setIsSignedUp);
+    checkChatroomAvailability(event.id, setHasChatroom);
+    if (organizer) {
+      fetchOrganizerProfilePicture(organizer);
+    }
   }, [event.id, event.category]);
 
   return (
@@ -224,14 +147,22 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           <div className={styles.subtitle}>
             {event.category}{" "}
             {organizer ? (
-              <>
-                created by{" "}
+              <div className={styles.organizerContainer}>
+                created by{' '}
+                <Image
+                  src={organizerProfilePicture || '/images/usericon.png'}
+                  alt={`${organizer}'s profile`}
+                  className={styles.organizerPicture}
+                  width={50}
+                  height={50}
+                />
+                {' '}
                 <a href={`/profile?username=${organizer}`}>
                   <span className={styles.organizerLink}>{organizer}</span>
                 </a>
-              </>
+              </div>
             ) : (
-              ""
+              ''
             )}
           </div>
           <div className="mb-4">
@@ -253,6 +184,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           </div>
 
           <div className="flex flex-col space-y-2">
+            
           {isOrganizer ? (
             <button
               onClick={() => confirmDeleteEvent()}
@@ -263,7 +195,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             </button>
           ) : (
             <button
-              onClick={() => isSignedUp ? confirmRemoveEntry() : handleEntryAction(event.id)}
+              onClick={() => isSignedUp ? confirmRemoveEntry() : handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal)}
               className={styles.signUp}
               style={{
                 backgroundColor: isSignedUp ? '#535352' : color || '#000',
@@ -315,7 +247,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           message="Are you sure you want to remove your entry for this event?"
           confirmText="Remove"
           cancelText="Cancel"
-          onConfirm={() => handleEntryAction(event.id)}
+          onConfirm={() => handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp,setShowRemoveEntryModal)}
           onCancel={() => setShowRemoveEntryModal(false)}
         />
       )}

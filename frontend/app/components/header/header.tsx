@@ -43,10 +43,17 @@ const Header: React.FC = () => {
             responseType: "arraybuffer",
           }
         );
+        console.log(profileResponse)
+        
+        if (profileResponse.data.byteLength === 0) {
+          setProfilePicture('/images/usericon.png');
+          return;
+        }
 
         const base64Image = Buffer.from(profileResponse.data, "binary").toString(
           "base64"
         );
+        
         const mimeType = profileResponse.headers["content-type"];
 
         const profilePictureData = `data:${mimeType};base64,${base64Image}`;
@@ -84,7 +91,7 @@ const Header: React.FC = () => {
             >
               <Image
                 className={styles.userIcon}
-                src={profilePicture || "/images/user_icon.png"} 
+                src={profilePicture || "/images/usericon.png"} 
                 alt="User"
                 width={40}
                 height={40}

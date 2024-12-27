@@ -7,7 +7,8 @@ export const handleEntryAction = async (
   setLoading: (loading: boolean) => void,
   setSuccess: (success: boolean) => void,
   setError: (error: string | null) => void,
-  setIsSignedUp: (isSignedUp: boolean) => void
+  setIsSignedUp: (isSignedUp: boolean) => void,
+  setShowRemoveEntryModal: (showRemoveEntryModal: boolean) => void
 ) => {
   setLoading(true);
   setSuccess(false);
@@ -23,6 +24,7 @@ export const handleEntryAction = async (
         headers: { Authorization: token },
       });
       setIsSignedUp(false);
+      setShowRemoveEntryModal(false);
     } else {
       await axios.post(
         'http://localhost:9000/event/entry',

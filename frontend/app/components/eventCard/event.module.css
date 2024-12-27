@@ -132,3 +132,19 @@
     margin-bottom: 2%;
   }
   
+
+  .organizerContainer{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .organizerPicture{
+    border-radius: 50%;
+    border: 1px solid #fff;
+    object-fit: cover;
+    margin-left : 10px;
+    margin-right : 10px;
+    height: 40px;
+    width: 40px;
+  }

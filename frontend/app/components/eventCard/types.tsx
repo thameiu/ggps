@@ -1,20 +1,17 @@
-export type Event = {
-    id: number;
-    title: string;
-    description: string;
-    beginDate: string;
-    endDate: string;
-    street: string;
-    number: string;
-    city: string;
-    zipCode: string;
-    latitude: number;
-    longitude: number;
-    category: string;
-  };
-  
-  export type EventCardProps = {
-    event: Event;
-    organizer: string | null;
-  };
-  
+export interface Event {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  beginDate: string;
+  endDate: string;
+  number: string;
+  street: string;
+  city: string;
+  zipCode: string;
+}
+
+export interface EventCardProps {
+  event: Event;
+  organizer: string;
+}
