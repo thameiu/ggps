@@ -1,27 +1,19 @@
-
-/* Optional: Hover effect for links inside navbar */
-.navbar a:hover {
-    color: #ff4040;
-}
-
-
-.logo h1 {
-    margin: 0;
-    font-size: 24px;
-    display: inline-block;
-    font-family: var(--font-sofia-pro-black-az);
-}
-
 .nav ul {
     list-style: none;
     display: flex;
+    align-items: center; 
     margin: 0;
     padding: 0;
+    height: 100%;
+    gap: 15px;
+
 }
 
 .nav li {
     margin-left: 20px;
     font-family: var(--font-sofia-pro-medium-az);
+    display: flex;
+    align-items: center;  
 }
 
 .nav a {
@@ -34,6 +26,27 @@
     text-decoration: underline;
 }
 
+.userIcon {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%; 
+    border: 1px solid #fff;
+    object-fit: cover;
+}
+
+.logo {
+    display: flex;
+    align-items: center; 
+    width: 30%;
+}
+
+.logo img {
+    background: radial-gradient(circle, rgba(120, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0) 50%);
+    background-size: contain;
+    height: 40px; 
+    width: auto; 
+}
+
 .topBar {
     position: fixed; 
     display: flex;
@@ -41,55 +54,13 @@
     align-items: center;
     top: 0;       
     left: 0;        
-    height: 11%;
+    height: 11%; 
     width: 100%;     
     z-index: 1000;   
     color: white;
     padding: 10px 20px;
-    /* background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.9) 70%); */
-    background:rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     background-size: 100% 100%;
     background-repeat: no-repeat;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-
-.topbar a:hover {
-    color: #ff4040;
-}
-
-
-.logo h1 {
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.nav ul {
-    list-style: none;
-    display: flex;
-    gap: 15px;
-    margin: 0;
-    padding: 0;
-}
-
-.nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-size: 1rem;
-}
-
-.logo{
-    
-    width:30%;
-
-}
-
-.logo img{
-            background: radial-gradient(circle, rgba(120, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.0) 50%);
-            background-size:contain;
-
-}
-
-.userIcon{
-    /* padding-bottom:12px; */
 }

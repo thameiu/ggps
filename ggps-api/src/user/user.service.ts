@@ -50,24 +50,24 @@ export class UserService {
             throw new Error('User not found');
         }
         
-        return await this.prisma.user.update({
+        await this.prisma.user.update({
             where: { id: user.id },
             data: { profilePicture: file.buffer }, 
         });
-        }
+        return await this.getProfilePictureAsBlob(user.username);
+    }
         
-        async getProfilePictureAsBlob(username: string): Promise<Buffer> {
+    async getProfilePictureAsBlob(username: string): Promise<Buffer> {
         const user = await this.prisma.user.findUnique({
             where: { username },
             select: { profilePicture: true },
         });
         
         if (!user || !user.profilePicture) {
-            // throw new Error('Profile picture not found');
             return null;
         }
         
         return user.profilePicture;
-        }
+    }
         
 }
