@@ -22,7 +22,8 @@
     "react-dom": "^18",
     "react-leaflet": "^4.2.1",
     "react-leaflet-markercluster": "^4.2.1",
-    "react-router-dom": "^7.0.2"
+    "react-router-dom": "^7.0.2",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.14",
@@ -30,6 +31,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18",
     "@types/react-router-dom": "^5.3.3",
+    "@types/socket.io-client": "^1.4.36",
     "autoprefixer": "^10.4.20",
     "eslint": "^8",
     "eslint-config-next": "14.2.10",

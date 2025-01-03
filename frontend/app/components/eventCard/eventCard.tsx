@@ -212,6 +212,43 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             </p>
           </div>
 
+
+
+          <div className="flex flex-col space-y-2">
+            
+          {isOrganizer ? (
+            <button
+              onClick={() => confirmDeleteEvent()}
+              className={styles.deleteButton}
+
+            >
+              {loading ? 'Processing...' : 'Delete Event'}
+            </button>
+          ) : (
+            <button
+
+  
+              onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal);fetchParticipants();}}
+              className={styles.signUp}
+              style={{
+                backgroundColor: isSignedUp ? '#535352' : color || '#000',
+              }}
+            >
+              {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
+            </button>
+          )}
+
+          {success && (
+            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
+              {isOrganizer ? 'Event deleted successfully!' : isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
+            </p>
+          )}
+          {error && (
+            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
+              {error}
+            </p>
+          )}
+
           {/* Participants Section */}
           <div className={styles.participantsSection}>
             <button
@@ -240,39 +277,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             )}
           </div>
 
-          <div className="flex flex-col space-y-2">
-            
-          {isOrganizer ? (
-            <button
-              onClick={() => confirmDeleteEvent()}
-              className={styles.deleteButton}
-
-            >
-              {loading ? 'Processing...' : 'Delete Event'}
-            </button>
-          ) : (
-            <button
-              onClick={() => isSignedUp ? confirmRemoveEntry() : handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal)}
-              className={styles.signUp}
-              style={{
-                backgroundColor: isSignedUp ? '#535352' : color || '#000',
-              }}
-            >
-              {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
-            </button>
-          )}
-
-          {success && (
-            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
-              {isOrganizer ? 'Event deleted successfully!' : isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
-            </p>
-          )}
-          {error && (
-            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
-              {error}
-            </p>
-          )}
-
           <style jsx>{`
             @keyframes fadeOut {
               0% {
@@ -293,6 +297,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           message="Are you sure you want to delete this event? This action cannot be undone."
           confirmText="Delete"
           cancelText="Cancel"
+
           onConfirm={() => handleDeleteEvent(event.id)}
           onCancel={() => setShowDeleteModal(false)}
         />
@@ -304,7 +309,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           message="Are you sure you want to remove your entry for this event?"
           confirmText="Remove"
           cancelText="Cancel"
-          onConfirm={() => handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp,setShowRemoveEntryModal)}
+            onConfirm={async () => {
+            await handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp, setShowRemoveEntryModal);
+            fetchParticipants();
+            }}
           onCancel={() => setShowRemoveEntryModal(false)}
         />
       )}

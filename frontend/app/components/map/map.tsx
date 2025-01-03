@@ -164,53 +164,18 @@ export default function MapComponent() {
                         }}
                     >
                         <Popup className={styles.eventPopup}>
-                            <button
-                                onClick={async () => {
-                                    const token = localStorage.getItem("token");
-                                    if (!token) {
-                                        alert("You must be logged in to sign up for events.");
-                                        return;
-                                    }
-
-                                    try {
-                                        const response = await axios.post(
-                                            "http://localhost:9000/event/entry",
-                                            {
-                                                eventId: event.id,
-                                                token: localStorage.getItem("token"),
-                                                status: "waiting",
-                                            },
-                                            { headers: { authorization: token } }
-                                        );
-
-                                        if (response.status === 201) {
-                                            alert("Successfully signed up for the event!");
-                                        } else if (response.statusText === 'This user has already signed up for this event') {
-                                            alert("Failed to sign up for the event.");
-                                        } else {
-                                            alert(response.statusText);
-                                        }
-                                    } catch (error: AxiosError | unknown) {
-                                        if (axios.isAxiosError(error) && error.code === 'ERR_BAD_REQUEST') {
-                                            alert("You have already signed up for this event.");
-                                            return;
-                                        }
-
-                                        alert("An error occurred. Please try again.");
-                                        console.error("Error signing up for event:", error);
-                                    }
-                                }}
-                            >
-                                Sign up
-                            </button>
-                            <br />
-                            <strong>{event.title}</strong>
-                            <br />
+                            <div className={styles.eventPopupTitle}>{event.title}</div>
                             {event.description}
                             <br />
-                            Date: {event.beginDate}
+                            
+                            {new Date(event.beginDate).toLocaleDateString()+'  '+new Date(event.beginDate).toLocaleTimeString()}
+                            
+                            {' - '}           
+
+                            {new Date(event.endDate).toLocaleDateString()+'  '+new Date(event.endDate).toLocaleTimeString()}
                             <br />
-                            <a href={`/event?id=${event.id}`}>More Information</a>
+                
+                            <div className={styles.eventPopupLink}><a  href={`/event?id=${event.id}`}>Check event {'>>'}</a></div>
                         </Popup>
                     </Marker>
                 ))}

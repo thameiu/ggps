@@ -27,7 +27,7 @@ export const fetchEvents = async ({
             longMin: bounds.getSouthWest().lng.toString(),
             latMax: bounds.getNorthEast().lat.toString(),
             longMax: bounds.getNorthEast().lng.toString(),
-            ...(searchWord && searchWord.length >= 3 && { searchWord }),
+            ...(searchWord && { searchWord }),
             ...(category && { category }),
         };
 
