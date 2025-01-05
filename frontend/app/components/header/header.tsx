@@ -30,7 +30,7 @@ const Header: React.FC = () => {
 
         const user = response.data.user;
         setUsername(user.username);
-        setProfilePicture('http://localhost:9000'+user.profilePicture);
+        if (user.profilePicture) setProfilePicture('http://localhost:9000'+user.profilePicture);
 
       } catch (err) {
         console.error("Error fetching user data:", err);

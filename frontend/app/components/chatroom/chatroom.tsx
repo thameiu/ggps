@@ -87,8 +87,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 setMessages((prevMessages) => [...prevMessages, ...newMessages]);
                 setFilteredMessages((prevMessages) => [...prevMessages, ...newMessages]);
 
-                const latestMessageId =
-                    newMessages[newMessages.length - 1].message.id;
+                const latestMessageId = newMessages[newMessages.length - 1].message.id;
                 lastMessageId.current = latestMessageId;
 
                 messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -174,13 +173,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             sendMessage();
         }
     };
-
+    
     return (
         <div className={styles.chatroomContainer}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <h2 className={styles.eventTitle}>{event.title} - chat</h2>
                 <button
-                className={styles.showPinnedButton}
+                    className={styles.showPinnedButton}
                     onClick={toggleShowPinned}
                     style={{
                         backgroundColor: color || "#000",
@@ -189,7 +188,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     {showPinnedOnly ? "Show All" : "Show Pinned"}
                 </button>
             </div>
-
+    
             {/* Messages List */}
             <div
                 className={styles.messagesContainer}
@@ -212,46 +211,65 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     filteredMessages.map((message) => (
                         <div
                             key={message.message.id}
-                            className={styles.messageContainer}
                             style={{
-                                alignSelf:
-                                    message.username === username ? "flex-end" : "flex-start",
-                                backgroundColor:
-                                    message.username === username ? "#565654" : "#000",
+                                alignSelf: message.username === username ? "flex-end" : "flex-start",
+                  
+                                flexDirection: message.username === username ? "row-reverse" : "row",
                             }}
+                            className={styles.messageContainer}
                         >
-                            <p className={styles.username}>{message.username}:</p>
-                            {message.message.content} <br />
-                            <small style={{ color: "#888" }}>
-                                {new Date(message.message.createdAt).toLocaleTimeString()}
-                            </small>
-                            {isOrganizer && (
-                                <button
-                                    onClick={() => pinMessage(message.message.id)}
-                                    className={styles.pinButton}
-                                >
-                                    {message.message.pinned ? (
-                                        <FontAwesomeIcon icon={faThumbTackSlash} />
-                                    ) : (
-                                        <FontAwesomeIcon icon={faThumbtack} />
-                                    )}
-                                </button>
-                            )}
+                            {/* Profile Picture */}
+                            <img
+                                src={`http://localhost:9000/user/${message.username}/profile-picture`}
+                                className={styles.messageProfilePicture}
+                                alt={`${message.username}'s profile`}
+                                style={{
+                                    margin: message.username === username ? "0 0 0 8px" : "0 8px 0 0",
+                                }}
+                                onError={(e) => {
+                                    e.currentTarget.src = "/images/usericon.png"; // Fallback to default image
+                                }}
+                            />
+
+
+                            <div 
+                            className={styles.messageBody}
+                            style={{ 
+                                backgroundColor: message.username === username ? "#565654" : "#000",
+                        
+                             }}>
+                                <p className={styles.username} style={{ margin: 0 }}>
+                                    {message.username}:
+                                </p>
+                                <p style={{ margin: "4px 0" }}>{message.message.content}</p>
+                                <small style={{ color: "#888" }}>
+                                    {new Date(message.message.createdAt).toLocaleTimeString()}
+                                </small>
+                                {isOrganizer && (
+                                    <button
+                                        onClick={() => pinMessage(message.message.id)}
+                                        className={styles.pinButton}
+                                        style={{ marginLeft: "8px" }}
+                                    >
+                                        {message.message.pinned ? (
+                                            <FontAwesomeIcon icon={faThumbTackSlash} />
+                                        ) : (
+                                            <FontAwesomeIcon icon={faThumbtack} />
+                                        )}
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                     ))
+                ) : showPinnedOnly ? (
+                    <p>No pinned messages yet.</p>
                 ) : (
-                    showPinnedOnly ? (
-                        <p>No pinned messages yet.</p>
-                    ) : (
-                        <p>No messages yet.</p>
-                    )
-                    
+                    <p>No messages yet.</p>
                 )}
                 <div ref={messageEndRef} />
             </div>
-
-
+    
             <div style={{ display: "flex", gap: "10px" }}>
                 <input
                     type="text"
@@ -277,6 +295,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             </div>
         </div>
     );
-};
-
-export default ChatRoom;
+    };
+    
+    export default ChatRoom;
+    

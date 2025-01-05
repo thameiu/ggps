@@ -55,7 +55,6 @@ getEventByUsername(@Param('username') username: string) {
 }
 
 @Get('/:username/profile-picture')
-@UseGuards(AuthGuard)
 async getProfilePictureAsUrl(
     @Param('username') username: string, 
     @Res() res: Response
