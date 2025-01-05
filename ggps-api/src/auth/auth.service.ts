@@ -30,7 +30,7 @@ export class AuthService {
       const payload = { userId: user.id, email: user.email };
       const token = this.jwtService.sign(payload);
   
-      const { hash,profilePicture, ...userWithoutHash } = user;
+      const { hash, ...userWithoutHash } = user;
   
       return { token, user: userWithoutHash };
     }catch(error){

@@ -35,7 +35,7 @@ export default function Login() {
 
       if (!response.ok) {
         const { message } = await response.json();
-        throw new Error(message || "Invalid credentials.");
+        throw new Error( "Invalid credentials.");
       }
 
       const { token } = await response.json(); // Get token from response
@@ -53,16 +53,7 @@ export default function Login() {
 
   return (
     <div className={`flex ${styles.login}`}>
-      {/* Left Side: Image Section */}
-      <div className="flex-1">
-        <img
-          src="/images/logo.png" // Replace with the path to your illustrative image
-          alt="Illustration"
-          className="object-cover w-full h-full"
-        />
-      </div>
 
-      {/* Right Side: Login Form Section */}
       <div className={`flex-1 flex items-center justify-center ${styles.rightSide}`}>
         <div className="w-full max-w-md p-8 space-y-6 rounded-lg">
           <h2 className="text-2xl font-semibold text-center text-white">Login</h2>

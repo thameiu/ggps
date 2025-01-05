@@ -1,4 +1,21 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, Req, UnauthorizedException, UseGuards, UseInterceptors, UploadedFile, Res, Headers } from "@nestjs/common";
+import { 
+    Body, 
+    Controller, 
+    Get, 
+    HttpCode, 
+    Param, 
+    ParseIntPipe, 
+    Post, 
+    Put, 
+    Query, 
+    Req, 
+    UnauthorizedException, 
+    UseGuards, 
+    UseInterceptors, 
+    UploadedFile, 
+    Res, 
+    Headers 
+} from "@nestjs/common";
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -12,58 +29,63 @@ import { TokenDto } from 'src/auth/dto/auth.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private authService: AuthService, private userService: UserService) {}
+constructor(
+    private authService: AuthService, 
+    private userService: UserService
+) {}
 
-    @Get('')
-    @UseGuards(AuthGuard)
-    @HttpCode(200)
-    getProfile(@Query() dto: TokenDto) {
-        return this.authService.getUserFromToken(dto.token);
+@Get('')
+@UseGuards(AuthGuard)
+@HttpCode(200)
+getProfile(@Query() dto: TokenDto) {
+    return this.authService.getUserFromToken(dto.token);
+}
+
+@Put('')
+@UseGuards(AuthGuard)
+updateProfile(@Body() dto: UpdateProfileDto, @Headers('authorization') token: string) {
+    return this.userService.updateProfile(dto, token);
+}
+
+@Get('/:username')
+@UseGuards(AuthGuard)
+@HttpCode(200)
+getEventByUsername(@Param('username') username: string) {
+    return this.userService.findByUsername(username);
+}
+
+@Get('/:username/profile-picture')
+@UseGuards(AuthGuard)
+async getProfilePictureAsUrl(
+    @Param('username') username: string, 
+    @Res() res: Response
+) {
+    const profilePictureUrl = await this.userService.getProfilePictureAsUrl(username);
+    if (!profilePictureUrl) {
+    res.status(404).send({ message: 'Profile picture not found' });
+    return;
     }
 
-    @Put('')
-    @UseGuards(AuthGuard)
-    updateProfile(@Body() dto: UpdateProfileDto, @Headers('authorization') token: string) {
-        return this.userService.updateProfile(dto,token);
-    }
+    res.redirect(profilePictureUrl);
+}
 
-
-    @Get('/:username')
-    @UseGuards(AuthGuard)
-    @HttpCode(200)
-    getEventByUsername(@Param('username',) username: string) {
-        return this.userService.findByUsername(username);
-    }
-
-    @Get('/:username/profile-picture')
-    @UseGuards(AuthGuard)
-    async getProfilePictureAsBlob(@Param('username') username: string, @Res() res: Response) {
-        const profilePicture = await this.userService.getProfilePictureAsBlob(username);
-
-        res.set({
-            'Content-Type': 'image/jpeg', 
-            'Content-Disposition': `inline; filename="${username}-profile-picture.jpg"`,
-        });
-
-        res.send(profilePicture);
-    }
-
-
-    @Post('profile-picture')
-    @UseGuards(AuthGuard)
-    @UseInterceptors(
+@Post('profile-picture')
+@UseGuards(AuthGuard)
+@UseInterceptors(
     FileInterceptor('file', {
-        limits: { fileSize: 5 * 1024 * 1024 }, 
-        fileFilter: (req, file, cb) => {
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+    fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
-            return cb(new Error('Unsupported file format'), false);
+        return cb(new Error('Unsupported file format'), false);
         }
         cb(null, true);
-        },
+    },
     }),
-    )
-    async uploadProfilePictureAsBlob(@UploadedFile() file: Multer.File, @Headers('authorization') token: string, ) {
-        return await this.userService.updateProfilePictureAsBlob(token, file);
-    }
-
+)
+async uploadProfilePictureAsFile(
+    @UploadedFile() file: Multer.File, 
+    @Headers('authorization') token: string
+) {
+    return await this.userService.updateProfilePictureAsFile(token, file);
+}
 }

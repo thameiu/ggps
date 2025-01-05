@@ -7,7 +7,7 @@ import axios from "axios";
 const Header: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [profilePicture, setProfilePicture] = useState<string | null>();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -18,6 +18,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+
         const token = localStorage.getItem("token");
         if (!token) throw new Error("User not authenticated.");
 
@@ -29,37 +30,8 @@ const Header: React.FC = () => {
 
         const user = response.data.user;
         setUsername(user.username);
+        setProfilePicture('http://localhost:9000'+user.profilePicture);
 
-        const cachedProfilePicture = localStorage.getItem("profilePicture");
-        if (cachedProfilePicture) {
-          setProfilePicture(cachedProfilePicture);
-          return;
-        }
-
-        const profileResponse = await axios.get(
-          `http://localhost:9000/user/${user.username}/profile-picture`,
-          {
-            headers: { Authorization: token },
-            responseType: "arraybuffer",
-          }
-        );
-        console.log(profileResponse)
-        
-        if (profileResponse.data.byteLength === 0) {
-          setProfilePicture('/images/usericon.png');
-          return;
-        }
-
-        const base64Image = Buffer.from(profileResponse.data, "binary").toString(
-          "base64"
-        );
-        
-        const mimeType = profileResponse.headers["content-type"];
-
-        const profilePictureData = `data:${mimeType};base64,${base64Image}`;
-        setProfilePicture(profilePictureData);
-
-        localStorage.setItem("profilePicture", profilePictureData);
       } catch (err) {
         console.error("Error fetching user data:", err);
       }
@@ -89,7 +61,7 @@ const Header: React.FC = () => {
               href={username ? `/profile?username=${username}` : "/login"}
               className={styles.userLink}
             >
-              <Image
+              <img
                 className={styles.userIcon}
                 src={profilePicture || "/images/usericon.png"} 
                 alt="User"

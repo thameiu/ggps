@@ -72,25 +72,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
 
       const response = await axios.get(
-        `http://localhost:9000/user/${username}/profile-picture`,
+        `http://localhost:9000/user/${username}`,
         {
           headers: { Authorization: token },
-          responseType: 'arraybuffer',
         }
       );
 
-      
-      if (response.data.byteLength == 0) {
+      if (response.status !== 200 || !response.data.profilePicture) {
         setOrganizerProfilePicture('/images/usericon.png');
         return;
       }
-
-      const base64Image = Buffer.from(response.data, 'binary').toString('base64');
-      const mimeType = response.headers['content-type'];
-
-      const profilePictureData = `data:${mimeType};base64,${base64Image}`;
-      setOrganizerProfilePicture(profilePictureData);
-
+      
+      setOrganizerProfilePicture('http://localhost:9000'+response.data.profilePicture);
     } catch (err) {
       console.error('Failed to fetch organizer profile picture:', err);
       setOrganizerProfilePicture('/images/usericon.png');
@@ -178,7 +171,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             {organizer ? (
               <div className={styles.organizerContainer}>
                 created by{' '}
-                <Image
+                <img
                   src={organizerProfilePicture || '/images/usericon.png'}
                   alt={`${organizer}'s profile`}
                   className={styles.organizerPicture}

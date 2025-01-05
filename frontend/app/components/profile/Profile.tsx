@@ -71,40 +71,17 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
 
       setProfileData(response.data);
       setFormData(response.data);
+
+      if (!response.data.profilePicture){
+        setProfilePicture('/images/usericon.png');
+        return;
+      }
+      setProfilePicture('http://localhost:9000'+response.data.profilePicture);
     } catch (err) {
       console.error("Error fetching profile data:", err);
       setErrorMessage("Failed to load profile data.");
     } finally {
       setIsFetchingProfile(false);
-    }
-  };
-
-  const fetchProfilePicture = async (username: string) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("User not authenticated.");
-
-      const response = await axios.get(
-        `http://localhost:9000/user/${username}/profile-picture`,
-        {
-          headers: { Authorization: token },
-          responseType: "arraybuffer",
-        }
-      );
-
-      if (response.data.byteLength == 0) {
-        setProfilePicture("/images/usericon.png");
-        return;
-      }
-
-      const base64Image = Buffer.from(response.data, "binary").toString("base64");
-      const mimeType = response.headers["content-type"];
-
-      const profilePictureData = `data:${mimeType};base64,${base64Image}`;
-      setProfilePicture(profilePictureData);
-    } catch (err) {
-      console.error("Failed to fetch profile picture:", err);
-      setProfilePicture("/images/usericon.png");
     }
   };
 
@@ -172,7 +149,6 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
 
   useEffect(() => {
     fetchProfileData();
-    fetchProfilePicture(username);
   }, [username]);
 
   if (isFetchingProfile) {
@@ -263,7 +239,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
           ) : (
             <div className={styles.details}>
               <div className={styles.profileHeader}>
-                <Image
+                <img
                   src={profilePicture || "/images/usericon.png"}
                   alt={`${username}'s profile picture`}
                   className={styles.profilePicture}

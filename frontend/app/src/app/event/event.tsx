@@ -25,7 +25,6 @@ const EventPage: React.FC = () => {
     const searchParams = useSearchParams();
     const [event, setEvent] = React.useState<Event | null>(null);
     const [organizer, setOrganizer] = React.useState<string | null>(null);
-
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
