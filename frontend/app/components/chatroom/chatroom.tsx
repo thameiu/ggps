@@ -235,7 +235,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                             <div 
                             className={styles.messageBody}
                             style={{ 
-                                backgroundColor: message.username === username ? "#565654" : "#000",
+                                    backgroundColor: message.username === username ? "#565654" : "#222",
                         
                              }}>
                                 <p className={styles.username} style={{ margin: 0 }}>
