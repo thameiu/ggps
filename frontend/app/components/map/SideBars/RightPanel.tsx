@@ -18,6 +18,7 @@ type RightPanelProps = {
     setPosition: (position: L.LatLng | null) => void;
     isPanelOpen: boolean;
     bounds: L.LatLngBounds | null;
+    addNewEvent: (newEvent: any) => void; 
 };
 
 export default function RightPanel({
@@ -29,6 +30,7 @@ export default function RightPanel({
     setAddress,
     isPanelOpen,
     bounds,
+    addNewEvent,
 }: RightPanelProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -44,6 +46,7 @@ export default function RightPanel({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [validateAddress, setValidateAddress] = useState(false);
+    const [isSubmitClicked, setIsSubmitClicked] = useState(false); // Added state for submit tracking
 
     useEffect(() => {
         if (position && !placeFromAddress) {
@@ -94,8 +97,6 @@ export default function RightPanel({
             setAddress(result.display_name);
             setPosition(newPosition);
             setValidateAddress(true);
-
-
             setPlaceFromAddress(true);
             setError(null); 
         } catch (error) {
@@ -104,70 +105,84 @@ export default function RightPanel({
         }
     };
 
+    useEffect(() => {
+        const submitEvent = async () => {
+            // Only proceed with submission if the submit button was clicked
+            if (!isSubmitClicked) return;
+
+            if (!validateAddress || !position) {
+                setError("You must select a valid address and position.");
+                return;
+            }
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                setError("You must be logged in to create an event.");
+                return;
+            }
+
+            try {
+                const response = await axios.post(
+                    "http://localhost:9000/event",
+                    {
+                        title,
+                        description,
+                        category,
+                        beginDate,
+                        endDate,
+                        latitude: position.lat.toString(),
+                        longitude: position.lng.toString(),
+                        street,
+                        city,
+                        zipCode,
+                        country,
+                        number,
+                        game: "",
+                        token: token,
+                        createChatroom: createChatroom,
+                    },
+                    {
+                        headers: {
+                            authorization: token,
+                        },
+                    }
+                );
+
+                if (response.status === 201) {
+                    const newEvent = response.data; // Assuming the new event data is returned
+                    addNewEvent(newEvent); // Add the new event to the map
+                    setSuccess(true);
+                    setTitle("");
+                    setDescription("");
+                    setBeginDate("");
+                    setEndDate("");
+                    setError(null);
+                    setIsPanelOpen(false);
+                    if (bounds) {
+                        fetchEvents({ bounds, searchWord: "", category: null, setEvents: () => {} });
+                    }
+                    setPosition(null);
+                }
+            } catch (error) {
+                console.error("Failed to create event:", error);
+                setError("Failed to create the event. Please try again.");
+            }
+            // Reset submit tracking after submission
+            setIsSubmitClicked(false);
+        };
+
+        // Trigger the event creation once the address is validated and position is set
+        if (validateAddress && position && isSubmitClicked) {
+            submitEvent();
+        }
+    }, [validateAddress, position, title, description, category, beginDate, endDate, street, city, zipCode, country, number, createChatroom, bounds, setIsPanelOpen, isSubmitClicked]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        setIsSubmitClicked(true); // Track the submit action
         await handleGeocodeAddress();
-        if (!validateAddress){
-            setError("Address not found. Please check the details.");
-            return;
-        }
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            setError("You must be logged in to create an event.");
-            return;
-        }
-
-        if (!position) {
-            setError("You must select a location on the map.");
-            return;
-        }
-
-        try {
-            const response = await axios.post(
-                "http://localhost:9000/event",
-                {
-                    title,
-                    description,
-                    category,
-                    beginDate,
-                    endDate,
-                    latitude: position.lat.toString(),
-                    longitude: position.lng.toString(),
-                    street,
-                    city,
-                    zipCode,
-                    country,
-                    number,
-                    game: "",
-                    token: token,
-                    createChatroom: createChatroom,
-                },
-                {
-                    headers: {
-                        authorization: token,
-                    },
-                }
-            );
-
-            if (response.status === 201) {
-                setSuccess(true);
-                setTitle("");
-                setDescription("");
-                setBeginDate("");
-                setEndDate("");
-                setError(null);
-                setIsPanelOpen(false);
-                if (bounds) {
-                    fetchEvents({ bounds, searchWord: "", category: null, setEvents: () => {} });
-                }
-            }
-        } catch (error) {
-            console.error("Failed to create event:", error);
-        }
     };
-
     return (
     <>
         <button
@@ -187,7 +202,6 @@ export default function RightPanel({
             }}
         >
             <h3 className={styles.createFormTitle}>Create Event</h3>
-            {success && <p style={{ color: "green" }}>Event created successfully!</p>}
             <form onSubmit={handleSubmit} className={styles.createForm}>
                 <input
                     type="text"

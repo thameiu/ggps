@@ -121,7 +121,7 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({
         }
     }, [positionRef.current, map]);
 
-    return positionRef.current ? (
+    return positionRef.current && isPanelOpen ? (
         <Marker
             position={positionRef.current}
             icon={L.icon({

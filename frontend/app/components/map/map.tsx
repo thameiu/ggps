@@ -73,6 +73,10 @@ export default function MapComponent() {
             fetchEvents({ bounds, searchWord, category, setEvents, dateFilter });
     }, [bounds, searchWord, category, dateFilter]);
 
+    const addNewEvent = (newEvent: any) => {
+        setEvents((prevEvents) => [...prevEvents, newEvent]);
+    };
+
     if (loading) 
         return (
             <Loader />
@@ -109,6 +113,7 @@ export default function MapComponent() {
                         setAddress={setAddress}
                         setPlaceFromAddress={setPlaceFromAddress}
                         placeFromAddress={placeFromAddress}
+                        addNewEvent={addNewEvent}
                     />
 
                     <SearchBar
