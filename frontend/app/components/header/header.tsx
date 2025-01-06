@@ -4,11 +4,13 @@ import styles from "./header.module.css";
 import Image from "next/image";
 import axios from "axios";
 import {useRouter} from 'next/navigation';
+import Modal from "../modal/Modal";
 
 const Header: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>();
+  const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -82,10 +84,10 @@ const Header: React.FC = () => {
               }}
               onClick={(e) => {
                 e.preventDefault();
-                router.push(`/map`);
+                setShowLogoutModal(true);
               }}
             >
-              Contact
+              Logout
             </a>
           </li>
           <li>
@@ -110,6 +112,19 @@ const Header: React.FC = () => {
           </li>
         </ul>
       </div>
+      {showLogoutModal && (
+        <Modal
+          title="Log out"
+          message="Are you sure you want to log out ? You will have to log in again."
+          confirmText="Log out"
+          cancelText="Cancel"
+            onConfirm={ () => {
+              localStorage.removeItem("token");
+              window.location.href = "/";
+            }}
+          onCancel={() => setShowLogoutModal(false)}
+        />
+      )}
     </div>
   );
 };

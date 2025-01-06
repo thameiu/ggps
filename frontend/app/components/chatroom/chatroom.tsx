@@ -6,6 +6,8 @@ import styles from "./chatroom.module.css";
 import { Event } from "../eventCard/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack, faThumbTackSlash } from "@fortawesome/free-solid-svg-icons";
+import io from "socket.io-client";
+import Loader from "../loader/loader";
 
 interface ChatRoomProps {
     event: Event;
@@ -23,170 +25,174 @@ interface Message {
     username: string;
 }
 
+
 const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [filteredMessages, setFilteredMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState<string>("");
     const [showPinnedOnly, setShowPinnedOnly] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [username, setUsername] = useState<string | null>(null);
+    const [username, setUsername] = useState<string>('');
     const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
     const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+    
+    const socket = io("http://127.0.0.1:9000");
+
 
     const token = localStorage.getItem("token");
     const lastMessageId = useRef<number | null>(null);
     const messageEndRef = useRef<HTMLDivElement>(null);
     
-
-
-
-    
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true);
             try {
-                const response = await axios.get(
-                    "http://localhost:9000/chat/access", {
-                    params: {
-                        token: token,
-                        eventId: event.id,
-                    },
-                    headers: { authorization: token }
-                    }
-                );
-                if (response.status === 200) {
-                    console.log("Token verified:", response.data);
-                    setUsername(response.data.username);
+                const accessResponse = await axios.get("http://localhost:9000/chat/access", {
+                    params: { token, eventId: event.id },
+                    headers: { authorization: token },
+                });
+
+                if (accessResponse.status === 200) {
+                    console.log("Token verified:", accessResponse.data);
+                    setUsername(accessResponse.data.username);
                     setIsOrganizer(
-                        response.data.access.role === "organizer" || response.data.access.role === "admin"
+                        accessResponse.data.access.role === "organizer" ||
+                            accessResponse.data.access.role === "admin"
                     );
+
+                        const messagesResponse = await axios.get(`http://localhost:9000/chat/${event.id}/messages`, {
+                        headers: { authorization: token },
+                    });
+
+                    const newMessages = messagesResponse.data.filter((msg: Message) => {
+                        return (
+                            lastMessageId.current === null ||
+                            msg.message.id > lastMessageId.current
+                        );
+                    });
+
+                    if (newMessages.length > 0) {
+                        setMessages((prevMessages) => [...prevMessages, ...newMessages]);
+                        setFilteredMessages((prevMessages) => [...prevMessages, ...newMessages]);
+
+                        const latestMessageId = newMessages[newMessages.length - 1].message.id;
+                        lastMessageId.current = latestMessageId;
+                    }
+                scrollToBottom();
                 }
+
             } catch (error) {
-                console.error("Token verification failed:", error);
+                console.error("Error fetching data:", error);
+            } finally {
+                setIsLoading(false);
             }
-            
-            fetchMessages();
         };
 
         fetchData();
-
-        const interval = setInterval(fetchMessages, 5000);
-        return () => clearInterval(interval);
     }, [event.id]);
 
-    const fetchMessages = async () => {
-        console.log(showPinnedOnly);
-        if (showPinnedOnly){ 
-            console.log("showPinnedOnly");
+    useEffect(() => {
+        if (!socket) {
+            console.log("Socket not connected.");
             return;
         }
-        try {
-            if (showPinnedOnly) return;
-            const response = await axios.get(
-                `http://localhost:9000/chat/${event.id}/messages`,
-                {
-                    headers: { Authorization: token },
-                }
-            );
 
-            const newMessages = response.data.filter((msg: Message) => {
-                return (
-                    lastMessageId.current === null ||
-                    msg.message.id > lastMessageId.current
-                );
-            });
+        socket.emit("joinChatroom", { eventId: event.id, token });
 
-            if (newMessages.length > 0) {
-                setMessages((prevMessages) => [...prevMessages, ...newMessages]);
-                setFilteredMessages((prevMessages) => [...prevMessages, ...newMessages]);
-
-                const latestMessageId = newMessages[newMessages.length - 1].message.id;
-                lastMessageId.current = latestMessageId;
-
+        socket.on("receiveMessage", (message: Message) => {
+            if (!messages.some((msg) => msg.message.id === message.message.id)) {
+                setMessages((prevMessages) => {
+                    const updatedMessages = [...prevMessages, message];
+                    setFilteredMessages(updatedMessages.filter(msg => !showPinnedOnly || msg.message.pinned));
+                    return updatedMessages;
+                });
             }
-        } catch (error) {
-            console.error("Failed to fetch messages:", error);
-        }
+        });
+        
+
+        socket.on("messagePinned", (updatedMessage: Message) => {
+            console.log("Message pinned/unpinned:", updatedMessage);
+        
+            setMessages((prevMessages) =>
+                prevMessages.map((message) =>
+                    message.message.id === updatedMessage.message.id
+                        ? { ...message, message: updatedMessage.message }
+                        : message
+                )
+            );
+        
+            if (!showPinnedOnly) {
+                setFilteredMessages((prevMessages) =>
+                    prevMessages.map((message) =>
+                        message.message.id === updatedMessage.message.id
+                            ? { ...message, message: updatedMessage.message }
+                            : message
+                    )
+                );
+            } else {
+                setFilteredMessages((prevMessages) =>
+                    prevMessages.filter((msg) => msg.message.pinned)
+                );
+            }
+        });
+        
+        
+
+        socket.on("joinedChatroom", (data: { username: string; role: string }) => {
+        });
+
+        return () => {
+            socket.emit("leaveChatroom", { eventId: event.id });
+            socket.off("receiveMessage");
+            socket.off("joinedChatroom");
+        };
+    }, [socket, event.id, showPinnedOnly, messages]);
+
+    const scrollToBottom = () => {
+        messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const sendMessage = async () => {
+    const sendMessage = () => {
         if (!newMessage.trim()) return;
 
-        try {
-            const response = await axios.post(
-                "http://localhost:9000/chat/message",
-                { token, eventId: event.id, content: newMessage },
-                { headers: { Authorization: token } }
-            );
+        const messageToAdd: Message = {
+            message: {
+                id: Date.now(), 
+                createdAt: new Date().toISOString(),
+                userId: -1, // Temporary userId
+                content: newMessage,
+                pinned: false,
+            },
+            username: username,
+        };
 
-            const formattedMessage: Message = {
-                message: {
-                    id: response.data.message.id,
-                    createdAt: response.data.message.createdAt,
-                    userId: response.data.message.userId,
-                    content: response.data.message.content,
-                    pinned: response.data.message.pinned || false,
-                },
-                username: response.data.username || "You",
-            };
-
-            setMessages((prevMessages) => [...prevMessages, formattedMessage]);
-            setFilteredMessages((prevMessages) => [...prevMessages, formattedMessage]);
-            lastMessageId.current = response.data.message.id;
-            setNewMessage("");
-
-            messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          
-        } catch (error) {
-            console.error("Failed to send message:", error);
-        }
-        if (messageEndRef.current) {
-            messageEndRef.current.scrollIntoView({
-                behavior: "smooth",
-                block: "end",
-            });
+        setMessages((prevMessages) => [...prevMessages, messageToAdd]);
+        if (!showPinnedOnly) {
+            setFilteredMessages((prevMessages) => [...prevMessages, messageToAdd]);
         }
 
+        scrollToBottom();
+
+        // Emit the message to the server
+        socket.emit("sendMessage", { token, eventId: event.id, content: newMessage });
+
+        setNewMessage(""); // Clear the input field
     };
 
-    const pinMessage = async (messageId: number) => {
-        try {
-            await axios.put(
-                `http://localhost:9000/chat/pin`,
-                { token, messageId },
-                { headers: { Authorization: token } }
-            );
-
-            setMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.message.id === messageId
-                        ? { ...msg, message: { ...msg.message, pinned: msg.message.pinned==true?false:true } }
-                        : msg
-                )
-            );
-            setFilteredMessages((prevMessages) =>
-                prevMessages.map((msg) =>
-                    msg.message.id === messageId
-                        ? { ...msg, message: { ...msg.message, pinned : msg.message.pinned==true?false:true } }
-                        : msg
-                )
-            );
-        } catch (error) {
-            console.error("Failed to pin message:", error);
-        }
+    const pinMessage = (messageId: number) => {
+        socket.emit("pinMessage", { token, messageId,eventId: event.id });
     };
 
     const toggleShowPinned = () => {
         setShowPinnedOnly(!showPinnedOnly);
-        if (showPinnedOnly) {
-            setFilteredMessages(messages);
-        } else {
+        if (!showPinnedOnly) {
             setFilteredMessages(messages.filter((msg) => msg.message.pinned));
+        } else {
+            setFilteredMessages(messages);
         }
-        console.log("showPinnedOnly",showPinnedOnly);
-
     };
+
     const handleMessageClick = (messageId: number) => {
-        // Toggle the selected message
         setSelectedMessageId((prev) => (prev === messageId ? null : messageId));
     };
 
@@ -194,7 +200,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         if (e.key === "Enter") {
             sendMessage();
         }
-    };
+    }
 
     return (
         <div className={styles.chatroomContainer}>
@@ -219,7 +225,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 }}
             >
                 {isLoading ? (
-                    <p>Loading messages...</p>
+                    <Loader/>
                 ) : filteredMessages.length > 0 ? (
                     filteredMessages.map((message) => (
                         <div

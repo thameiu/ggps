@@ -36,4 +36,6 @@ export class PinMessageDto {
     @IsInt()
     messageId: number;
 
+    @IsNotEmpty()
+    eventId: string;
 }

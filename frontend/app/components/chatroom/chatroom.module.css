@@ -32,7 +32,7 @@
     position: relative;
     border:  1px solid #ddd;
     margin-bottom: 10px;
-    border-radius: 4px;
+    border-radius: 15px;
     display: flex;
     flex-direction: column;
 
@@ -68,7 +68,7 @@
 .inputField{
     flex: 1;
     padding: 8px;
-    border-radius: 4px;
+    border-radius: 25px;
     border: 1px solid #ddd;
     /* width:80%; */
     background: black;

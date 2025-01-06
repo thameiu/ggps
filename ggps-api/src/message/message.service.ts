@@ -103,7 +103,7 @@ export class MessageService {
       },
     });
 
-    return updatedMessage;
+    return {username:user.username,message:updatedMessage};
   }
 
   async createChatroom(dto: CreateChatroomDto): Promise<any> {

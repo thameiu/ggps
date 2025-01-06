@@ -11,6 +11,6 @@ import { MessageGateway } from './message.gateway';
 @Module({
   imports: [AuthModule], 
   controllers: [MessageController],
-  providers: [MessageService, MessageGateway, PrismaService, JwtService],
+  providers: [MessageService, MessageGateway, MessageController,PrismaService, JwtService],
 })
 export class MessageModule {}

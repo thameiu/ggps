@@ -1,61 +1,88 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { MessageService } from './message.service';
-import { CreateMessageDto } from './dto';
+import { MessageController } from './message.controller';
+import { CreateMessageDto, PinMessageDto } from './dto';
+import { ForbiddenException } from '@nestjs/common';
 
-@WebSocketGateway({ 
-    cors:true,
-}) // Enable CORS for cross-origin requests
+@WebSocketGateway({
+  cors: {
+    origin: 'http://localhost:3000', 
+  },
+})
 export class MessageGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly messageService: MessageService) {}
+  constructor(private readonly messageController: MessageController) {}
 
-  // Handle when a client connects
-  handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
-  }
-
-  // Handle when a client disconnects
-  handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
-  }
-
-  // Handle sending a message in a chatroom
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() createMessageDto: CreateMessageDto,
-    @ConnectedSocket() client: Socket
+    @ConnectedSocket() client: Socket,
   ) {
-    // Save message to the database
-    const message = await this.messageService.create(createMessageDto);
+    try {
+      const messageData = await this.messageController.createMessage(createMessageDto);
 
-    // Broadcast the message to all users in the chatroom
-    this.server.to(createMessageDto.eventId).emit('message', message);
-    return message;
+      this.server.to(createMessageDto.eventId).emit('receiveMessage', messageData);
+      console.log('messageData', messageData);
+      return { status: 'success', data: messageData };
+    } catch (error) {
+      client.emit('error', error.message || 'An error occurred');
+    }
   }
 
-  // Handle joining a chatroom
-  @SubscribeMessage('joinRoom')
-  handleJoinRoom(@MessageBody() data: { chatroomId: string }, @ConnectedSocket() client: Socket) {
-    client.join(data.chatroomId);
-    console.log(`Client ${client.id} joined room ${data.chatroomId}`);
-    this.server.to(data.chatroomId).emit('userJoined', { userId: client.id });
+  @SubscribeMessage('joinChatroom')
+  async handleJoinChatroom(
+    @MessageBody('eventId') eventId: string,
+    @MessageBody('token') token: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const access = await this.messageController.getUserAccess(token, eventId);
+
+      if (!access) {
+        throw new ForbiddenException('Access denied to chatroom');
+      }
+
+      client.join(eventId);
+      client.emit('joinedChatroom', { eventId });
+
+      return { status: 'success', message: `Joined chatroom ${eventId}` };
+    } catch (error) {
+      client.emit('error', error.message || 'An error occurred');
+    }
   }
 
-  // Handle leaving a chatroom
-  @SubscribeMessage('leaveRoom')
-  handleLeaveRoom(@MessageBody() data: { chatroomId: string }, @ConnectedSocket() client: Socket) {
-    client.leave(data.chatroomId);
-    console.log(`Client ${client.id} left room ${data.chatroomId}`);
-    this.server.to(data.chatroomId).emit('userLeft', { userId: client.id });
+  @SubscribeMessage('leaveChatroom')
+  async handleLeaveChatroom(
+    @MessageBody('eventId') eventId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.leave(eventId);
+    client.emit('leftChatroom', { eventId });
   }
 
-// Handle receiving a message
-@SubscribeMessage('messageReceived')
-handleMessageReceived(@MessageBody() data: { messageId: string }, @ConnectedSocket() client: Socket) {
-    console.log(`Message received: ${data.messageId} by client ${client.id}`);
-    this.server.emit('messageReceived', { messageId: data.messageId, userId: client.id });
-}
+  @SubscribeMessage('pinMessage')
+  async handlePinMessage(
+    @MessageBody() pinMessageDto: PinMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) { 
+    try {
+      
+      const updatedMessage = await this.messageController.pinMessage(pinMessageDto);
+      console.log('updatedMessage', updatedMessage);
+      
+      this.server.to(pinMessageDto.eventId).emit('messagePinned', updatedMessage);
+
+      return { status: 'success', data: updatedMessage };
+    } catch (error) {
+      client.emit('error', error.message || 'An error occurred');
+    }
+  }
 }
