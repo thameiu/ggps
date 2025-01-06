@@ -185,16 +185,17 @@ export class EventService {
             });
 
             const chatroom = await this.message.getChatroomByEvent(event.id);
-            const existingAccess = await this.message.checkUserAccess(dto.token, chatroom.id);
-
-
-            if (chatroom && !existingAccess.access){
-                await this.message.giveAccess(dto.token, chatroom.id,dto.status);
+            
+            if (chatroom){
+                const existingAccess = await this.message.checkUserAccess(dto.token, event.id);
+                if (chatroom && !existingAccess.access){
+                    await this.message.giveAccess(dto.token, chatroom.id,dto.status);
+                }
             }
             return entry;
         } catch (error) {
             throw error;
-        }
+        } 
     }
 
     async deleteEntry(dto: DeleteDto) {

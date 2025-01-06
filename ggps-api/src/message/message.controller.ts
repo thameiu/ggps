@@ -2,12 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Quer
 import { MessageService } from './message.service';
 import { CreateMessageDto, CreateChatroomDto, PinMessageDto } from './dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('chat')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
-  
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('message')
   @UseGuards(AuthGuard)
   createMessage(@Body() createMessageDto: CreateMessageDto) {

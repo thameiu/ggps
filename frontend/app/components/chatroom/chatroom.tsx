@@ -35,14 +35,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [username, setUsername] = useState<string>('');
     const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
     const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
-    
-    const socket = io("http://127.0.0.1:9000");
 
+    const socket = useRef(io("http://127.0.0.1:9000")).current;
 
     const token = localStorage.getItem("token");
     const lastMessageId = useRef<number | null>(null);
     const messageEndRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
@@ -57,10 +56,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     setUsername(accessResponse.data.username);
                     setIsOrganizer(
                         accessResponse.data.access.role === "organizer" ||
-                            accessResponse.data.access.role === "admin"
+                        accessResponse.data.access.role === "admin"
                     );
 
-                        const messagesResponse = await axios.get(`http://localhost:9000/chat/${event.id}/messages`, {
+                    const messagesResponse = await axios.get(`http://localhost:9000/chat/${event.id}/messages`, {
                         headers: { authorization: token },
                     });
 
@@ -78,7 +77,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                         const latestMessageId = newMessages[newMessages.length - 1].message.id;
                         lastMessageId.current = latestMessageId;
                     }
-                scrollToBottom();
+
+                    scrollToBottom();
                 }
 
             } catch (error) {
@@ -100,6 +100,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         socket.emit("joinChatroom", { eventId: event.id, token });
 
         socket.on("receiveMessage", (message: Message) => {
+            console.log("Message received:", message);
             if (!messages.some((msg) => msg.message.id === message.message.id)) {
                 setMessages((prevMessages) => {
                     const updatedMessages = [...prevMessages, message];
@@ -108,11 +109,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 });
             }
         });
-        
 
         socket.on("messagePinned", (updatedMessage: Message) => {
             console.log("Message pinned/unpinned:", updatedMessage);
-        
+
             setMessages((prevMessages) =>
                 prevMessages.map((message) =>
                     message.message.id === updatedMessage.message.id
@@ -120,7 +120,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                         : message
                 )
             );
-        
+
             if (!showPinnedOnly) {
                 setFilteredMessages((prevMessages) =>
                     prevMessages.map((message) =>
@@ -135,18 +135,14 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 );
             }
         });
-        
-        
-
-        socket.on("joinedChatroom", (data: { username: string; role: string }) => {
-        });
 
         return () => {
             socket.emit("leaveChatroom", { eventId: event.id });
+            socket.off("sendMessage");
+            socket.off("pinMessage");
             socket.off("receiveMessage");
-            socket.off("joinedChatroom");
         };
-    }, [socket, event.id, showPinnedOnly, messages]);
+    }, [event.id, showPinnedOnly]);
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -155,32 +151,14 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const sendMessage = () => {
         if (!newMessage.trim()) return;
 
-        const messageToAdd: Message = {
-            message: {
-                id: Date.now(), 
-                createdAt: new Date().toISOString(),
-                userId: -1, // Temporary userId
-                content: newMessage,
-                pinned: false,
-            },
-            username: username,
-        };
-
-        setMessages((prevMessages) => [...prevMessages, messageToAdd]);
-        if (!showPinnedOnly) {
-            setFilteredMessages((prevMessages) => [...prevMessages, messageToAdd]);
-        }
-
-        scrollToBottom();
-
-        // Emit the message to the server
         socket.emit("sendMessage", { token, eventId: event.id, content: newMessage });
 
-        setNewMessage(""); // Clear the input field
+        scrollToBottom();
+        setNewMessage("");
     };
 
     const pinMessage = (messageId: number) => {
-        socket.emit("pinMessage", { token, messageId,eventId: event.id });
+        socket.emit("pinMessage", { token, messageId, eventId: event.id });
     };
 
     const toggleShowPinned = () => {
@@ -200,7 +178,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         if (e.key === "Enter") {
             sendMessage();
         }
-    }
+    };
 
     return (
         <div className={styles.chatroomContainer}>

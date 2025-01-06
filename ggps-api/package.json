@@ -33,6 +33,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/platform-socket.io": "^10.4.15",
+    "@nestjs/throttler": "^6.3.0",
     "@nestjs/websockets": "^10.4.15",
     "@prisma/client": "^5.21.0",
     "argon2": "^0.41.1",

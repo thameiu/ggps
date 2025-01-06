@@ -7,6 +7,7 @@ export class CreateMessageDto {
     token: string;
 
     @IsNotEmpty()
+    @IsString()
     eventId: string;
 
     @IsNotEmpty()

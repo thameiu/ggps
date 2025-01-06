@@ -1,4 +1,5 @@
 import { Body, Controller, ParseIntPipe, Post, Req, UseGuards, HttpCode, Get, Query, Head, Param, Delete } from "@nestjs/common";
+import { Throttle } from '@nestjs/throttler';
 import { EventService }from './event.service';
 import { DeleteDto, EntryDto, EventDto, MinMaxCoordinatesDto } from "./dto";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -10,6 +11,7 @@ export class EventController {
     constructor(private eventService : EventService){
     }
 
+    @Throttle({ default: { limit: 1, ttl: 60000000 } })
     @Post()
     @UseGuards(AuthGuard)
     create(@Body() dto: EventDto){

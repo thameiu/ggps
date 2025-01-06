@@ -9,6 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { MessageController } from './message.controller';
 import { CreateMessageDto, PinMessageDto } from './dto';
 import { ForbiddenException } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @WebSocketGateway({
   cors: {
@@ -30,7 +31,7 @@ export class MessageGateway {
       const messageData = await this.messageController.createMessage(createMessageDto);
 
       this.server.to(createMessageDto.eventId).emit('receiveMessage', messageData);
-      console.log('messageData', messageData);
+      console.log(messageData);
       return { status: 'success', data: messageData };
     } catch (error) {
       client.emit('error', error.message || 'An error occurred');
@@ -76,7 +77,6 @@ export class MessageGateway {
     try {
       
       const updatedMessage = await this.messageController.pinMessage(pinMessageDto);
-      console.log('updatedMessage', updatedMessage);
       
       this.server.to(pinMessageDto.eventId).emit('messagePinned', updatedMessage);
 
