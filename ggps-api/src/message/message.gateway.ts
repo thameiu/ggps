@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { MessageController } from './message.controller';
 import { CreateMessageDto, PinMessageDto } from './dto';
 import { ForbiddenException } from '@nestjs/common';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 
 @WebSocketGateway({
   cors: {
@@ -22,6 +22,7 @@ export class MessageGateway {
 
   constructor(private readonly messageController: MessageController) {}
 
+  @Throttle({ default: { limit: 1, ttl: 10000 } })
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() createMessageDto: CreateMessageDto,
@@ -31,7 +32,6 @@ export class MessageGateway {
       const messageData = await this.messageController.createMessage(createMessageDto);
 
       this.server.to(createMessageDto.eventId).emit('receiveMessage', messageData);
-      console.log(messageData);
       return { status: 'success', data: messageData };
     } catch (error) {
       client.emit('error', error.message || 'An error occurred');

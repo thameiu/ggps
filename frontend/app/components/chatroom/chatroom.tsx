@@ -52,7 +52,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 });
 
                 if (accessResponse.status === 200) {
-                    console.log("Token verified:", accessResponse.data);
                     setUsername(accessResponse.data.username);
                     setIsOrganizer(
                         accessResponse.data.access.role === "organizer" ||
@@ -100,7 +99,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         socket.emit("joinChatroom", { eventId: event.id, token });
 
         socket.on("receiveMessage", (message: Message) => {
-            console.log("Message received:", message);
             if (!messages.some((msg) => msg.message.id === message.message.id)) {
                 setMessages((prevMessages) => {
                     const updatedMessages = [...prevMessages, message];
@@ -111,8 +109,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         });
 
         socket.on("messagePinned", (updatedMessage: Message) => {
-            console.log("Message pinned/unpinned:", updatedMessage);
-
             setMessages((prevMessages) =>
                 prevMessages.map((message) =>
                     message.message.id === updatedMessage.message.id
@@ -153,8 +149,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
 
         socket.emit("sendMessage", { token, eventId: event.id, content: newMessage });
 
-        scrollToBottom();
         setNewMessage("");
+
     };
 
     const pinMessage = (messageId: number) => {
@@ -179,6 +175,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             sendMessage();
         }
     };
+
+    useEffect(() => {
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage.username === username) {
+                scrollToBottom();
+            }
+        }
+    }, [messages]);
 
     return (
         <div className={styles.chatroomContainer}>

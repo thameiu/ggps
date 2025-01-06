@@ -55,7 +55,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
         },
       });
   
-      console.log('Event deleted successfully');
       setSuccess(true);
 
     } catch (err) {

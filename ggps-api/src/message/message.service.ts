@@ -43,8 +43,6 @@ export class MessageService {
       if (!existingAccess) {
         throw new ForbiddenException('User does not have access to this chatroom');
       }
-      console.log("in")
-
       const message = await this.prisma.message.create({
         data: {
           chatroom: {
