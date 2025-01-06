@@ -31,6 +31,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [username, setUsername] = useState<string | null>(null);
     const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
+    const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
 
     const token = localStorage.getItem("token");
     const lastMessageId = useRef<number | null>(null);
@@ -58,6 +59,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             } catch (error) {
                 console.error("Token verification failed:", error);
             }
+            
             fetchMessages();
         };
 
@@ -68,7 +70,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     }, [event.id]);
 
     const fetchMessages = async () => {
+        console.log(showPinnedOnly);
+        if (showPinnedOnly){ 
+            console.log("showPinnedOnly");
+            return;
+        }
         try {
+            if (showPinnedOnly) return;
             const response = await axios.get(
                 `http://localhost:9000/chat/${event.id}/messages`,
                 {
@@ -90,7 +98,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 const latestMessageId = newMessages[newMessages.length - 1].message.id;
                 lastMessageId.current = latestMessageId;
 
-                messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }
         } catch (error) {
             console.error("Failed to fetch messages:", error);
@@ -123,14 +130,20 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             lastMessageId.current = response.data.message.id;
             setNewMessage("");
 
-            messageEndRef.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "end",
-            });
+            messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          
         } catch (error) {
             console.error("Failed to send message:", error);
         }
     };
+    useEffect(() => {
+        if (messageEndRef.current) {
+            messageEndRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
+        }
+    }, [messages]);
 
     const pinMessage = async (messageId: number) => {
         try {
@@ -166,6 +179,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         } else {
             setFilteredMessages(messages.filter((msg) => msg.message.pinned));
         }
+        console.log("showPinnedOnly",showPinnedOnly);
+
+    };
+    const handleMessageClick = (messageId: number) => {
+        // Toggle the selected message
+        setSelectedMessageId((prev) => (prev === messageId ? null : messageId));
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -173,7 +192,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             sendMessage();
         }
     };
-    
+
     return (
         <div className={styles.chatroomContainer}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -188,20 +207,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     {showPinnedOnly ? "Show All" : "Show Pinned"}
                 </button>
             </div>
-    
+
             {/* Messages List */}
             <div
                 className={styles.messagesContainer}
                 style={{
-                    height: "600px",
-                    overflowY: "scroll",
-                    border: "1px solid #ddd",
-                    marginBottom: "10px",
-                    padding: "10px",
-                    borderRadius: "4px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
                     scrollbarColor: color || "#fff",
                 }}
             >
@@ -211,43 +221,61 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     filteredMessages.map((message) => (
                         <div
                             key={message.message.id}
+                            onClick={() => handleMessageClick(message.message.id)}
                             style={{
                                 alignSelf: message.username === username ? "flex-end" : "flex-start",
-                  
                                 flexDirection: message.username === username ? "row-reverse" : "row",
+                                background: message.message.pinned
+                                    ? `linear-gradient(to right, rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0.2), rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0))`
+                                    : "",
+                                borderWidth: message.message.pinned ? "1px" : "",
+                                borderStyle: message.message.pinned ? "solid" : "",
+                                borderImage: message.message.pinned
+                                    ? `linear-gradient(to right, rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0.5), rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0)) 1`
+                                    : "",
+                                borderRight: '',
                             }}
                             className={styles.messageContainer}
+                            
                         >
                             {/* Profile Picture */}
-                            <img
-                                src={`http://localhost:9000/user/${message.username}/profile-picture`}
-                                className={styles.messageProfilePicture}
-                                alt={`${message.username}'s profile`}
-                                style={{
-                                    margin: message.username === username ? "0 0 0 8px" : "0 8px 0 0",
-                                }}
-                                onError={(e) => {
-                                    e.currentTarget.src = "/images/usericon.png"; // Fallback to default image
-                                }}
-                            />
-
-
-                            <div 
-                            className={styles.messageBody}
-                            style={{ 
-                                    backgroundColor: message.username === username ? "#565654" : "#222",
-                        
-                             }}>
-                                <p className={styles.username} style={{ margin: 0 }}>
-                                    {message.username}:
+                            {message.username !== username && (
+                                <img
+                                    src={`http://localhost:9000/user/${message.username}/profile-picture`}
+                                    className={styles.messageProfilePicture}
+                                    alt={`${message.username}'s profile`}
+                                    onError={(e) => {
+                                        e.currentTarget.src = "/images/usericon.png";
+                                    }}
+                                />
+                            )}
+                            {/* Message Body */}
+                            <div className={styles.messageBody}>
+                                <p
+                                    className={styles.username}
+                                    style={{
+                                        textAlign: message.username === username ? "right" : "left",
+                                        color: message.message.pinned ? "#EEE" : "",
+                                    }}
+                                >
+                                    {message.username === username ? "You" : message.username}
                                 </p>
-                                <p style={{ margin: "4px 0" }}>{message.message.content}</p>
-                                <small style={{ color: "#888" }}>
-                                    {new Date(message.message.createdAt).toLocaleTimeString()}
-                                </small>
+                                <p
+                                    className={styles.messageContent}
+                                    style={{
+                                        backgroundColor: message.username === username ? "#565654" : "#222",
+                                        textAlign: message.username === username ? "right" : "left",
+                                    }}
+                                >
+                                    {message.message.content}
+                                </p>
+
                                 {isOrganizer && (
                                     <button
-                                        onClick={() => pinMessage(message.message.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent message click
+                                            pinMessage(message.message.id);
+                                        }}
                                         className={styles.pinButton}
                                         style={{ marginLeft: "8px" }}
                                     >
@@ -257,6 +285,20 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                                             <FontAwesomeIcon icon={faThumbtack} />
                                         )}
                                     </button>
+                                )}
+
+                                {/* Show createdAt when the message is clicked */}
+                                {selectedMessageId === message.message.id && (
+                                    <small
+                                        style={{
+                                            color: "#888",
+                                            display: "block",
+                                            marginTop: "8px",
+                                            textAlign: message.username === username ? "right" : "left",
+                                        }}
+                                    >
+                                        {new Date(message.message.createdAt).toLocaleTimeString()}
+                                    </small>
                                 )}
                             </div>
                         </div>
@@ -269,7 +311,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 )}
                 <div ref={messageEndRef} />
             </div>
-    
+
             <div style={{ display: "flex", gap: "10px" }}>
                 <input
                     type="text"
@@ -295,7 +337,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             </div>
         </div>
     );
-    };
-    
-    export default ChatRoom;
-    
+};
+
+export default ChatRoom;

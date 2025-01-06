@@ -3,11 +3,13 @@ import React, { useEffect, useState } from "react";
 import styles from "./header.module.css";
 import Image from "next/image";
 import axios from "axios";
+import {useRouter} from 'next/navigation';
 
 const Header: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>();
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -18,7 +20,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-
+        
         const token = localStorage.getItem("token");
         if (!token) throw new Error("User not authenticated.");
 
@@ -48,18 +50,54 @@ const Header: React.FC = () => {
       <div className={styles.nav}>
         <ul>
           <li>
-            <a href="/">Home</a>
-          </li>
-          <li>
-            <a href="/map">Map</a>
-          </li>
-          <li>
-            <a href="/contact">Contact</a>
+            <a 
+              style={{
+                cursor: 'pointer',
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/`);
+              }}
+            >
+              Home
+            </a>
           </li>
           <li>
             <a
-              href={username ? `/profile?username=${username}` : "/login"}
-              className={styles.userLink}
+              style={{
+                cursor: 'pointer',
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/map`);
+              }}
+            >
+              Map
+            </a>
+          </li>
+          <li>
+            <a
+              style={{
+                cursor: 'pointer',
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/map`);
+              }}
+            >
+              Contact
+            </a>
+          </li>
+          <li>
+            <a
+                style={{
+                  cursor: 'pointer',
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(`/profile?username=${username}`);
+                }}
+                className={styles.userLink}
             >
               <img
                 className={styles.userIcon}

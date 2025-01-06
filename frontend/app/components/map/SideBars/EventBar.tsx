@@ -4,12 +4,14 @@ import axios from "axios";
 import { Event } from "../../eventCard/types";
 import styles from "./eventbar.module.css";
 import { selectColor } from "../../eventCard/eventUtils";
+import { useRouter } from "next/navigation";
 
 export function EventBar() {
   const [isBarOpen, setIsBarOpen] = useState(false);
   const [userEvents, setUserEvents] = useState([]);
   const [organizedEvents, setOrganizedEvents] = useState([]);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -80,7 +82,17 @@ export function EventBar() {
                   <strong>Category:</strong> {event.category}
                 </p>
                 <p>
-                  <a href={`/event?id=${event.id}`}>More Information</a>
+                  <a 
+                    style={{
+                      cursor: 'pointer',
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push(`/event?id=${event.id}`);
+                    }}
+                  >
+                    More Information
+                  </a>
                 </p>
               </div>
             ))
@@ -115,7 +127,17 @@ export function EventBar() {
                   <strong>Category:</strong> {event.category}
                 </p>
                 <p>
-                  <a href={`/event?id=${event.id}`}>More Information</a>
+                  <a
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push(`/event?id=${event.id}`);
+                  }}
+                  >
+                    More Information
+                  </a>
                 </p>
               </div>
             ))

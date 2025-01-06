@@ -4,6 +4,7 @@ import styles from './event.module.css';
 import Chatroom from '../chatroom/chatroom';
 import { EventCardProps } from './types';
 import Modal from '../modal/Modal';
+import {useRouter} from 'next/navigation';
 import { handleEntryAction, checkChatroomAvailability, checkOrganizerStatus, checkSignUpStatus,selectColor } from './eventUtils';
 import Image from 'next/image';
 import 'animate.css';
@@ -22,6 +23,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [organizerProfilePicture, setOrganizerProfilePicture] = useState<string | null>(null);
   const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string }[]>([]);
   const [showParticipants, setShowParticipants] = useState(false);
+  const router = useRouter();
 
   const confirmDeleteEvent = () => {
     setShowDeleteModal(true);
@@ -179,7 +181,16 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                   height={50}
                 />
                 {' '}
-                <a href={`/profile?username=${organizer}`}>
+                
+                <a 
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push(`/profile?username=${organizer}`);
+                  }
+                }>
                   <span className={styles.organizerLink}>{organizer}</span>
                 </a>
               </div>
@@ -259,7 +270,15 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
               <ul className={`${styles.participantsList} animate__animated animate__fadeIn`}>
                 {participants.map((participant) => (
                   <li className={styles.participantItem} key={participant.id}>
-                    <a className={styles.participantLink} href={`/profile?username=${participant.username}`}>
+                    <a className={styles.participantLink} 
+                      style={{
+                        cursor: 'pointer',
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(`/profile?username=${participant.username}`);
+                      }}
+                    >
                       <div className={styles.participantUsername}>{participant.username}</div>
                       <div className={styles.participantName}>{participant.firstName} {participant.lastName} </div>{' '}
                       <div className={styles.participantStatus}>({participant.status})</div>

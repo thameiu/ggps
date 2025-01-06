@@ -1,7 +1,6 @@
 "use client"; // Ensures this component is treated as a client component
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
 
 export default function Login() {
@@ -10,7 +9,6 @@ export default function Login() {
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,11 +35,14 @@ export default function Login() {
         const { message } = await response.json();
         throw new Error( "Invalid credentials.");
       }
+      localStorage.clear();
+
 
       const { token } = await response.json(); // Get token from response
       localStorage.setItem("token", token); // Store token in localStorage
 
-      router.push("/map"); // Redirect to /map
+      window.location.href = "/map";
+
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message); // Set error message to be displayed
@@ -56,7 +57,7 @@ export default function Login() {
 
       <div className={`flex-1 flex items-center justify-center ${styles.rightSide}`}>
         <div className="w-full max-w-md p-8 space-y-6 rounded-lg">
-          <h2 className="text-2xl font-semibold text-center text-white">Login</h2>
+          <h2 className={`text-2xl font-semibold text-center text-white ${styles.title}`}>Log in</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
@@ -106,6 +107,7 @@ export default function Login() {
           {error && (
         <p className="mt-4 text-sm text-center text-red-500">{error}</p>
           )}
+          <p className='text-center'>Don't have an account ? <a href='/signup' className={styles.link}>Sign up !</a></p>
         </div>
       </div>
     </div>

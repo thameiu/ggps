@@ -175,7 +175,19 @@ export default function MapComponent() {
                             {new Date(event.endDate).toLocaleDateString()+'  '+new Date(event.endDate).toLocaleTimeString()}
                             <br />
                 
-                            <div className={styles.eventPopupLink}><a  href={`/event?id=${event.id}`}>Check event {'>>'}</a></div>
+                            <div className={styles.eventPopupLink}>
+                            <a 
+                                style={{
+                                cursor: 'pointer',
+                                }}
+                                onClick={(e) => {
+                                e.preventDefault();
+                                router.push(`/event?id=${event.id}`);
+                                }}
+                            >
+                                Check event {'>>'}
+                            </a>
+                            </div>
                         </Popup>
                     </Marker>
                 ))}

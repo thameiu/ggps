@@ -2,13 +2,15 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import styles from './home.module.css';
+import { useRouter } from "next/navigation";
 import 'animate.css';
 
 export default function Home() {
+  const router = useRouter();
   useEffect(() => {
     const canvas = document.getElementById("topo-canvas") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
-  
+    
     if (!ctx) return;
   
     const resizeCanvas = () => {
@@ -101,7 +103,13 @@ export default function Home() {
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
             className={styles.button}
-            href="/map"
+            style={{
+              cursor: 'pointer',
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              router.push(`/map`);
+            }}
           >
 
             Access map 
