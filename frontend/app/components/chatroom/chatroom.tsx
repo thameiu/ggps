@@ -36,7 +36,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const token = localStorage.getItem("token");
     const lastMessageId = useRef<number | null>(null);
     const messageEndRef = useRef<HTMLDivElement>(null);
+    
 
+
+
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -135,15 +139,14 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         } catch (error) {
             console.error("Failed to send message:", error);
         }
-    };
-    useEffect(() => {
         if (messageEndRef.current) {
             messageEndRef.current.scrollIntoView({
                 behavior: "smooth",
                 block: "end",
             });
         }
-    }, [messages]);
+
+    };
 
     const pinMessage = async (messageId: number) => {
         try {
@@ -233,7 +236,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                                 borderImage: message.message.pinned
                                     ? `linear-gradient(to right, rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0.5), rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0)) 1`
                                     : "",
-                                borderRight: '',
+                                borderRight: 'none',
                             }}
                             className={styles.messageContainer}
                             

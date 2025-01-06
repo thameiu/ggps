@@ -22,7 +22,7 @@
     font-size: 0.8em;
     margin-right:8px;
     margin-bottom: 4px;
-    color:#565654;
+    color:#fefefe;
 }
 
 .messagesContainer{
@@ -39,9 +39,10 @@
 }
 
 .messagesContainer::-webkit-scrollbar {
-    width: 10px !important;
+    width: 5px !important;
     z-index: 9999;
     /* padding: 30px; */
+    margin: 20px;
     
 
 }
@@ -59,6 +60,7 @@
     border-radius: 20px;
     background-color:#fefefe;
     margin-right: 10px;
+    
     z-index: 9999;
 
 }

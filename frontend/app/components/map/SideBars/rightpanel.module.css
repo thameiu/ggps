@@ -104,7 +104,7 @@
 
 
 .rightPanel::-webkit-scrollbar {
-    width: 10px !important;
+    width: 5px !important;
     padding: 30px; 
 }
 
