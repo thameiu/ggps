@@ -139,6 +139,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             socket.off("sendMessage");
             socket.off("pinMessage");
             socket.off("receiveMessage");
+            socket.off("messagePinned");
+
+            
         };
     }, [event.id, showPinnedOnly]);
 
@@ -238,7 +241,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                                 borderImage: message.message.pinned
                                     ? `linear-gradient(to right, rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0.5), rgba(${parseInt(color?.slice(5, 8) || '0')}, ${parseInt(color?.slice(9, 12) || '0')}, ${parseInt(color?.slice(13, 16) || '0')}, 0)) 1`
                                     : "",
-                                borderRight: 'none',
                             }}
                             className={styles.messageContainer}
                             

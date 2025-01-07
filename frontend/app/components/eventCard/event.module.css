@@ -162,68 +162,73 @@
     color: white;
     margin-left: auto;
     margin-right: auto;
-
 }
-
-.participantTitle {
-    font-size: 1.5rem;
-    color: white;
-    margin-bottom: 10px;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Add an underline for separation */
-    padding-bottom: 10px;
-}
-
-.participantList {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Space between participants */
-}
-
 .participantItem {
-    display: flex;
-    align-items: center;
-    justify-items: center;
-    background-color: rgba(255, 255, 255, 0.05); /* Subtle background for each item */
-    padding: 10px 15px;
-    border-radius: 10px;
-    transition: background-color 0.3s ease;
-}
-
-.participantLink{
-  display: flex;
+  margin-top:10px;
+  display: grid;
+  grid-template-columns: 50px 1fr 2fr 1fr;
+  align-items: center; 
+  background-color: rgba(255, 255, 255, 0.05); 
+  padding: 10px 15px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  gap: 15px;
+  width: 100%; 
 }
 
 .participantItem:hover {
-    background-color: rgba(255, 255, 255, 0.15); /* Slightly darker on hover */
+  background-color: rgba(255, 255, 255, 0.15); 
 }
 
-.participantAvatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    object-fit: cover;
-    margin-right: 15px;
+.participantLink {
+  display: contents;
+  text-decoration: none; 
 }
+
+
+.participantPicture{
+  grid-column: 1;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+  margin-left : 10px;
+  margin-right : 10px;
+  height: 40px;
+  width: 40px;
+}
+
 
 .participantUsername {
-    font-size: 1.2em;
-    color: white;
+  grid-column: 2;
+  font-size: 1.2em;
+  color: white;
+  font-weight: bold;
 }
 
-
 .participantName {
-  margin-left: 12px;
+  grid-column: 3;
+  font-size: 0.9em;
   color: #bbb;
-
 }
 
 .participantStatus {
-    color: #bbb;
-    margin-left: 12px;
+  grid-column: 4; 
+  font-size: 0.9em;
+  color: #bbb;
+  text-align: right; 
+}
 
+.participantList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  align-items: center;
+}
+
+.participantInfo {
+  display: contents; 
 }

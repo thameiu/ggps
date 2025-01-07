@@ -278,9 +278,19 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                         router.push(`/profile?username=${participant.username}`);
                       }}
                     >
+                      <img
+                        src={`http://localhost:9000/user/${participant.username}/profile-picture`}
+                        className={styles.participantPicture}
+                        alt={`${participant.username}'s profile`}
+                        onError={(e) => {
+                            e.currentTarget.src = "/images/usericon.png";
+                        }}
+                      ></img>
                       <div className={styles.participantUsername}>{participant.username}</div>
-                      <div className={styles.participantName}>{participant.firstName} {participant.lastName} </div>{' '}
-                      <div className={styles.participantStatus}>({participant.status})</div>
+                      <div className={styles.participantName}>{participant.firstName??'N/A'} {participant.lastName??'N/A'} </div>{' '}
+                      <div className={styles.participantStatus} style={{
+                        color: color || undefined,
+                      }}>{participant.status}</div>
                     </a>
                   </li>
                 ))}
