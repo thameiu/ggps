@@ -68,6 +68,8 @@ export default function Home() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
   }, []);
+
+  // document.title = "GGPS";
   
   return (
     

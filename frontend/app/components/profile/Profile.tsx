@@ -137,7 +137,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       setSuccessMessage("Profile updated successfully!");
       setProfileData(formData);
       setEditMode(false);
- 
+      window.location.reload();
     } catch (err) {
       console.error("Error saving profile data:", err);
       setErrorMessage("Failed to update profile. Please try again.");
@@ -149,6 +149,8 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
 
   useEffect(() => {
     fetchProfileData();
+    document.title = username + "'s Profile";
+    
   }, [username]);
 
   if (isFetchingProfile) {

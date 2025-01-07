@@ -82,6 +82,8 @@ export default function MapComponent() {
             <Loader />
         );
 
+    document.title = "Map";
+    
     return (
         <>
             <MapContainer
@@ -154,7 +156,36 @@ export default function MapComponent() {
                 />
 
                 <ModifyZoomButtons />
+                <style jsx global>{`
+                
+                    .leaflet-popup-content-wrapper {
+                    background-color: rgba(0, 0, 0, 0.8);
+                    color: #fff; 
+                    border-radius: 25px;
+                    padding: 10px;
+                    border:none;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); 
+                    }
+
+                    .leaflet-popup-tip {
+                    background-color: rgba(0, 0, 0, 0.8); 
+                    }
+
+                    
+                    .leaflet-popup-close-button{
+                        margin-top : 10px;
+                        margin-right : 10px;
+                    }
+
+                    .leaflet-popup-close-button span{
+                        color: #fff;
+                    }
+
+
+                `}</style>
                 {events.map((event) => (
+                    
+                    
                     <Marker
                         key={event.id}
                         icon={L.icon({
@@ -170,28 +201,28 @@ export default function MapComponent() {
                     >
                         <Popup className={styles.eventPopup}>
                             <div className={styles.eventPopupTitle}>{event.title}</div>
-                            {event.description}
-                            <br />
+                            <div className={styles.eventPopupDescription}>{event.description}</div>
                             
-                            {new Date(event.beginDate).toLocaleDateString()+'  '+new Date(event.beginDate).toLocaleTimeString()}
-                            
-                            {' - '}           
+                            <br/>
+                            <div className={styles.eventPopupDate}>
+                                {new Date(event.beginDate).toLocaleDateString()+'  '+new Date(event.beginDate).toLocaleTimeString().slice(0,5)}
+                                {' - '}        
+                                {new Date(event.endDate).toLocaleDateString()+'  '+new Date(event.endDate).toLocaleTimeString().slice(0,5)}
+                            </div>
 
-                            {new Date(event.endDate).toLocaleDateString()+'  '+new Date(event.endDate).toLocaleTimeString()}
-                            <br />
-                
+
                             <div className={styles.eventPopupLink}>
-                            <a 
-                                style={{
-                                cursor: 'pointer',
-                                }}
-                                onClick={(e) => {
-                                e.preventDefault();
-                                router.push(`/event?id=${event.id}`);
-                                }}
-                            >
-                                Check event {'>>'}
-                            </a>
+                                <a 
+                                    style={{
+                                        color:'#ba0000',
+                                    }}
+                                    onClick={(e) => {
+                                    e.preventDefault();
+                                    router.push(`/event?id=${event.id}`);
+                                    }}
+                                >
+                                    Check event
+                                </a>
                             </div>
                         </Popup>
                     </Marker>

@@ -241,11 +241,11 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             </button>
           )}
 
-          {success && (
+          {/* {success && (
             <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
               {isOrganizer ? 'Event deleted successfully!' : isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
             </p>
-          )}
+          )} */}
           {error && (
             <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
               {error}
@@ -253,6 +253,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           )}
 
           {/* Participants Section */}
+          {isSignedUp || isOrganizer ? (
           <div className={styles.participantsSection}>
             <button
               className={styles.toggleParticipantsButton}
@@ -297,6 +298,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
               </ul>
             )}
           </div>
+          ):''}
 
           <style jsx>{`
             @keyframes fadeOut {

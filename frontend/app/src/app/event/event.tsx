@@ -133,11 +133,14 @@ const EventPage: React.FC = () => {
         }
 
         animate();
+
+        document.title = event?.title ? event.title : "Event Page";
         
         return () => {
             window.removeEventListener("resize", resizeCanvas);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
+
     }, [event]); 
 
     if (!event) {

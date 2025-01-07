@@ -1,13 +1,38 @@
 .eventPopup{
     font-family: var(--font-sofia-pro-regular-az);
+    color:#fff;
+    
 }
 
 .eventPopupTitle{
-    font-size: 1.2rem;
+    font-size: 1.6em;
     margin: 0;
     font-family: var(--font-sofia-pro-medium-az);
+    text-shadow: #919191 1px 0 10px;
+
+}
+
+.eventPopupDescription{
+    font-size: 1.2em;
+    margin: 0;
+    font-family: var(--font-sofia-pro-regular-az);
+}
+
+.eventPopupDate{
+    margin: 0;
+    font-size: 1em;
+
+    font-family: var(--font-sofia-pro-regular-az);
 }
 
 .eventPopupLink{
-    text-align: right;
+    margin-top: 5px;
+    text-align: center;
+    font-family: var(--font-sofia-pro-regular-az);
+    font-size: 1.3em;
+    color:#ba0000;
+    text-shadow: #6e0000 1px 0 10px;
+    text-decoration: underline;
+    cursor:pointer;
 }
+

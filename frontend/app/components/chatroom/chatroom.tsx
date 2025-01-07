@@ -88,6 +88,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
         };
 
         fetchData();
+
     }, [event.id]);
 
     useEffect(() => {

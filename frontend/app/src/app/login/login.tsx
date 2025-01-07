@@ -52,6 +52,8 @@ export default function Login() {
     }
   };
 
+  document.title = "GGPS - Log in";
+
   return (
     <div className={`flex ${styles.login}`}>
 

@@ -74,6 +74,9 @@ export default function Signup() {
       }
     }
   };
+  
+  document.title = "GGPS - Log in";
+
   return (
     <div className={`flex ${styles.signup}`}>
       <div className={`flex-1 flex items-center justify-center ${styles.rightSide}`}>
