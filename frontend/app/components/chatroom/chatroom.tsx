@@ -103,6 +103,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 setMessages((prevMessages) => {
                     const updatedMessages = [...prevMessages, message];
                     setFilteredMessages(updatedMessages.filter(msg => !showPinnedOnly || msg.message.pinned));
+
+
                     return updatedMessages;
                 });
             }
@@ -183,6 +185,13 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     useEffect(() => {
         if (messages.length > 0) {
             const lastMessage = messages[messages.length - 1];
+            
+            const isAtBottom = messageEndRef.current && 
+            messageEndRef.current.getBoundingClientRect().bottom <= window.innerHeight;
+
+            if (isAtBottom) {
+                scrollToBottom();
+            }
             if (lastMessage.username === username) {
                 scrollToBottom();
             }
