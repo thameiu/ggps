@@ -149,3 +149,21 @@
     align-self: center;
     /* position:relative; */
 }
+
+
+.noMessages{
+    text-align: center;
+    align-self: center;
+    font-size : 1.2em;
+    margin-top: auto;
+    margin-bottom: auto;
+
+}
+
+.sendButton{
+    padding:8px 12px;
+    border-radius: 25px;
+    border:none;
+    color:#fff;
+    cursor:pointer;
+}

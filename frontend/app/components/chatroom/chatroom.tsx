@@ -117,19 +117,19 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                 )
             );
 
-            if (!showPinnedOnly) {
-                setFilteredMessages((prevMessages) =>
-                    prevMessages.map((message) =>
-                        message.message.id === updatedMessage.message.id
-                            ? { ...message, message: updatedMessage.message }
-                            : message
-                    )
-                );
-            } else {
-                setFilteredMessages((prevMessages) =>
-                    prevMessages.filter((msg) => msg.message.pinned)
-                );
-            }
+                if (!showPinnedOnly) {
+                    setFilteredMessages((prevMessages) =>
+                        prevMessages.map((message) =>
+                            message.message.id === updatedMessage.message.id
+                                ? { ...message, message: updatedMessage.message }
+                                : message
+                        )
+                    );
+                } else {
+                    setFilteredMessages((prevMessages) =>
+                        prevMessages.filter((msg) => msg.message.pinned)
+                    );
+                }
         });
 
         return () => {
@@ -158,13 +158,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     };
 
     const toggleShowPinned = () => {
-        setShowPinnedOnly(!showPinnedOnly);
-        if (!showPinnedOnly) {
+        setShowPinnedOnly((prev) => !prev);
+    };
+    
+    useEffect(() => {
+        if (showPinnedOnly) {
             setFilteredMessages(messages.filter((msg) => msg.message.pinned));
         } else {
-            setFilteredMessages(messages);
+            setFilteredMessages([...messages]);
         }
-    };
+    }, [showPinnedOnly, messages]);
+    
 
     const handleMessageClick = (messageId: number) => {
         setSelectedMessageId((prev) => (prev === messageId ? null : messageId));
@@ -297,9 +301,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
 
                     ))
                 ) : showPinnedOnly ? (
-                    <p>No pinned messages yet.</p>
+                    <p className={styles.noMessages}>No pinned messages yet.</p>
                 ) : (
-                    <p>No messages yet.</p>
+                    <p className={styles.noMessages}>No messages yet.</p>
                 )}
                 <div ref={messageEndRef} />
             </div>
@@ -314,14 +318,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     className={styles.inputField}
                 />
                 <button
+                    className={styles.sendButton}
                     onClick={sendMessage}
                     style={{
-                        padding: "8px 12px",
-                        borderRadius: "4px",
-                        border: "none",
                         backgroundColor: color || "#000",
-                        color: "#fff",
-                        cursor: "pointer",
                     }}
                 >
                     Send
