@@ -73,10 +73,10 @@ export function EventBar() {
                   <strong>Location:</strong> {event.street}, {event.city}, {event.zipCode}
                 </p>
                 <p>
-                  <strong>Begin:</strong> {new Date(event.beginDate).toLocaleString()}
+                    <strong>Begin:</strong> {new Date(event.beginDate).toLocaleString().slice(0, -3)}
                 </p>
                 <p>
-                  <strong>End:</strong> {new Date(event.endDate).toLocaleString()}
+                  <strong>End:</strong> {new Date(event.endDate).toLocaleString().slice(0, -3)}
                 </p>
                 <p>
                   <strong>Category:</strong> {event.category}
@@ -113,7 +113,7 @@ export function EventBar() {
                   border: `2px solid ${getBorderColor(event)}`,
                 }}
               >
-                <h3 className="text-lg font-bold">{event.title}</h3>
+                <h3 className={styles.eventBarCardTitle}>{event.title}</h3>
                 <p>
                   <strong>Location:</strong> {event.street}, {event.city}, {event.zipCode}
                 </p>

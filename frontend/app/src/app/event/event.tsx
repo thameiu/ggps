@@ -52,6 +52,7 @@ const EventPage: React.FC = () => {
 
                 } catch (error: any) {
                     console.error(error);
+                    router.push('/map');
                 }
             }
         };

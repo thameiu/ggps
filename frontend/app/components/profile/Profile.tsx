@@ -4,7 +4,10 @@ import axios from "axios";
 import styles from "./profile.module.css";
 import Loader from "../loader/loader";
 import Image from "next/image";
-
+import { Event } from "../eventCard/types";
+import { selectColor } from "../eventCard/eventUtils";
+import  { useRouter } from "next/navigation";
+import eventStyles from "../map/SideBars/eventbar.module.css";
 interface ProfileData {
   username: string;
   firstName: string;
@@ -36,6 +39,9 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
   const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [eventsOrganized, setEventsOrganized] = useState<Event[]>([]);
+  const [eventsParticipated, setEventsParticipated] = useState<Event[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchLoggedInUsername = async () => {
@@ -68,18 +74,31 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       const response = await axios.get(`http://localhost:9000/user/${username}`, {
         headers: { Authorization: token },
       });
-
+    
       setProfileData(response.data);
       setFormData(response.data);
+
+      const eventsResponse = await axios.get(`http://localhost:9000/event/${username}/entries`, {
+        headers: { Authorization: token },
+      });
+
+      console.log(eventsResponse.data);
+
+      setEventsOrganized(eventsResponse.data.organizedEvents || []);
+      setEventsParticipated(eventsResponse.data.events || []);
+
 
       if (!response.data.profilePicture){
         setProfilePicture('/images/usericon.png');
         return;
       }
       setProfilePicture('http://localhost:9000'+response.data.profilePicture);
+      console.log(response.data.profilePicture);
+
     } catch (err) {
       console.error("Error fetching profile data:", err);
       setErrorMessage("Failed to load profile data.");
+      router.push('/map');
     } finally {
       setIsFetchingProfile(false);
     }
@@ -146,12 +165,21 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
     }
   };
   
-
   useEffect(() => {
+    setEventsOrganized([]);
+    setEventsParticipated([]);
     fetchProfileData();
     document.title = username + "'s Profile";
-    
+
   }, [username]);
+    const getBorderColor = (event: Event) => {
+      let color: string | null = null;
+      selectColor(event, (selectedColor) => {
+        color = selectedColor;
+      });
+      return color;
+    };
+
 
   if (isFetchingProfile) {
     return <Loader />;
@@ -276,46 +304,115 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
             </div>
           )}
 
-          <div className={styles.events}>
-            <div>
-              {/* <h2>Events Organized</h2> */}
-              {profileData.eventsOrganized?.length ? (
-                <ul>
-                  {profileData.eventsOrganized.map((event) => (
-                    <li key={event.id}>
-                      {event.name} - {event.date}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                ''
-              )}
-            </div>
+           {/* Events Section */}
 
-            <div>
-              {/* <h2>Events Participated</h2> */}
-              {profileData.eventsParticipated?.length ? (
-                <ul>
-                  {profileData.eventsParticipated.map((event) => (
-                    <li key={event.id}>
-                      {event.name} - {event.date}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                ' '
-              )}
+  {/* Events Section */}
+  <div className={styles.eventsSection}>
+    <div className={styles.eventsColumns}>
+      {/* Participated Events */}
+      <div className={styles.eventsColumn}>
+        <h2 className={eventStyles.eventBarSectionTitle}>Events Participated</h2>
+        {eventsParticipated.length > 0 ? (
+          eventsParticipated.map((event: Event) => (
+            <div
+              key={event.id}
+              className={eventStyles.eventCard}
+              style={{
+                border: `2px solid ${getBorderColor(event)}`,
+              }}
+            >
+              <h3 className={eventStyles.eventBarCardTitle}>{event.title}</h3>
+              <p>
+                <strong>Location:</strong> {event.street}, {event.city}, {event.zipCode}
+              </p>
+              <p>
+                <strong>Begin:</strong> {new Date(event.beginDate).toLocaleString().slice(0, -3)}
+              </p>
+              <p>
+                <strong>End:</strong> {new Date(event.endDate).toLocaleString().slice(0, -3)}
+              </p>
+              <p>
+                <strong>Category:</strong> {event.category}
+              </p>
+              <p>
+                <a 
+                  style={{
+                    cursor: 'pointer',
+                    color: ` ${getBorderColor(event)}`,
+                   
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push(`/event?id=${event.id}`);
+                  }}
+                >
+                  More Information
+                </a>
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className={styles.noEvents}>No signed-up events found.</p>
+        )}
+      </div>
+
+      {/* Organized Events */}
+      <div className={styles.eventsColumn}>
+        <h2 className={eventStyles.eventBarSectionTitle}>Organized Events</h2>
+        {eventsOrganized.length > 0 ? (
+          eventsOrganized.map((event: Event) => (
+            <div
+              key={event.id}
+              className={eventStyles.eventCard}
+              style={{
+                border: `2px solid ${getBorderColor(event)}`,
+              }}
+            >
+              <h3 className={eventStyles.eventBarCardTitle}>{event.title}</h3>
+              <p>
+                <strong>Location:</strong> {event.street}, {event.city}, {event.zipCode}
+              </p>
+              <p>
+                <strong>Begin:</strong> {new Date(event.beginDate).toLocaleString().slice(0, -3)}
+              </p>
+              <p>
+                <strong>End:</strong> {new Date(event.endDate).toLocaleString().slice(0, -3)}
+              </p>
+              <p>
+                <strong>Category:</strong> {event.category}
+              </p>
+              <p>
+                <a
+                  style={{
+                    cursor: 'pointer',
+                    color: ` ${getBorderColor(event)}`,
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.push(`/event?id=${event.id}`);
+                  }}
+                >
+                  More Information
+                </a>
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className={styles.noEvents}>No organized events found.</p>
+        )}
             </div>
           </div>
-        </div>
-      ) : (
-        <p>Error: Unable to load profile data.</p>
-      )}
-
-      {successMessage && <p className={styles.success}>{successMessage}</p>}
-      {errorMessage && <p className={styles.error}>{errorMessage}</p>}
     </div>
-  );
+  </div>
+) : (
+  <p>Error: Unable to load profile data.</p>
+)}
+
+{successMessage && <p className={styles.success}>{successMessage}</p>}
+{errorMessage && <p className={styles.error}>{errorMessage}</p>}
+
+</div>
+);
 };
 
 export default Profile;

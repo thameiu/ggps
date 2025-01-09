@@ -302,6 +302,43 @@ export class EventService {
 
     }
 
+    async getUserEntriesByUsername(username: string) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { username },
+            });
+    
+            if (!user) {
+                throw new ForbiddenException('User not found');
+            }
+    
+            const entries = await this.prisma.entry.findMany({
+                where: {
+                    userId: user.id,
+                },
+                include: {
+                    event: true, 
+                },
+            });
+    
+            const organizedEvents = [];
+            const events = [];
+    
+            for (const entry of entries) {
+                if (entry.status === 'organizer') {
+                    organizedEvents.push(entry.event);
+                } else {
+                    events.push(entry.event);
+                }
+            }
+    
+            return { events, organizedEvents };
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+
     async getEntriesByEventId(id: number) {
         try {
             const entries = await this.prisma.entry.findMany({

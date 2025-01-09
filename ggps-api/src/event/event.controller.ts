@@ -61,11 +61,19 @@ export class EventController {
     }
     
 
+
     @Get('userEntries')
     @UseGuards(AuthGuard)
     @HttpCode(200)
     getUserEntries(@Query() dto: TokenDto){ 
         return this.eventService.getUserEntries(dto);
+    }
+
+    @Get(':username/entries')
+    @UseGuards(AuthGuard)
+    @HttpCode(200)
+    getUserEntriesByUsername(@Param('username') username: string) {
+        return this.eventService.getUserEntriesByUsername(username);
     }
 
 

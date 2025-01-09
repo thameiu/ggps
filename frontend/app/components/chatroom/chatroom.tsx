@@ -213,7 +213,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                         backgroundColor: color || "#000",
                     }}
                 >
-                    {showPinnedOnly ? "Show All" : "Show Pinned"}
+                    <FontAwesomeIcon icon={showPinnedOnly?faThumbTackSlash:faThumbtack} />
+                                      
                 </button>
             </div>
 
