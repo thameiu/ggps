@@ -1,11 +1,10 @@
-.openChat{
+.openBar{
     background-color: #333333;
     padding:10px;
-    border-radius: 10px;
+    border-radius: 15px;
     border:none;
     font-family: var(--font-sofia-pro-medium-az);
     transition: left 0.3s ease-in-out;
-
     position: absolute;
     bottom: 2%;
     left: 1%; 

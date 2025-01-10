@@ -2,7 +2,7 @@
     background-color: #333333;
     border: 1px solid #565654;
     padding:10px;
-    border-radius: 10px;
+    border-radius: 15px;
     border:none;
     font-family: var(--font-sofia-pro-medium-az);
     transition: right 0.3s ease-in-out;
@@ -10,6 +10,10 @@
     bottom: 2%;
     right: 1%; 
     z-index: 1000;
+}
+
+.openFormIcon{
+    transition: all ease-in-out 0.3s;
 }
 
 

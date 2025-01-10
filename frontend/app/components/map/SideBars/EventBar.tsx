@@ -41,13 +41,19 @@ export function EventBar() {
   return (
     <>
       <button
-        className={styles.openChat}
+        className={styles.openBar}
         onClick={() => setIsBarOpen((prev) => !prev)}
         style={{
           left: isBarOpen ? "310px" : "10px",
-        }}
+          }}
       >
-        {isBarOpen ? "Close Chat" : "Open Chat"}
+        <img
+        
+        src='/images/event.png'
+        width={35}
+        height={35}
+
+        />
       </button>
 
       <div

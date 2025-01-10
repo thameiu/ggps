@@ -192,7 +192,14 @@ export default function RightPanel({
                 right: isPanelOpen ? "310px" : "10px",
             }}
         >
-            {isPanelOpen ? "Close Panel" : "Create Event"}
+           <img 
+                className={styles.openFormIcon}
+                src='/images/create.png'
+                width={35}
+                height={35}
+                style={{transform: isPanelOpen ? "rotate(-45deg)" : "rotate(0deg)"}}
+       
+            />
         </button>
 
         <div
