@@ -11,6 +11,10 @@ import { CreateMessageDto, PinMessageDto } from './dto';
 import { ForbiddenException } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
+const rateLimitStore = new Map<string, { lastMessageTime: number; messageCount: number }>();
+const TIME_WINDOW = 1000; // 10 seconds
+const MAX_MESSAGES = 1; // Limit to 1 message per TIME_WINDOW
+
 @WebSocketGateway({
   cors: {
     origin: 'http://localhost:3000', 
@@ -22,13 +26,17 @@ export class MessageGateway {
 
   constructor(private readonly messageController: MessageController) {}
 
-  @Throttle({ default: { limit: 1, ttl: 10000 } })
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @MessageBody() createMessageDto: CreateMessageDto,
     @ConnectedSocket() client: Socket,
   ) {
     try {
+
+      if (!this.checkRateLimit(client.id)){
+        client.emit('error', 'Rate limit exceeded');
+        return;
+      };
       const messageData = await this.messageController.createMessage(createMessageDto);
 
       this.server.to(createMessageDto.eventId).emit('receiveMessage', messageData);
@@ -37,6 +45,7 @@ export class MessageGateway {
       client.emit('error', error.message || 'An error occurred');
     }
   }
+  
 
   @SubscribeMessage('joinChatroom')
   async handleJoinChatroom(
@@ -75,6 +84,10 @@ export class MessageGateway {
     @ConnectedSocket() client: Socket,
   ) { 
     try {
+      if (!this.checkRateLimit(client.id)){
+        client.emit('error', 'Rate limit exceeded');
+        return;
+      };
       
       const updatedMessage = await this.messageController.pinMessage(pinMessageDto);
       
@@ -84,5 +97,24 @@ export class MessageGateway {
     } catch (error) {
       client.emit('error', error.message || 'An error occurred');
     }
+  }
+
+  checkRateLimit(clientId: string) {
+    const currentTime = Date.now();
+    const rateLimitData = rateLimitStore.get(clientId) || { lastMessageTime: 0, messageCount: 0 };
+
+    if (currentTime - rateLimitData.lastMessageTime < TIME_WINDOW) {
+      if (rateLimitData.messageCount >= MAX_MESSAGES) {
+        console.log(1);
+        return false;
+      }
+      rateLimitData.messageCount += 1;
+    } else {
+      rateLimitData.lastMessageTime = currentTime;
+      rateLimitData.messageCount = 1;
+    }
+
+    rateLimitStore.set(clientId, rateLimitData);
+    return true;
   }
 }

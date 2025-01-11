@@ -14,8 +14,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{
-      ttl: 1000, // Time window in seconds
-      limit: 10, // Max number of requests allowed per window
+      ttl: 1000,
+      limit: 1,
     }]),
     PrismaModule, 
     AuthModule, 

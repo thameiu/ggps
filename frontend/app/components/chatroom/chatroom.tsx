@@ -41,6 +41,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const token = localStorage.getItem("token");
     const lastMessageId = useRef<number | null>(null);
     const messageEndRef = useRef<HTMLDivElement>(null);
+    const [isSendDisabled, setIsSendDisabled] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (isSendDisabled) {
+            const timer = setTimeout(() => {
+                setIsSendDisabled(false);
+            }, 1000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isSendDisabled]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -151,12 +162,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     };
 
     const sendMessage = () => {
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || isSendDisabled) return;
 
         socket.emit("sendMessage", { token, eventId: event.id, content: newMessage });
 
         setNewMessage("");
-
+        setIsSendDisabled(true);
     };
 
     const pinMessage = (messageId: number) => {
@@ -322,7 +333,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             </div>
 
             <div style={{ display: "flex", gap: "10px" }}>
+
                 <input
+                    disabled={isSendDisabled}
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}

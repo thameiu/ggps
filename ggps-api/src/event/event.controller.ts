@@ -11,7 +11,6 @@ export class EventController {
     constructor(private eventService : EventService){
     }
 
-    @Throttle({ default: { limit: 1, ttl: 60000000 } })
     @Post()
     @UseGuards(AuthGuard)
     create(@Body() dto: EventDto){
@@ -76,5 +75,8 @@ export class EventController {
         return this.eventService.getUserEntriesByUsername(username);
     }
 
+    
+    
+    
 
 }

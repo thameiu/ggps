@@ -330,12 +330,6 @@ export default function RightPanel({
                 </label>
 
                 <div className={styles.submitLine}>
-                    <button
-                        onClick={() => setIsPanelOpen(false)}
-                        className={styles.closeForm}
-                    >
-                        Close
-                    </button>
 
                     <button
                         type="submit"
