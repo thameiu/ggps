@@ -101,6 +101,9 @@ export class MinMaxCoordinatesDto {
     @IsOptional()
     category?: string;
 
+    pastEvents?: boolean;
+
+
 }
 
 

@@ -29,6 +29,7 @@ export const fetchEvents = async ({
             longMax: bounds.getNorthEast().lng.toString(),
             ...(searchWord && { searchWord }),
             ...(category && { category }),
+            pastEvents: dateFilter,
         };
 
         const endpoint = "http://localhost:9000/event/";

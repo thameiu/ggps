@@ -1,6 +1,5 @@
 .openForm{
-    background-color: #333333;
-    border: 1px solid #565654;
+    background-color: rgba(0, 0, 0, 0.8);
     padding:10px;
     border-radius: 15px;
     border:none;

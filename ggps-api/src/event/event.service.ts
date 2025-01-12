@@ -245,30 +245,38 @@ export class EventService {
     }
 
     async getBySearchWordAndOrCategoryInRadius(dto: MinMaxCoordinatesDto) {
-        if (!dto.latMax || !dto.latMin || !dto.longMax || !dto.longMin){
+        if (!dto.latMax || !dto.latMin || !dto.longMax || !dto.longMin) {
             return this.findAll();
-        }
-
-        else if (!dto.category && !dto.searchWord) {
+        } else if (!dto.category && !dto.searchWord) {
             return this.getInRadius(dto);
-        }
-
-        else if (!dto.category ) {
+        } else if (!dto.category) {
             return this.getBySearchWordInRadius(dto);
-        }
-
-        else if (!dto.searchWord ) {
+        } else if (!dto.searchWord) {
             return this.getByCategoryInRadius(dto);
         }
+    
         const eventsInRadius = await this.getInRadius(dto);
-            const searchWordLower = dto.searchWord.toLowerCase();
-        const filteredEvents = eventsInRadius.filter(event => 
-            (event.title.toLowerCase().includes(searchWordLower) || 
-            event.description.toLowerCase().includes(searchWordLower)) &&
+        const searchWordLower = dto.searchWord.toLowerCase();
+    
+        const filteredEvents = eventsInRadius.filter(event =>
+            (event.title.toLowerCase().includes(searchWordLower) ||
+                event.description.toLowerCase().includes(searchWordLower)) &&
             event.category === dto.category
         );
-        return filteredEvents;
+    
+        if (dto.pastEvents) {
+            const now = new Date();
+            return filteredEvents
+                .filter(event => new Date(event.beginDate) < now)
+                .sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime())
+                .slice(0, 150); 
+        }
+    
+        return filteredEvents
+            .sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime())
+            .slice(0, 150);
     }
+    
 
     async getUserEntries(dto: TokenDto) {
         try{
