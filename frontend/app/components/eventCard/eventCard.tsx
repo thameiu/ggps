@@ -218,34 +218,35 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
 
           <div className="flex flex-col space-y-2">
-            
-          {isOrganizer ? (
-            <button
-              onClick={() => confirmDeleteEvent()}
-              className={styles.deleteButton}
+          { event.beginDate > new Date().toISOString() ?(
+            isOrganizer ? (
+              <button
+                onClick={() => confirmDeleteEvent()}
+                className={styles.deleteButton}
 
-            >
-              {loading ? 'Processing...' : 'Delete Event'}
-            </button>
-          ) : (
-            <button
+              >
+                {loading ? 'Processing...' : 'Delete Event'}
+              </button>
+            ) : (
+              <button
 
-  
-              onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal);fetchParticipants();}}
-              className={styles.signUp}
-              style={{
-                backgroundColor: isSignedUp ? '#535352' : color || '#000',
-              }}
-            >
-              {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
-            </button>
-          )}
-
-          {/* {success && (
-            <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
-              {isOrganizer ? 'Event deleted successfully!' : isSignedUp ? 'Entry added successfully!' : 'Entry removed successfully!'}
-            </p>
-          )} */}
+    
+                onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal);fetchParticipants();}}
+                className={styles.signUp}
+                style={{
+                  backgroundColor: isSignedUp ? '#535352' : color || '#000',
+                }}
+              >
+                {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
+              </button>
+            )
+          ):
+          <div className={styles.signUp}
+          style={{
+            backgroundColor: '#535352',
+            width: '25%'
+          }}
+          >This event has already ended.</div>}
           {error && (
             <p className={styles.status} style={{ animation: 'fadeOut 3s forwards' }}>
               {error}

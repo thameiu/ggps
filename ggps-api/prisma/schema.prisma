@@ -25,6 +25,7 @@ model User{
   firstName String?
   lastName String?
   profilePicture String?
+  biography String?
 
   events Entry[]
 

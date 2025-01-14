@@ -16,4 +16,9 @@ export class UpdateProfileDto {
     @IsString()
     @IsNotEmpty()
     firstName:string
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    biography:string
 }

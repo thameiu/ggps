@@ -1,4 +1,4 @@
-import { Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
+import { BadRequestException, Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { DeleteDto, EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
 import { Prisma } from '@prisma/client';
@@ -17,13 +17,25 @@ export class EventService {
             throw new ForbiddenException('User not found');
         }
 
+        const currentDateTime = new Date();
+        const beginDate = new Date(dto.beginDate);
+        const endDate = new Date(dto.endDate);
+
+        if (beginDate <= currentDateTime) {
+            throw new BadRequestException('Begin date must be after the current datetime.');
+        }
+
+        if (endDate <= beginDate) {
+            throw new BadRequestException('End date must be after begin date.');
+        }
+
         try {
             const event = await this.prisma.event.create({
                 data: {
                     title: dto.title,
                     description: dto.description,
-                    beginDate: new Date(dto.beginDate),
-                    endDate: new Date(dto.endDate),
+                    beginDate: beginDate,
+                    endDate: endDate,
                     street: dto.street,
                     number: dto.number,
                     city: dto.city,
@@ -150,53 +162,63 @@ export class EventService {
             throw error;
         }
     }
-
-
     async createEntry(dto: EntryDto) {
         try {
-
             const user = await this.auth.getUserFromToken(dto.token);
+    
+            if (!user) {
+                throw new ForbiddenException('User not found');
+            }
+    
             const event = await this.prisma.event.findUnique({
                 where: {
-                    id: parseInt(dto.eventId)
-                }
-            })
+                    id: parseInt(dto.eventId),
+                },
+            });
+    
+            if (!event) {
+                throw new ForbiddenException('Event not found');
+            }
+    
+            const now = new Date();
+            if (new Date(event.beginDate) < now) {
+                throw new HttpException('Cannot sign up for an event that has already started.', HttpStatus.BAD_REQUEST);
+            }
+    
             const entryFound = await this.prisma.entry.findFirst({
                 where: {
                     eventId: parseInt(dto.eventId),
                     userId: user.id,
-                }
-            })
-            if (!user) {
-                throw new ForbiddenException('User not found');
-            }
-            if (!event) {
-                throw new ForbiddenException('Event not found');
-            }
+                },
+            });
+    
             if (entryFound) {
-                throw new HttpException('User already signed up for this event', HttpStatus.BAD_REQUEST);
+                throw new HttpException('User already signed up for this event.', HttpStatus.BAD_REQUEST);
             }
+    
             const entry = await this.prisma.entry.create({
                 data: {
                     userId: user.id,
                     eventId: event.id,
                     status: dto.status,
-                }
+                },
             });
-
+    
             const chatroom = await this.message.getChatroomByEvent(event.id);
-            
-            if (chatroom){
+    
+            if (chatroom) {
                 const existingAccess = await this.message.checkUserAccess(dto.token, event.id);
-                if (chatroom && !existingAccess.access){
-                    await this.message.giveAccess(dto.token, chatroom.id,dto.status);
+                if (chatroom && !existingAccess.access) {
+                    await this.message.giveAccess(dto.token, chatroom.id, dto.status);
                 }
             }
+    
             return entry;
         } catch (error) {
             throw error;
-        } 
+        }
     }
+    
 
     async deleteEntry(dto: DeleteDto) {
         try {

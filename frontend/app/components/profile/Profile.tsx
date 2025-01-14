@@ -12,7 +12,7 @@ interface ProfileData {
   username: string;
   firstName: string;
   lastName: string;
-  bio?: string;
+  biography: string;
   eventsOrganized?: Array<{ id: number; name: string; date: string }>;
   eventsParticipated?: Array<{ id: number; name: string; date: string }>;
 }
@@ -28,7 +28,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
     username: "",
     firstName: "",
     lastName: "",
-    bio: "",
+    biography: "",
     eventsOrganized: [],
     eventsParticipated: [],
   });
@@ -108,6 +108,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    console.log(name, value);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -133,7 +134,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       data.append("username", formData.username);
       data.append("firstName", formData.firstName);
       data.append("lastName", formData.lastName);
-      data.append("bio", formData.bio || "");
+      data.append("biography", formData.biography);
   
       await axios.put(`http://localhost:9000/user`, data, {
         headers: { Authorization: token, "Content-Type": 	"application/json" },
@@ -243,8 +244,8 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
               <label>
                 <span>Bio:</span>
                 <textarea
-                  name="bio"
-                  value={formData.bio}
+                  name="biography"
+                  value={formData.biography}
                   onChange={handleInputChange}
                   className={styles.textarea}
                 />
@@ -289,8 +290,8 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                 </div>
               </div>
 
-              <p className={styles.bio}>
-                <strong>Bio:</strong> {profileData.bio || "No bio provided."}
+              <p className={styles.biography}>
+                 {profileData.biography || "No biography provided."}
               </p>
 
               {loggedInUsername === username && (

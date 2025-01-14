@@ -20,8 +20,8 @@ import { AuthService } from 'src/auth/auth.service';
 
 @Controller('event')
 export class EventController {
-  private rateLimit = new Map<string, number>(); // Store the last request timestamp for each user
-  private readonly RATE_LIMIT_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
+  private rateLimit = new Map<string, number>();
+  private readonly RATE_LIMIT_INTERVAL = 15 * 60 * 1000;
 
   constructor(private eventService: EventService, private auth: AuthService) {}
 
@@ -46,9 +46,15 @@ export class EventController {
       );
     }
 
-    this.rateLimit.set(user.username, now);
+    try {
+      const event = await this.eventService.create(dto);
 
-    return this.eventService.create(dto);
+      this.rateLimit.set(user.username, now);
+
+      return event;
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Get('id/:id')

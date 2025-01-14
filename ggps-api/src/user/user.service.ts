@@ -22,6 +22,7 @@ export class UserService {
                 username: dto.username,
                 firstName: dto.firstName ? dto.firstName : user.firstName,
                 lastName: dto.lastName ? dto.lastName : user.lastName,
+                biography: dto.biography ? dto.biography : user.biography,
             },
         });
         return updatedUser;
@@ -38,6 +39,7 @@ export class UserService {
                 username: true,
                 firstName: true,
                 lastName: true,
+                biography: true,
                 createdAt: true,
                 profilePicture: true,
             },

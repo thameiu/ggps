@@ -46,7 +46,21 @@ export default function RightPanel({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [validateAddress, setValidateAddress] = useState(false);
-    const [isSubmitClicked, setIsSubmitClicked] = useState(false); // Added state for submit tracking
+    const [isSubmitClicked, setIsSubmitClicked] = useState(false);
+    const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
+    useEffect(() => {
+        const disabledUntil = localStorage.getItem("disabledUntil");
+        if (disabledUntil) {
+          const now = new Date().getTime();
+          const disabledUntilTime = parseInt(disabledUntil, 10);
+          if (now < disabledUntilTime) {
+            setIsButtonDisabled(true);
+            const timeout = disabledUntilTime - now;
+            setTimeout(() => setIsButtonDisabled(false), timeout);
+          }
+        }
+      }, []);
 
     useEffect(() => {
         if (position && !placeFromAddress) {
@@ -122,6 +136,19 @@ export default function RightPanel({
                 return;
             }
 
+            const now = new Date();
+            const beginDateTime = new Date(beginDate);
+            const endDateTime = new Date(endDate);
+
+            if (beginDateTime < now) {
+                setError("Begin date must be later than the current date and time.");
+                return;
+            }
+            if (endDateTime < beginDateTime) {
+                setError("End date must be later than the begin date.");
+                return;
+            }
+
             try {
                 const response = await axios.post(
                     "http://localhost:9000/event",
@@ -150,8 +177,8 @@ export default function RightPanel({
                 );
 
                 if (response.status === 201) {
-                    const newEvent = response.data; // Assuming the new event data is returned
-                    addNewEvent(newEvent); // Add the new event to the map
+                    const newEvent = response.data; 
+                    addNewEvent(newEvent); 
                     setSuccess(true);
                     setTitle("");
                     setDescription("");
@@ -163,16 +190,22 @@ export default function RightPanel({
                         fetchEvents({ bounds, searchWord: "", category: null, setEvents: () => {} });
                     }
                     setPosition(null);
+                    const disabledUntil = new Date().getTime() + 15 * 60 * 1000; // 15 minutes in milliseconds
+                    localStorage.setItem("disabledUntil", disabledUntil.toString());
+                    setIsButtonDisabled(true);
+              
+                    // Re-enable after 15 minutes
+                    setTimeout(() => setIsButtonDisabled(false), 15 * 60 * 1000);
+                    setIsButtonDisabled(true);
+                    
                 }
             } catch (error) {
                 console.error("Failed to create event:", error);
                 setError("Failed to create the event. Please try again.");
-            }
-            // Reset submit tracking after submission
+            } 
             setIsSubmitClicked(false);
         };
-
-        // Trigger the event creation once the address is validated and position is set
+ 
         if (validateAddress && position && isSubmitClicked) {
             submitEvent();
         }
@@ -180,7 +213,7 @@ export default function RightPanel({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitClicked(true); // Track the submit action
+        setIsSubmitClicked(true); 
         await handleGeocodeAddress();
     };
     return (
@@ -191,10 +224,16 @@ export default function RightPanel({
             style={{
                 right: isPanelOpen ? "310px" : "10px",
             }}
+            disabled={isButtonDisabled}
+            title={
+                isButtonDisabled && parseInt(localStorage.getItem('disabledUntil')!) !== null
+                  ? `Button will be enabled in ${ Math.max(0, Math.ceil((parseInt(localStorage.getItem('disabledUntil')!) - new Date().getTime()) / 1000 / 60))} minutes`
+                  : ""
+              } 
         >
            <img 
                 className={styles.openFormIcon}
-                src='/images/create.png'
+                src= {isButtonDisabled ? "/images/timeout.png" : "/images/create.png"}
                 width={35}
                 height={35}
                 style={{transform: isPanelOpen ? "rotate(-45deg)" : "rotate(0deg)"}}
@@ -238,6 +277,8 @@ export default function RightPanel({
                     <option className={styles.option} value="Convention">Convention</option>
                     <option className={styles.option} value="Esport Event">E-sport Event</option>
                     <option className={styles.option} value="Speedrunning event">Speedrunning Event</option>
+                    <option className={styles.option} value="Event">Other category</option>
+
                 </select>
                 <div className={styles.addressContainer}>
                 {/* Address inputs */}
