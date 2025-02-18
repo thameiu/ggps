@@ -40,48 +40,78 @@ export class SeederService {
 
 
     async seedEvents(count: number) {
+        const gameTitles = [
+            "The Legend of Zelda", "Super Mario Bros.", "Minecraft", "Elden Ring",
+            "Final Fantasy XIV", "Counter-Strike 2", "League of Legends",
+            "Dark Souls", "The Witcher 3", "Overwatch 2", "Dota 2", "Fortnite",
+            "Call of Duty: Warzone", "Hollow Knight", "Cyberpunk 2077",
+            "Street Fighter 6", "Tekken 8", "Super Smash Bros. Ultimate", "Balatro",
+            "Valorant", "Apex Legends", "Rainbow Six Siege", "World of Warcraft",
+            "Genshin Impact", "Among Us", "Rocket League", "Dead by Daylight",
+            "Mortal Kombat 12", "Resident Evil Village", "FIFA 22", "NBA 2K22",
+            "PUBG", "Hearthstone", "Starcraft 3", "Star Wars: The Old Republic",
+            "World of Tanks", "World of Warships", "World of Warplanes",
+            "World of Warcraft Classic", "World of Warcraft: The Burning Crusade",
+            "World of Warcraft: Wrath of the Lich King",
+            "Tosser of coin", "RogueTile", "The Elder Scrolls V: Skyrim",
+            "Half-Life 2", "Portal 2", "Left 4 Dead 3", "Team Fortress 2",
+            "Deathmatch Classic", "Counter-Strike: Global Offensive",
+            "Bed Wars", "Sky Wars", "Murder Mystery", "Build Battle",
+            "Roblox", "Mario Kart 8", "Dreamworks Kartz", "Garfield Kart"
+        ];
+    
         for (let i = 0; i < count; i++) {
-            
             const users = await this.prisma.user.findMany();
-
             const randomUser = users[Math.floor(Math.random() * users.length)];
+    
             const loginResponse = await this.auth.login({
-            email: randomUser.email,
-            password: 'azerty',
+                email: randomUser.email,
+                password: 'azerty',
             });
 
+            const beginDate = faker.date.future();
+            const durationHours = Math.random() * (5 * 24 - 8) + 8;
+            const endDate = new Date(beginDate.getTime() + durationHours * 60 * 60 * 1000);
+    
+    
             const token = loginResponse.token;
-
+    
+            const gameTitle = gameTitles[Math.floor(Math.random() * gameTitles.length)]
+    
             const dto: EventDto = {
-            title: faker.lorem.sentence(),
-            description: faker.lorem.paragraph(),
-            beginDate: faker.date.future().toISOString(),
-            endDate: faker.date.future().toISOString(),
-            street: faker.location.street(),
-            number: faker.location.buildingNumber().toString(),
-            city: faker.location.city(),
-            zipCode: faker.location.zipCode(),
-            country: faker.location.country(),
-            latitude: faker.location.latitude().toString(),
-            longitude: faker.location.longitude().toString(),
-            category: ['Tournament', 'Event', 'Lan', 'Speedrunning event', 'Esport Event', 'Convention'][
-                Math.floor(Math.random() * 6)
-            ], 
-            token,
-            createChatroom: true,
+                title: gameTitle
+                    ? `Tournament in ${gameTitle}`
+                    : faker.lorem.sentence(),
+                description: gameTitle
+                    ? `An amazing event for ${gameTitle} fans!`
+                    : faker.lorem.paragraph(),
+                beginDate: beginDate.toISOString(),
+                endDate: endDate.toISOString(),
+                street: faker.location.street(),
+                number: faker.location.buildingNumber().toString(),
+                city: faker.location.city(),
+                zipCode: faker.location.zipCode(),
+                country: faker.location.country(),
+                latitude: faker.location.latitude().toString(),
+                longitude: faker.location.longitude().toString(),
+                category: ['Tournament', 'Event', 'Lan', 'Speedrunning event', 'Esport Event', 'Convention'][
+                    Math.floor(Math.random() * 6)
+                ],
+                token,
+                createChatroom: true,
             };
-
+    
             try {
-            // Create the event using the event service
-            await this.eventService.create(dto);
+                await this.eventService.create(dto);
             } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError) {
-                if (error.code === 'P2002') {
-                throw new ForbiddenException('Duplicate entry');
+                if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                    if (error.code === 'P2002') {
+                        throw new ForbiddenException('Duplicate entry');
+                    }
                 }
-            }
-            throw error;
+                throw error;
             }
         }
     }
+    
 }
