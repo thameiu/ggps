@@ -1,11 +1,12 @@
 import { BadRequestException, Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DeleteDto, EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
+import { DeleteDto, EntryDto, EventDto, EventFetchDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
 import { MessageService } from "src/message/message.service";
 import { TokenDto } from 'src/auth/dto';
+import { log } from 'console';
 
 @Injectable()
 export class EventService {
@@ -139,7 +140,7 @@ export class EventService {
         }
     }
 
-    async getInRadius(dto:MinMaxCoordinatesDto) {
+    async getInRadius(dto:EventFetchDto) {
         const latMin:number =parseFloat(dto.latMin);
         const longMin:number =parseFloat(dto.longMin);
         const latMax:number=parseFloat(dto.latMax);
@@ -250,13 +251,13 @@ export class EventService {
         }
     }
 
-    async getByCategoryInRadius(dto: MinMaxCoordinatesDto) {
+    async getByCategoryInRadius(dto: EventFetchDto) {
         const eventsInRadius = await this.getInRadius(dto);
         const events = eventsInRadius.filter(event => event.category === dto.category);
         return events;
     }
 
-    async getBySearchWordInRadius(dto: MinMaxCoordinatesDto) {
+    async getBySearchWordInRadius(dto: EventFetchDto) {
         const eventsInRadius = await this.getInRadius(dto);
         const searchWordLower = dto.searchWord.toLowerCase();
         const filteredEvents = eventsInRadius.filter(event => 
@@ -266,38 +267,67 @@ export class EventService {
         return filteredEvents;
     }
 
-    async getBySearchWordAndOrCategoryInRadius(dto: MinMaxCoordinatesDto) {
+    async getBySearchWordAndOrCategoryInRadius(dto: EventFetchDto) {
         if (!dto.latMax || !dto.latMin || !dto.longMax || !dto.longMin) {
             return this.findAll();
         } else if (!dto.category && !dto.searchWord) {
             return this.getInRadius(dto);
-        } else if (!dto.category) {
+        } else if (!dto.category && !dto.recommend) {
             return this.getBySearchWordInRadius(dto);
-        } else if (!dto.searchWord) {
+        } else if (!dto.searchWord && !dto.recommend) {
             return this.getByCategoryInRadius(dto);
         }
     
         const eventsInRadius = await this.getInRadius(dto);
         const searchWordLower = dto.searchWord.toLowerCase();
     
-        const filteredEvents = eventsInRadius.filter(event =>
-            (event.title.toLowerCase().includes(searchWordLower) ||
-                event.description.toLowerCase().includes(searchWordLower)) &&
-            event.category === dto.category
-        );
+        const bothMatches = [];
+        const searchWordOnly = [];
+        const categoryOnly = [];
+    
+        for (const event of eventsInRadius) {
+            const matchesSearchWord = event.title.toLowerCase().includes(searchWordLower) || event.description.toLowerCase().includes(searchWordLower);
+            const matchesCategory = event.category === dto.category;
+    
+            if (matchesSearchWord && matchesCategory) {
+                bothMatches.push(event);
+            } else if (matchesSearchWord) {
+                searchWordOnly.push(event);
+            } else if (matchesCategory) {
+                categoryOnly.push(event);
+            }
+        }
+    
+        bothMatches.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+        searchWordOnly.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+        categoryOnly.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+    
+        let orderedEvents = [...bothMatches, ...searchWordOnly, ...categoryOnly];
+    
+        if (dto.recommend) {
+            const existingEventIds = new Set(orderedEvents.map(event => event.id));
+            const additionalEvents = eventsInRadius.filter(event => !existingEventIds.has(event.id));
+    
+            additionalEvents.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+    
+            orderedEvents = [...orderedEvents, ...additionalEvents].slice(0, 1000);
+        }
     
         if (dto.pastEvents) {
             const now = new Date();
-            return filteredEvents
+            return orderedEvents
                 .filter(event => new Date(event.beginDate) < now)
-                .sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime())
-                .slice(0, 150); 
+                .slice(0, dto.recommend ? 1000 : 150);
         }
     
-        return filteredEvents
-            .sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime())
-            .slice(0, 150);
+        if (!dto.recommend) {
+            orderedEvents.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+        }
+    
+        return orderedEvents.slice(0, dto.recommend ? 1000 : 150);
     }
+    
+    
     
 
     async getUserEntries(dto: TokenDto) {

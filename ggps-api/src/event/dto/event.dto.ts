@@ -71,7 +71,7 @@ export class DeleteDto {
 }
 
 
-export class MinMaxCoordinatesDto {
+export class EventFetchDto {
 
     @IsOptional()
     @IsNotEmpty()
@@ -102,6 +102,9 @@ export class MinMaxCoordinatesDto {
     category?: string;
 
     pastEvents?: boolean;
+    
+    @IsOptional()
+    recommend?: boolean;
 
 
 }

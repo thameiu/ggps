@@ -13,7 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { DeleteDto, EntryDto, EventDto, MinMaxCoordinatesDto } from './dto';
+import { DeleteDto, EntryDto, EventDto, EventFetchDto } from './dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { TokenDto } from 'src/auth/dto';
 import { AuthService } from 'src/auth/auth.service';
@@ -67,7 +67,7 @@ export class EventController {
   @Get()
   @UseGuards(AuthGuard)
   @HttpCode(200)
-  getInRadius(@Query() dto: MinMaxCoordinatesDto) {
+  getInRadius(@Query() dto: EventFetchDto) {
     return this.eventService.getBySearchWordAndOrCategoryInRadius(dto);
   }
 

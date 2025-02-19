@@ -39,7 +39,7 @@ export class SeederService {
     }
 
 
-    async seedEvents(count: number) {
+    async seedEvents(count: number, france: boolean) {
         const gameTitles = [
             "The Legend of Zelda", "Super Mario Bros.", "Minecraft", "Elden Ring",
             "Final Fantasy XIV", "Counter-Strike 2", "League of Legends",
@@ -68,32 +68,45 @@ export class SeederService {
                 email: randomUser.email,
                 password: 'azerty',
             });
-
+    
             const beginDate = faker.date.future();
             const durationHours = Math.random() * (5 * 24 - 8) + 8;
             const endDate = new Date(beginDate.getTime() + durationHours * 60 * 60 * 1000);
     
-    
             const token = loginResponse.token;
     
-            const gameTitle = gameTitles[Math.floor(Math.random() * gameTitles.length)]
+            const gameTitle = gameTitles[Math.floor(Math.random() * gameTitles.length)];
+    
+            let latitude, longitude, city, zipCode, country;
+    
+            if (france) {
+                // Generate a random location within France
+                latitude = (Math.random() * (51.1 - 41.0) + 41.0).toFixed(6);
+                longitude = (Math.random() * (9.6 - (-5.2)) + (-5.2)).toFixed(6);
+                city = faker.location.city(); // Still random, but we assume it's in France
+                zipCode = faker.location.zipCode('#####'); // French format
+                country = "France";
+            } else {
+                // Use completely random worldwide location
+                latitude = faker.location.latitude().toString();
+                longitude = faker.location.longitude().toString();
+                city = faker.location.city();
+                zipCode = faker.location.zipCode();
+                country = faker.location.country();
+            }
     
             const dto: EventDto = {
-                title: gameTitle
-                    ? `Tournament in ${gameTitle}`
-                    : faker.lorem.sentence(),
-                description: gameTitle
-                    ? `An amazing event for ${gameTitle} fans!`
-                    : faker.lorem.paragraph(),
+                title: `Tournament in ${gameTitle}`,
+                description: `An amazing event for ${gameTitle} fans!`,
                 beginDate: beginDate.toISOString(),
                 endDate: endDate.toISOString(),
                 street: faker.location.street(),
                 number: faker.location.buildingNumber().toString(),
-                city: faker.location.city(),
-                zipCode: faker.location.zipCode(),
-                country: faker.location.country(),
-                latitude: faker.location.latitude().toString(),
-                longitude: faker.location.longitude().toString(),
+                city,
+                zipCode,
+                country,
+                latitude,
+                longitude,
                 category: ['Tournament', 'Event', 'Lan', 'Speedrunning event', 'Esport Event', 'Convention'][
                     Math.floor(Math.random() * 6)
                 ],
@@ -113,5 +126,6 @@ export class SeederService {
             }
         }
     }
+    
     
 }

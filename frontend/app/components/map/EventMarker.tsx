@@ -21,14 +21,30 @@ export const fetchEvents = async ({
     const token = localStorage.getItem("token");
     if (!token || !bounds) return;
 
+    const getCookie = (name: string) => {
+        const cookies = document.cookie.split("; ");
+        for (const cookie of cookies) {
+            const [key, value] = cookie.split("=");
+            if (key === name) return decodeURIComponent(value);
+        }
+        return null;
+    };
+
+    const mostSearchedWord = getCookie("keyword");
+    const mostSearchedCategory = getCookie("category");
+
+    const finalSearchWord = searchWord || mostSearchedWord;
+    const finalCategory = category || mostSearchedCategory;
+
     try {
         const params = {
             latMin: bounds.getSouthWest().lat.toString(),
             longMin: bounds.getSouthWest().lng.toString(),
             latMax: bounds.getNorthEast().lat.toString(),
             longMax: bounds.getNorthEast().lng.toString(),
-            ...(searchWord && { searchWord }),
-            ...(category && { category }),
+            ...(finalSearchWord && { searchWord: finalSearchWord }),
+            ...(finalCategory && { category: finalCategory }),
+            recommend:true,
             pastEvents: dateFilter,
         };
 
