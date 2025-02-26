@@ -27,7 +27,7 @@ export default function MapComponent() {
     const [placeFromAddress, setPlaceFromAddress] = useState(false); 
     const [searchWord, setSearchWord] = useState<string | null>("");
     const [category, setCategory] = useState<string | null>("");
-    const [dateFilter, setDateFilter] = useState<boolean | null>(false); 
+    const [dateFilter, setDateFilter] = useState<boolean>(false); 
     const [events, setEvents] = useState<any[]>([]); 
     const [loading, setLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(true);
@@ -125,7 +125,7 @@ export default function MapComponent() {
                             latMax: bounds?.getNorthEast().lat || 0,
                             longMax: bounds?.getNorthEast().lng || 0,
                         }}
-                        onResultsFound={(foundEvents) => setEvents(foundEvents)}
+                        onResultsFound={(foundEvents) => setEvents(foundEvents.splice(0,100))}
                         onSearch={(searchTerm) => setSearchWord(searchTerm)}
                         onCategoryChange={(selectedCategory) => setCategory(selectedCategory)}
                         onDateFilterToggle={(dateFilter) => setDateFilter(dateFilter)} 

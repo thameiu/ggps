@@ -252,84 +252,126 @@ export class EventService {
     }
 
     async getByCategoryInRadius(dto: EventFetchDto) {
-        const eventsInRadius = await this.getInRadius(dto);
-        const events = eventsInRadius.filter(event => event.category === dto.category);
+        let events = await this.getInRadius(dto);
+        events = events.filter(event => event.category === dto.category);
+    
+        if (dto.pastEvents) {
+            const now = new Date();
+            events = events.filter(event => new Date(event.beginDate) < now);
+        }
+        else{
+            const now = new Date();
+            events = events.filter(event => new Date(event.beginDate) > now);
+            events.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+
+        }
+
         return events;
     }
 
+    
     async getBySearchWordInRadius(dto: EventFetchDto) {
         const eventsInRadius = await this.getInRadius(dto);
         const searchWordLower = dto.searchWord.toLowerCase();
-        const filteredEvents = eventsInRadius.filter(event => 
+        let filteredEvents = eventsInRadius.filter(event => 
             event.title.toLowerCase().includes(searchWordLower) || 
             event.description.toLowerCase().includes(searchWordLower)
         );
+        if (dto.pastEvents) {
+            const now = new Date();
+            filteredEvents = filteredEvents.filter(event => new Date(event.beginDate) < now);
+
+        }
+        else{
+            const now = new Date();
+            filteredEvents = filteredEvents.filter(event => new Date(event.beginDate) > now);
+            filteredEvents.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+
+        }
         return filteredEvents;
     }
 
-    async getBySearchWordAndOrCategoryInRadius(dto: EventFetchDto) {
+    async getBySearchWordAndCategoryInRadius(dto: EventFetchDto){
+        const eventsInRadius = await this.getInRadius(dto);
+        const searchWordLower = dto.searchWord.toLowerCase();
+        let filteredEvents = eventsInRadius.filter(event => 
+            (event.title.toLowerCase().includes(searchWordLower) || 
+            event.description.toLowerCase().includes(searchWordLower))
+            && event.category === dto.category
+        );
+        if (dto.pastEvents) {
+            const now = new Date();
+            filteredEvents = filteredEvents.filter(event => new Date(event.beginDate) < now);
+
+
+        }
+        else{
+            const now = new Date();
+            filteredEvents = filteredEvents.filter(event => new Date(event.beginDate) > now);
+            filteredEvents.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+
+        }
+        return filteredEvents;
+    }
+
+    async getFilteredEvents(dto: EventFetchDto) {
         if (!dto.latMax || !dto.latMin || !dto.longMax || !dto.longMin) {
             return this.findAll();
-        } else if (!dto.category && !dto.searchWord) {
+        } else if (!dto.category && !dto.searchWord && !dto.recommend) {
             return this.getInRadius(dto);
         } else if (!dto.category && !dto.recommend) {
             return this.getBySearchWordInRadius(dto);
         } else if (!dto.searchWord && !dto.recommend) {
             return this.getByCategoryInRadius(dto);
+        } else if (dto.searchWord && dto.category && !dto.recommend) {
+            return this.getBySearchWordAndCategoryInRadius(dto);
         }
     
-        const eventsInRadius = await this.getInRadius(dto);
+        let eventsInRadius = await this.getInRadius(dto);
         const searchWordLower = dto.searchWord.toLowerCase();
     
-        const bothMatches = [];
-        const searchWordOnly = [];
-        const categoryOnly = [];
-    
-        for (const event of eventsInRadius) {
-            const matchesSearchWord = event.title.toLowerCase().includes(searchWordLower) || event.description.toLowerCase().includes(searchWordLower);
-            const matchesCategory = event.category === dto.category;
-    
-            if (matchesSearchWord && matchesCategory) {
-                bothMatches.push(event);
-            } else if (matchesSearchWord) {
-                searchWordOnly.push(event);
-            } else if (matchesCategory) {
-                categoryOnly.push(event);
-            }
-        }
-    
-        bothMatches.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
-        searchWordOnly.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
-        categoryOnly.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
-    
-        let orderedEvents = [...bothMatches, ...searchWordOnly, ...categoryOnly];
+        let returnEvents = [];
     
         if (dto.recommend) {
+    
+            if (dto.pastEvents) {
+                const now = new Date();
+                eventsInRadius = eventsInRadius.filter(event => new Date(event.beginDate) < now);
+            }
+    
+            const bothMatches = [];
+            const searchWordOnly = [];
+            const categoryOnly = [];
+    
+            for (const event of eventsInRadius) {
+                const matchesSearchWord = event.title.toLowerCase().includes(searchWordLower) || event.description.toLowerCase().includes(searchWordLower);
+                const matchesCategory = event.category === dto.category;
+    
+                if (matchesSearchWord && matchesCategory) {
+                    bothMatches.push(event);
+                } else if (matchesSearchWord) {
+                    searchWordOnly.push(event);
+                } else if (matchesCategory) {
+                    categoryOnly.push(event);
+                }
+            }
+    
+            bothMatches.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+            searchWordOnly.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+            categoryOnly.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
+    
+            const orderedEvents = [...bothMatches, ...searchWordOnly, ...categoryOnly];
             const existingEventIds = new Set(orderedEvents.map(event => event.id));
             const additionalEvents = eventsInRadius.filter(event => !existingEventIds.has(event.id));
     
             additionalEvents.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
     
-            orderedEvents = [...orderedEvents, ...additionalEvents].slice(0, 1000);
+            returnEvents = [...orderedEvents, ...additionalEvents].slice(0, 1000);
         }
     
-        if (dto.pastEvents) {
-            const now = new Date();
-            return orderedEvents
-                .filter(event => new Date(event.beginDate) < now)
-                .slice(0, dto.recommend ? 1000 : 150);
-        }
-    
-        if (!dto.recommend) {
-            orderedEvents.sort((a, b) => new Date(a.beginDate).getTime() - new Date(b.beginDate).getTime());
-        }
-    
-        return orderedEvents.slice(0, dto.recommend ? 1000 : 150);
+        return returnEvents.slice(0, dto.recommend ? 1000 : 150);
     }
     
-    
-    
-
     async getUserEntries(dto: TokenDto) {
         try{
             const user = await this.auth.getUserFromToken(dto.token);

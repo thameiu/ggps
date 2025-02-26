@@ -68,7 +68,7 @@ export class EventController {
   @UseGuards(AuthGuard)
   @HttpCode(200)
   getInRadius(@Query() dto: EventFetchDto) {
-    return this.eventService.getBySearchWordAndOrCategoryInRadius(dto);
+    return this.eventService.getFilteredEvents(dto);
   }
 
   @Get('entries/:id')

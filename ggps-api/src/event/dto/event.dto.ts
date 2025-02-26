@@ -101,6 +101,7 @@ export class EventFetchDto {
     @IsOptional()
     category?: string;
 
+    @IsOptional()
     pastEvents?: boolean;
     
     @IsOptional()

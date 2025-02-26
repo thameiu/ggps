@@ -26,7 +26,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
     const [searchWord, setSearchWord] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
-    const [dateFilter, setDateFilter] = useState(false);
+    const [dateFilter, setDateFilter] = useState<boolean>(false);
 
     // Helper function to set cookies
     const setCookie = (name: string, value: string, days = 30) => {
@@ -88,6 +88,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     latMax: coordinates.latMax,
                     longMin: coordinates.longMin,
                     longMax: coordinates.longMax,
+                    ...(dateFilter && { pastEvents: dateFilter }),
+                    
                 },
                 headers: {
                     authorization: localStorage.getItem("token"),

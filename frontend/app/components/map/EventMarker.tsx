@@ -7,7 +7,7 @@ interface FetchEventsProps {
     searchWord: string | null;
     category: string | null;
     setEvents: (events: any[]) => void;
-    dateFilter?: boolean|null; 
+    dateFilter?: boolean; 
     mapInstance?: L.Map;
 }
 
@@ -33,8 +33,20 @@ export const fetchEvents = async ({
     const mostSearchedWord = getCookie("keyword");
     const mostSearchedCategory = getCookie("category");
 
-    const finalSearchWord = searchWord || mostSearchedWord;
-    const finalCategory = category || mostSearchedCategory;
+    const recommend = searchWord || category ? false : true;
+
+    let finalSearchWord = null;
+    let finalCategory = null;
+
+    if (recommend) {
+        finalSearchWord = mostSearchedWord;
+        finalCategory = mostSearchedCategory
+    }
+    else{
+        finalSearchWord = searchWord;
+        finalCategory = category;
+    }
+
 
     try {
         const params = {
@@ -44,8 +56,8 @@ export const fetchEvents = async ({
             longMax: bounds.getNorthEast().lng.toString(),
             ...(finalSearchWord && { searchWord: finalSearchWord }),
             ...(finalCategory && { category: finalCategory }),
-            recommend:true,
-            pastEvents: dateFilter,
+            ...(recommend && { recommend: recommend }),
+            ...(dateFilter && { pastEvents: dateFilter }),
         };
 
         const endpoint = "http://localhost:9000/event/";
@@ -64,7 +76,7 @@ export const fetchEvents = async ({
             );
         }
 
-        setEvents(events.slice(0, 50));
+        setEvents(events.slice(0, 100));
     } catch (error) {
         console.error("Failed to fetch events:", error);
     }
