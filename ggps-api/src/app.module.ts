@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SeederModule } from './seeder/seeder.module';
 import { MessageModule } from './message/message.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { MailerService } from './mailer/mailer.service';
 
 @Module({
   imports: [
@@ -25,6 +26,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
     MessageModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, MailerService],
 })
 export class AppModule { }

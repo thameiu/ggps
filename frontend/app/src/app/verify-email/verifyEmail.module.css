@@ -1,0 +1,16 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full viewport height */
+    width: 100%;
+    background: radial-gradient(circle, rgba(20, 0, 0, 0.9) 1%, rgba(0, 0, 0, 0.5) 70%);
+
+}
+
+
+.verifyEmail {
+    font-family: var(--font-sofia-pro-regular-az);
+    text-align: center;
+    font-size: 1.2em;
+}

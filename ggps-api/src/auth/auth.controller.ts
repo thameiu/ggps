@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, ParseIntPipe, Post, Req, UnauthorizedException } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query, Req, UnauthorizedException } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthDto, LogDto } from "./dto";
 
@@ -29,5 +29,10 @@ export class AuthController {
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
+  }
+
+  @Get('verify')
+  async verifyEmail(@Query('token') token: string) {
+    return this.authService.verifyEmail(token);
   }
 }

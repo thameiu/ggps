@@ -4,12 +4,15 @@ import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto, LogDto } from './dto';
 import { Prisma } from '@prisma/client';
+import { MailerService } from 'src/mailer/mailer.service';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private prisma: PrismaService,
+    private mailerService: MailerService,
   ) {}
 
   async login(dto: LogDto): Promise<{ token: string, user: any }> {
@@ -39,7 +42,9 @@ export class AuthService {
 
   async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
-
+    const rawToken = randomBytes(32).toString('hex');
+    const hashedToken = await argon.hash(rawToken);
+  
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -48,9 +53,19 @@ export class AuthService {
           lastName: dto.lastName,
           firstName: dto.firstName,
           hash,
+          verificationToken: hashedToken,
         },
       });
       delete user.hash;
+  
+      const confirmLink = `http://localhost:3000/verify-email?token=${rawToken}`;
+  
+      await this.mailerService.sendMail(
+        user.email,
+        'Confirm your GGPS account',
+        `Bonjour ${user.firstName},\n\nPlease confirm your email by clicking this link: ${confirmLink}`
+      );
+  
       return user;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -61,7 +76,7 @@ export class AuthService {
       throw error;
     }
   }
-
+  
 
   async verifyToken(token: string) {
     try {
@@ -98,4 +113,35 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
   }
+
+  async verifyEmail(token: string) {
+    const users = await this.prisma.user.findMany({
+      where: { verificationToken: { not: null } },
+    });
+  
+    if (!users.length) {
+      throw new ForbiddenException('Invalid or expired verification token');
+    }
+  
+    let matchedUser = null;
+  
+    for (const user of users) {
+      if (await argon.verify(user.verificationToken, token)) {
+        matchedUser = user;
+        break;
+      }
+    }
+  
+    if (!matchedUser) {
+      throw new ForbiddenException('Invalid or expired verification token');
+    }
+  
+    await this.prisma.user.update({
+      where: { id: matchedUser.id },
+      data: { verified: true, verificationToken: null },
+    });
+  
+    return { message: 'Email verified successfully' };
+  }
+  
 }
