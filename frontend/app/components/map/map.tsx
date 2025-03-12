@@ -36,6 +36,9 @@ export default function MapComponent() {
     const [hasZoomedOutOnce, setHasZoomedOutOnce] = useState(false); 
     const [isChatOpen, setIsChatOpen] = useState(false); 
     const [isPanelHovered, setIsPanelHovered] = useState(false); 
+    const [userCoordinates, setUserCoordinates] = useState<LatLng | null>(null);
+
+
     const router = useRouter();
 
     useEffect(() => {
@@ -55,8 +58,16 @@ export default function MapComponent() {
                     }
                 );
 
-                if (verifyResponse.status !== 200) throw new Error("Invalid token");
+                if (verifyResponse.status !== 200) 
+                    throw new Error("Invalid token");
+                
+                if (verifyResponse.data.user.latitude && verifyResponse.data.user.longitude){
+                    setUserCoordinates(new L.LatLng(verifyResponse.data.user.latitude, verifyResponse.data.user.longitude));
+
+                }
+                    
                 setIsTokenValid(true);
+
             } catch (error) {
                 setIsTokenValid(false);
                 router.push("/login");
@@ -71,7 +82,7 @@ export default function MapComponent() {
 
     useEffect(() => {
             fetchEvents({ bounds, searchWord, category, setEvents, dateFilter });
-    }, [bounds, searchWord, category, dateFilter]);
+    }, [bounds, searchWord, category, dateFilter, isTokenValid]);
 
     const addNewEvent = (newEvent: any) => {
         setEvents((prevEvents) => [...prevEvents, newEvent]);
@@ -87,7 +98,7 @@ export default function MapComponent() {
     return (
         <>
             <MapContainer
-                center={[46.58529425166958, 2.7246093750000004]}
+                center={[userCoordinates?.lat ? userCoordinates.lat : 46.58529425166958, userCoordinates?.lng ? userCoordinates.lng : 2.457275390625]}
                 zoom={7}
                 style={{ height: "100vh", width: "100%" }}
                 maxBounds={[

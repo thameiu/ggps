@@ -27,8 +27,16 @@ model User{
   profilePicture String?
   biography String?
 
-  verified          Boolean @default(false) 
+  verified Boolean @default(false) 
   verificationToken String? @unique
+
+  street           String?
+  number           String?
+  city             String?
+  zipCode          String?
+  country          String?
+  latitude         Float?
+  longitude        Float?
 
   events Entry[]
 

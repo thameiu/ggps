@@ -57,7 +57,11 @@ export class SeederService {
             "Half-Life 2", "Portal 2", "Left 4 Dead 3", "Team Fortress 2",
             "Deathmatch Classic", "Counter-Strike: Global Offensive",
             "Bed Wars", "Sky Wars", "Murder Mystery", "Build Battle",
-            "Roblox", "Mario Kart 8", "Dreamworks Kartz", "Garfield Kart"
+            "Roblox", "Mario Kart 8", "Dreamworks Kartz", "Garfield Kart",
+             "Super Smash Bros. Melee", "Super Smash Bros. Brawl",
+              "Super Smash Bros. 64", "Smash4", "Super Smash Bros. Ultimate",
+               "Super Smash Bros. Ultimate", "Super Smash Bros. Ultimate", "Super Smash Bros. Ultimate",
+                "Super Smash Bros. Ultimate", "Super Smash Bros. Ultimate", "Super Smash Bros. Ultimate"
         ];
     
         for (let i = 0; i < count; i++) {

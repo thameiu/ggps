@@ -32,6 +32,7 @@ export class AuthService {
       const payload = { userId: user.id, email: user.email };
       const token = this.jwtService.sign(payload);
   
+      //TODO : remove validation token
       const { hash, ...userWithoutHash } = user;
   
       return { token, user: userWithoutHash };

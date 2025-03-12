@@ -13,6 +13,11 @@ interface ProfileData {
   firstName: string;
   lastName: string;
   biography: string;
+  country: string;
+  city: string;
+  street: string;
+  number: string;
+  zipCode: string;
   eventsOrganized?: Array<{ id: number; name: string; date: string }>;
   eventsParticipated?: Array<{ id: number; name: string; date: string }>;
 }
@@ -31,6 +36,11 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
     biography: "",
     eventsOrganized: [],
     eventsParticipated: [],
+    country: "",
+    city: "",
+    street: "",
+    number: "",
+    zipCode: "",
   });
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -135,11 +145,22 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       data.append("firstName", formData.firstName);
       data.append("lastName", formData.lastName);
       data.append("biography", formData.biography);
+      data.append("country", formData.country);
+      data.append("city", formData.city);
+      data.append("street", formData.street);
+      data.append("zipCode", formData.zipCode);
+      data.append("number", formData.number);
+
   
-      await axios.put(`http://localhost:9000/user`, data, {
-        headers: { Authorization: token, "Content-Type": 	"application/json" },
+      const response = await axios.put(`http://localhost:9000/user`, data, {
+        headers: { Authorization: token, "Content-Type": "application/json" },
       });
-  
+
+      if (response.status === 400) {
+        setErrorMessage("Invalid data provided. Please check your inputs.");
+        return;  
+      }
+
       if (selectedFile) {
         const pictureData = new FormData();
         pictureData.append("file", selectedFile);
@@ -149,15 +170,14 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
         });
         const newProfilePictureURL = URL.createObjectURL(selectedFile);
         setProfilePicture(newProfilePictureURL);
- 
+  
         localStorage.setItem("profilePicture", newProfilePictureURL);
-
       }
   
       setSuccessMessage("Profile updated successfully!");
       setProfileData(formData);
       setEditMode(false);
-      window.location.reload();
+      // window.location.reload();
     } catch (err) {
       console.error("Error saving profile data:", err);
       setErrorMessage("Failed to update profile. Please try again.");
@@ -165,6 +185,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       setLoading(false);
     }
   };
+  
   
   useEffect(() => {
     setEventsOrganized([]);
@@ -193,8 +214,8 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       {profileData ? (
         <div className={styles.profileCard}>
           {editMode && loggedInUsername === username ? (
-            
             <div className={styles.form}>
+              {/* Profile Picture */}
               <label>
                 <span>Profile Picture:</span>
                 <input
@@ -202,11 +223,10 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   accept="image/*"
                   onChange={handleFileChange}
                   className={styles.fileInput}
-                  
-                  
                 />
               </label>
 
+              {/* Existing Fields */}
               <label>
                 <span>Username:</span>
                 <input
@@ -218,7 +238,6 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   disabled
                 />
               </label>
-
               <label>
                 <span>First Name:</span>
                 <input
@@ -229,7 +248,6 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   className={styles.input}
                 />
               </label>
-
               <label>
                 <span>Last Name:</span>
                 <input
@@ -240,7 +258,6 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                   className={styles.input}
                 />
               </label>
-
               <label>
                 <span>Bio:</span>
                 <textarea
@@ -251,6 +268,63 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
                 />
               </label>
 
+              {/* New Address Fields */}
+              <label>
+                <span>Country:</span>
+                <input
+                  type="text"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                />
+              </label>
+
+              <label>
+                <span>City:</span>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                />
+              </label>
+
+              <label>
+                <span>Street Number:</span>
+                <input
+                  type="text"
+                  name="number"
+                  value={formData.number}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                />
+              </label>
+
+              <label>
+                <span>Street:</span>
+                <input
+                  type="text"
+                  name="street"
+                  value={formData.street}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                />
+              </label>
+
+              <label>
+                <span>Postal Code:</span>
+                <input
+                  type="text"
+                  name="zipCode"
+                  value={formData.zipCode}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                />
+              </label>
+
+              {/* Save and Cancel Buttons */}
               <div className={styles.actions}>
                 <button
                   onClick={handleSaveChanges}
@@ -268,6 +342,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
               </div>
             </div>
           ) : (
+            // Existing Profile Details Section
             <div className={styles.details}>
               <div className={styles.profileHeader}>
                 <img
@@ -291,9 +366,18 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
               </div>
 
               <p className={styles.biography}>
-                 {profileData.biography || "No biography provided."}
+                {profileData.biography || "No biography provided."}
               </p>
 
+              {/* New Address Details Section
+              <div className={styles.address}>
+                <p><strong>Country:</strong> {profileData.country || "N/A"}</p>
+                <p><strong>City:</strong> {profileData.city || "N/A"}</p>
+                <p><strong>Street:</strong> {profileData.street || "N/A"}</p>
+                <p><strong>Postal Code:</strong> {profileData.zipCode || "N/A"}</p>
+              </div> */}
+
+              {/* Edit Profile Button */}
               {loggedInUsername === username && (
                 <button
                   onClick={() => setEditMode(true)}
@@ -305,7 +389,8 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
             </div>
           )}
 
-           {/* Events Section */}
+{successMessage && <p className={styles.success}>{successMessage}</p>}
+{errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
   {/* Events Section */}
   <div className={styles.eventsSection}>
@@ -409,8 +494,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
   <p>Error: Unable to load profile data.</p>
 )}
 
-{successMessage && <p className={styles.success}>{successMessage}</p>}
-{errorMessage && <p className={styles.error}>{errorMessage}</p>}
+
 
 </div>
 );
