@@ -37,7 +37,10 @@ export default function MapComponent() {
     const [isChatOpen, setIsChatOpen] = useState(false); 
     const [isPanelHovered, setIsPanelHovered] = useState(false); 
     const [userCoordinates, setUserCoordinates] = useState<LatLng | null>(null);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+    
+    const [zoomLevel, setZoomLevel] = useState<number>(7);  // Add zoom level state
 
     const router = useRouter();
 
@@ -63,7 +66,6 @@ export default function MapComponent() {
                 
                 if (verifyResponse.data.user.latitude && verifyResponse.data.user.longitude){
                     setUserCoordinates(new L.LatLng(verifyResponse.data.user.latitude, verifyResponse.data.user.longitude));
-
                 }
                     
                 setIsTokenValid(true);
@@ -81,11 +83,22 @@ export default function MapComponent() {
     }, [router]);
 
     useEffect(() => {
-            fetchEvents({ bounds, searchWord, category, setEvents, dateFilter });
-    }, [bounds, searchWord, category, dateFilter, isTokenValid]);
+        if (!isPopupOpen) {
+            fetchEvents({ bounds, searchWord, category, setEvents, dateFilter, zoomLevel });
+        }
+    }, [bounds, searchWord, category, dateFilter, isTokenValid,]);
 
     const addNewEvent = (newEvent: any) => {
         setEvents((prevEvents) => [...prevEvents, newEvent]);
+    };
+    const MapZoomHandler = () => {
+        useMapEvents({
+            zoom: (e) => {
+                setZoomLevel(e.target.getZoom());
+                console.log("Zoom level: ", e.target.getZoom()); 
+            },
+        });
+        return null; 
     };
 
     if (loading) 
@@ -99,7 +112,7 @@ export default function MapComponent() {
         <>
             <MapContainer
                 center={[userCoordinates?.lat ? userCoordinates.lat : 46.58529425166958, userCoordinates?.lng ? userCoordinates.lng : 2.457275390625]}
-                zoom={7}
+                zoom={zoomLevel} // Set zoom level
                 style={{ height: "100vh", width: "100%" }}
                 maxBounds={[
                     [-90, -180],
@@ -108,7 +121,9 @@ export default function MapComponent() {
                 maxBoundsViscosity={1.0}
                 minZoom={3}
                 maxZoom={18}
+
             >
+                 <MapZoomHandler />
                 <DisableZoom isPanelHovered={isPanelHovered} />
 
                 <div
@@ -136,15 +151,13 @@ export default function MapComponent() {
                             latMax: bounds?.getNorthEast().lat || 0,
                             longMax: bounds?.getNorthEast().lng || 0,
                         }}
-                        onResultsFound={(foundEvents) => setEvents(foundEvents.splice(0,100))}
+                        onResultsFound={(foundEvents) => setEvents(foundEvents.splice(0,150))}
                         onSearch={(searchTerm) => setSearchWord(searchTerm)}
                         onCategoryChange={(selectedCategory) => setCategory(selectedCategory)}
                         onDateFilterToggle={(dateFilter) => setDateFilter(dateFilter)} 
                     />
 
                 </div>
-
-
 
                 <TileLayer
                     noWrap
@@ -153,8 +166,6 @@ export default function MapComponent() {
                 />
 
                 <BoundsFinder setBounds={setBounds} />
-
-
 
                 <LocationMarker
                     isPanelOpen={isPanelOpen}
@@ -190,13 +201,9 @@ export default function MapComponent() {
 
                     .leaflet-popup-close-button span{
                         color: #fff;
-                    }
-
-
-                `}</style>
-                {events.map((event) => (
-                    
-                    
+                    }`
+                }</style>
+                {events.slice(0,150).map((event) => (
                     <Marker
                         key={event.id}
                         icon={L.icon({
@@ -208,6 +215,8 @@ export default function MapComponent() {
                         position={[event.latitude || 0, event.longitude || 0]}
                         eventHandlers={{
                             mouseover: (event) => event.target.openPopup(),
+                            popupopen: () => setIsPopupOpen(true),
+                            popupclose: () => setIsPopupOpen(false),
                         }}
                     >
                         <Popup className={styles.eventPopup}>
@@ -220,7 +229,6 @@ export default function MapComponent() {
                                 {' - '}        
                                 {new Date(event.endDate).toLocaleDateString()+'  '+new Date(event.endDate).toLocaleTimeString().slice(0,5)}
                             </div>
-
 
                             <div className={styles.eventPopupLink}>
                                 <a 

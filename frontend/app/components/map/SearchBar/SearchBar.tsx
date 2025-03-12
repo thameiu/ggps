@@ -28,14 +28,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const [selectedCategory, setSelectedCategory] = useState("");
     const [dateFilter, setDateFilter] = useState<boolean>(false);
 
-    // Helper function to set cookies
     const setCookie = (name: string, value: string, days = 30) => {
         const expires = new Date();
         expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
         document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
     };
 
-    // Helper function to get cookies
     const getCookie = (name: string) => {
         const cookies = document.cookie.split("; ");
         for (const cookie of cookies) {
@@ -45,64 +43,62 @@ const SearchBar: React.FC<SearchBarProps> = ({
         return null;
     };
 
-    // Function to update the search count for keywords and categories
     const updateSearchCount = (name: string, value: string) => {
         // Retrieve current count
         const currentCount = parseInt(getCookie(`${name}_${value}`) || "0", 10);
         const newCount = currentCount + 1;
 
-        // Update the count in cookies
         setCookie(`${name}_${value}`, newCount.toString());
 
-        // Check if this is now the most searched keyword/category
         const mostSearched = getCookie(name);
         const mostSearchedCount = parseInt(getCookie(`${name}_${mostSearched}`) || "0", 10);
 
         if (!mostSearched || newCount > mostSearchedCount) {
-            setCookie(name, value); // Update the most searched keyword/category
+            setCookie(name, value); 
         }
     };
 
-    // Retrieve stored search parameters on mount
-    useEffect(() => {
-        const mostSearchedWord = getCookie("mostSearchedWord");
-        const mostSearchedCategory = getCookie("mostSearchedCategory");
-
-        if (mostSearchedWord) setSearchWord(mostSearchedWord);
-        if (mostSearchedCategory) setSelectedCategory(mostSearchedCategory);
-    }, []);
-
     const handleSearch = async (category?: string) => {
         try {
-            const finalCategory = category ?? selectedCategory;
-
-            // Update search counts and track the most searched keyword/category
-            updateSearchCount("keyword", searchWord);
+            
+            let finalSearchWord = searchWord.trim() || getCookie("keyword") || "";
+            let finalCategory = category ?? (selectedCategory || getCookie("category") || "");
+    
+            if (finalSearchWord) updateSearchCount("keyword", finalSearchWord);
             if (finalCategory) updateSearchCount("category", finalCategory);
-
+    
+            // Prepare request parameters
+            const params: Record<string, any> = {
+                searchWord: finalSearchWord || undefined,
+                category: finalCategory || undefined,
+                latMin: coordinates.latMin,
+                latMax: coordinates.latMax,
+                longMin: coordinates.longMin,
+                longMax: coordinates.longMax,
+                ...(dateFilter && { pastEvents: dateFilter }),
+            };
+    
             const response = await axios.get("http://localhost:9000/event", {
-                params: {
-                    searchWord,
-                    category: finalCategory || undefined,
-                    latMin: coordinates.latMin,
-                    latMax: coordinates.latMax,
-                    longMin: coordinates.longMin,
-                    longMax: coordinates.longMax,
-                    ...(dateFilter && { pastEvents: dateFilter }),
-                    
-                },
+                params,
                 headers: {
                     authorization: localStorage.getItem("token"),
                 },
             });
-
-            onResultsFound(response.data);
-            onSearch(searchWord);
+    
+            const events = response.data;
+    
+            localStorage.setItem("fetchedEvents", JSON.stringify(events));
+    
+            onResultsFound(events);
+            onSearch(finalSearchWord);
             onCategoryChange(finalCategory);
         } catch (error) {
             console.error("Error fetching events:", error);
         }
     };
+    
+    
+    
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {

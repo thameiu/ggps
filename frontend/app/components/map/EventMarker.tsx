@@ -1,14 +1,17 @@
 import { Marker, Popup } from 'react-leaflet';
 import axios, { AxiosError } from 'axios';
 import { LatLngBounds } from 'leaflet';
+import { useEffect } from 'react';
+import { AsyncResource } from 'node:async_hooks';
 
 interface FetchEventsProps {
     bounds: LatLngBounds | null;
     searchWord: string | null;
     category: string | null;
     setEvents: (events: any[]) => void;
-    dateFilter?: boolean; 
+    dateFilter?: boolean;
     mapInstance?: L.Map;
+    zoomLevel?: number;
 }
 
 export const fetchEvents = async ({
@@ -16,8 +19,10 @@ export const fetchEvents = async ({
     searchWord,
     category,
     setEvents,
-    dateFilter = true, 
+    dateFilter = true,
+    zoomLevel = 10,
 }: FetchEventsProps) => {
+    
     const token = localStorage.getItem("token");
     if (!token || !bounds) return;
 
@@ -33,30 +38,95 @@ export const fetchEvents = async ({
     const mostSearchedWord = getCookie("keyword");
     const mostSearchedCategory = getCookie("category");
 
-    const recommend = searchWord || category ? false : true;
+    let finalSearchWord = searchWord;
+    let finalCategory = category;
+    let recommend = false;
 
-    let finalSearchWord = null;
-    let finalCategory = null;
-
-    if (recommend) {
+    if (!searchWord && mostSearchedWord) {
         finalSearchWord = mostSearchedWord;
-        finalCategory = mostSearchedCategory
+        recommend = true;
     }
-    else{
-        finalSearchWord = searchWord;
-        finalCategory = category;
+
+    if (!category && mostSearchedCategory) {
+        finalCategory = mostSearchedCategory;
+        recommend = true;
+
+    }
+
+    if (mostSearchedWord && category) {
+        recommend = false;
+
     }
 
 
+    const storedEvents = JSON.parse(localStorage.getItem("fetchedEvents") || "[]");
+    let filteredEvents = storedEvents.filter((event: any) => {
+        const eventLatLng = [event.latitude, event.longitude];
+        return bounds.contains(eventLatLng);
+    });
+
+    if (finalSearchWord && !recommend) {
+        filteredEvents = filteredEvents.filter((event: any) =>
+            event.title.toLowerCase().includes(finalSearchWord.toLowerCase())
+        );
+    }
+
+    if (finalCategory && !recommend) {
+        filteredEvents = filteredEvents.filter(
+            (event: any) => event.category.toLowerCase() === finalCategory.toLowerCase()
+        );
+    }
+
+    if (!dateFilter) {
+        const now = new Date();
+        filteredEvents = filteredEvents.filter(
+            (event: any) => new Date(event.beginDate) > now
+        );
+    }
+
+    if (filteredEvents.length < 5 && zoomLevel < 10) {
+
+        await fetchAndStoreEvents({
+            bounds,
+            searchWord: finalSearchWord,
+            category: finalCategory,
+            setEvents,
+            dateFilter,
+            recommend,
+            token,
+        });
+    } else {
+        setEvents(filteredEvents.slice(0, 150));
+    }
+};
+
+
+export const fetchAndStoreEvents = async ({
+    bounds,
+    searchWord,
+    category,
+    setEvents,
+    dateFilter,
+    recommend,
+    token,
+}: {
+    bounds: LatLngBounds | null;
+    searchWord: string | null;
+    category: string | null;
+    setEvents: (events: any[]) => void;
+    dateFilter?: boolean;
+    recommend: boolean;
+    token: string;
+}) => {
     try {
-        const params = {
-            latMin: bounds.getSouthWest().lat.toString(),
-            longMin: bounds.getSouthWest().lng.toString(),
-            latMax: bounds.getNorthEast().lat.toString(),
-            longMax: bounds.getNorthEast().lng.toString(),
-            ...(finalSearchWord && { searchWord: finalSearchWord }),
-            ...(finalCategory && { category: finalCategory }),
-            ...(recommend && { recommend: recommend }),
+        const params: any = {
+            latMin: bounds?.getSouthWest().lat.toString(),
+            longMin: bounds?.getSouthWest().lng.toString(),
+            latMax: bounds?.getNorthEast().lat.toString(),
+            longMax: bounds?.getNorthEast().lng.toString(),
+            ...(searchWord && { searchWord }),
+            ...(category && { category }),
+            ...(recommend && { recommend }),
             ...(dateFilter && { pastEvents: dateFilter }),
         };
 
@@ -69,18 +139,15 @@ export const fetchEvents = async ({
 
         let events = eventsResponse.data;
 
-        if (!dateFilter) {
-            const now = new Date();
-            events = events.filter(
-                (event: any) => new Date(event.beginDate) > now
-            );
-        }
+        // Store the fetched events in localStorage
+        localStorage.setItem("fetchedEvents", JSON.stringify(events));
 
-        setEvents(events.slice(0, 100));
+        setEvents(events.slice(0, 1000)); // Update the state with fetched events
     } catch (error) {
         console.error("Failed to fetch events:", error);
     }
 };
+
 
 
 export const getIconUrl = (category: string) => {

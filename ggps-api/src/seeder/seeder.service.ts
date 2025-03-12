@@ -64,8 +64,13 @@ export class SeederService {
                 "Super Smash Bros. Ultimate", "Super Smash Bros. Ultimate", "Super Smash Bros. Ultimate"
         ];
     
-        for (let i = 0; i < count; i++) {
-            const users = await this.prisma.user.findMany();
+        const users = await this.prisma.user.findMany();
+
+        if (users.length === 0) {
+            throw new Error("No users found in database.");
+        }
+    
+        const tasks = Array.from({ length: count }).map(async () => {
             const randomUser = users[Math.floor(Math.random() * users.length)];
     
             const loginResponse = await this.auth.login({
@@ -78,20 +83,16 @@ export class SeederService {
             const endDate = new Date(beginDate.getTime() + durationHours * 60 * 60 * 1000);
     
             const token = loginResponse.token;
-    
             const gameTitle = gameTitles[Math.floor(Math.random() * gameTitles.length)];
     
             let latitude, longitude, city, zipCode, country;
-    
             if (france) {
-                // Generate a random location within France
                 latitude = (Math.random() * (51.1 - 41.0) + 41.0).toFixed(6);
                 longitude = (Math.random() * (9.6 - (-5.2)) + (-5.2)).toFixed(6);
-                city = faker.location.city(); // Still random, but we assume it's in France
-                zipCode = faker.location.zipCode('#####'); // French format
+                city = faker.location.city();
+                zipCode = faker.location.zipCode('#####');
                 country = "France";
             } else {
-                // Use completely random worldwide location
                 latitude = faker.location.latitude().toString();
                 longitude = faker.location.longitude().toString();
                 city = faker.location.city();
@@ -123,12 +124,13 @@ export class SeederService {
             } catch (error) {
                 if (error instanceof Prisma.PrismaClientKnownRequestError) {
                     if (error.code === 'P2002') {
-                        throw new ForbiddenException('Duplicate entry');
+                        console.warn('Duplicate entry skipped');
                     }
                 }
-                throw error;
             }
-        }
+        });
+    
+        await Promise.allSettled(tasks);
     }
     
     
