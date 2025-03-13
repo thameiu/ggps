@@ -58,15 +58,27 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
-    const handleSearch = async (category?: string) => {
+    const handleSearch = async (newCategory?: string) => {
         try {
             
             let finalSearchWord = searchWord.trim() || getCookie("keyword") || "";
-            let finalCategory = category ?? (selectedCategory || getCookie("category") || "");
+            let finalCategory = newCategory ?? (selectedCategory || getCookie("category") || "");
+            console.log(finalCategory, finalSearchWord, "finalCategory, finalSearchWord");
+            console.log(newCategory, selectedCategory, searchWord, "category, searchWord");
+
+            if (searchWord) updateSearchCount("keyword", finalSearchWord);
+            if (selectedCategory) updateSearchCount("category", finalCategory);
     
-            if (finalSearchWord) updateSearchCount("keyword", finalSearchWord);
-            if (finalCategory) updateSearchCount("category", finalCategory);
-    
+            let recommend = false;
+            if (searchWord === "" && selectedCategory === "" && newCategory === undefined ) {
+                recommend = true;
+            }
+            if (searchWord && selectedCategory === "" && newCategory === undefined ) {
+                finalCategory = "";
+                recommend = false;
+                console.log("cbon?")
+            }
+
             // Prepare request parameters
             const params: Record<string, any> = {
                 searchWord: finalSearchWord || undefined,
@@ -76,6 +88,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 longMin: coordinates.longMin,
                 longMax: coordinates.longMax,
                 ...(dateFilter && { pastEvents: dateFilter }),
+                ...(recommend && { recommend: recommend }),
             };
     
             const response = await axios.get("http://localhost:9000/event", {
@@ -90,8 +103,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
             localStorage.setItem("fetchedEvents", JSON.stringify(events));
     
             onResultsFound(events);
-            onSearch(finalSearchWord);
-            onCategoryChange(finalCategory);
+            onSearch(searchWord);
+            // onCategoryChange(selectedCategory);//TODO: make sure this doesn't activate fetchEvents
         } catch (error) {
             console.error("Error fetching events:", error);
         }

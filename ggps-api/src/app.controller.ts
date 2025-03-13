@@ -7,7 +7,7 @@ import { SeederService } from './seeder/seeder.service';
 export class AppController {
   constructor(private readonly appService: AppService, private seeder: SeederService) {
     // this.seeder.seedUsers(99);
-    this.seeder.seedEvents(1000, true); 
+    // this.seeder.seedEvents(1000, true);
   }
 
   @Get()

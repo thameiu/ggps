@@ -314,6 +314,81 @@ export class MessageService {
 
   }
 
+  async updateUserAccess(token: string, eventId: number, role: string, username: string) {
+    // Step 1: Verify the user's access level using the token
+    const user = await this.auth.getUserFromToken(token);
+  
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+  
+    // Step 2: Check if the user has 'admin' or 'organizer' role
+    const userAccess = await this.prisma.access.findFirst({
+      where: {
+        userId: user.id,
+        role: {
+          in: ['admin', 'organizer'],
+        },
+      },
+    });
+  
+    if (!userAccess) {
+      throw new ForbiddenException('User does not have permission to update access');
+    }
+  
+    // Step 3: Find the chatroom associated with the given event ID
+    const event = await this.prisma.event.findUnique({
+      where: {
+        id: eventId,
+      },
+    });
+  
+    if (!event) {
+      throw new ForbiddenException('Event not found');
+    }
+  
+    const chatroom = await this.getChatroomByEvent(eventId);
+  
+    if (!chatroom) {
+      throw new ForbiddenException('Chatroom not found');
+    }
+  
+    // Step 4: Verify if the target user has existing access to the chatroom
+    const targetUser = await this.prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+  
+    if (!targetUser) {
+      throw new ForbiddenException('Target user not found');
+    }
+  
+    const existingAccess = await this.prisma.access.findFirst({
+      where: {
+        userId: targetUser.id,
+        chatroomId: chatroom.id,
+      },
+    });
+  
+    if (!existingAccess) {
+      throw new ForbiddenException('Target user does not have access to this chatroom');
+    }
+  
+    // Step 5: Update the role of the target user's access
+    const updatedAccess = await this.prisma.access.update({
+      where: {
+        id: existingAccess.id,
+      },
+      data: {
+        role: role,
+      },
+    });
+  
+    return updatedAccess;
+  }
+  
+
   findAll() {
     return `This action returns all message`;
   }

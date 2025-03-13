@@ -40,7 +40,7 @@ export default function MapComponent() {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     
-    const [zoomLevel, setZoomLevel] = useState<number>(7);  // Add zoom level state
+    const [zoomLevel, setZoomLevel] = useState<number>(10);
 
     const router = useRouter();
 
@@ -84,6 +84,7 @@ export default function MapComponent() {
 
     useEffect(() => {
         if (!isPopupOpen) {
+            console.log("useeffect",category);
             fetchEvents({ bounds, searchWord, category, setEvents, dateFilter, zoomLevel });
         }
     }, [bounds, searchWord, category, dateFilter, isTokenValid,]);

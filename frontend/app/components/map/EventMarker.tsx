@@ -48,16 +48,17 @@ export const fetchEvents = async ({
     }
 
     if (!category && mostSearchedCategory) {
-        finalCategory = mostSearchedCategory;
+        if (!searchWord){
+            finalCategory = mostSearchedCategory;
+        }
         recommend = true;
 
     }
 
-    if (mostSearchedWord && category) {
+    if (category || searchWord) {
         recommend = false;
 
     }
-
 
     const storedEvents = JSON.parse(localStorage.getItem("fetchedEvents") || "[]");
     let filteredEvents = storedEvents.filter((event: any) => {
@@ -129,7 +130,7 @@ export const fetchAndStoreEvents = async ({
             ...(recommend && { recommend }),
             ...(dateFilter && { pastEvents: dateFilter }),
         };
-
+        
         const endpoint = "http://localhost:9000/event/";
 
         const eventsResponse = await axios.get(endpoint, {
