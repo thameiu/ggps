@@ -8,6 +8,7 @@ import {useRouter} from 'next/navigation';
 import { handleEntryAction, checkChatroomAvailability, checkOrganizerStatus, checkSignUpStatus,selectColor } from './eventUtils';
 import Image from 'next/image';
 import 'animate.css';
+import { kMaxLength } from 'buffer';
 
 const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRemoveEntryModal, setShowRemoveEntryModal] = useState(false);
   const [organizerProfilePicture, setOrganizerProfilePicture] = useState<string | null>(null);
-  const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string }[]>([]);
+  const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string, role?:string }[]>([]);
   const [showParticipants, setShowParticipants] = useState(false);
   const router = useRouter();
 
@@ -66,6 +67,35 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     }
   };
 
+  const handleRoleChange = async (e: React.ChangeEvent<HTMLSelectElement>, username: string) => {
+    const newRole = e.target.value;
+  
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('User not authenticated.');
+      }
+  
+      const response = await axios.put('http://localhost:9000/chat/access', {
+        token,
+        eventId: event.id.toString(),
+        role: newRole,
+        username: username,
+      }, {
+        headers: { Authorization: token },
+      });
+  
+      if (response.status === 200) {
+        // alert(`User ${username} updated to ${newRole}`);
+        fetchParticipants();
+      }
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      alert('Failed to update role.');
+    }
+  };
+  
+
   const fetchOrganizerProfilePicture = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
@@ -103,6 +133,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       );
 
       setParticipants(response.data);
+      console.log(response.data);
     } catch (err) {
       console.error('Failed to fetch participants:', err);
     }
@@ -294,6 +325,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                         color: color || undefined,
                       }}>{participant.status}</div>
                     </a>
+                    {/* Role Selector */}
+                    {(isOrganizer && participant.role!=='organizer') && (
+                    <select 
+                      className={styles.roleSelector} 
+                      value={participant.role || 'member'} 
+                      onChange={(e) => handleRoleChange(e, participant.username)}
+                    >
+                      <option value="write">Write</option>
+                      <option value="read">Read only</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    )}
                   </li>
                 ))}
               </ul>

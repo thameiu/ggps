@@ -443,13 +443,18 @@ export class EventService {
 
     async getEntriesByEventId(id: number) {
         try {
-            const entries = await this.prisma.entry.findMany({
-                where: {
-                    eventId: id
-                }
+            // Find the chatroom associated with the event
+            const chatroom = await this.prisma.chatroom.findUnique({
+                where: { eventId: id },
+                select: { id: true }
             });
+    
+            const entries = await this.prisma.entry.findMany({
+                where: { eventId: id }
+            });
+    
             const userIds = entries.map(entry => entry.userId);
-
+    
             const users = await this.prisma.user.findMany({
                 where: {
                     id: { in: userIds }
@@ -461,18 +466,33 @@ export class EventService {
                     lastName: true
                 }
             });
-            const userEntries = entries.map(entry => {
+    
+            let chatroomAccess = {};
+            
+            if (chatroom) {
+                const accessList = await this.prisma.access.findMany({
+                    where: { chatroomId: chatroom.id },
+                    select: {
+                        userId: true,
+                        role: true
+                    }
+                });
+                chatroomAccess = Object.fromEntries(accessList.map(a => [a.userId, a.role]));
+            }
+    
+            return entries.map(entry => {
                 const user = users.find(user => user.id === entry.userId);
                 return {
                     ...user,
-                    status: entry.status
+                    status: entry.status,
+                    role: chatroomAccess[entry.userId] || null // Include role if exists, else null
                 };
             });
-
-            return userEntries;
-            
+    
         } catch (error) {
             throw error;
         }
     }
+    
+    
 }

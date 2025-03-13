@@ -34,6 +34,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [username, setUsername] = useState<string>('');
     const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
     const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
 
     const socket = useRef(io("http://127.0.0.1:9000")).current;
@@ -64,10 +66,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
 
                 if (accessResponse.status === 200) {
                     setUsername(accessResponse.data.username);
-                    setIsOrganizer(
-                        accessResponse.data.access.role === "organizer" ||
-                        accessResponse.data.access.role === "admin"
-                    );
+                    setIsOrganizer(accessResponse.data.access.role === "organizer");
+                    setIsAdmin(accessResponse.data.access.role === "admin");
 
                     const messagesResponse = await axios.get(`http://localhost:9000/chat/${event.id}/messages`, {
                         headers: { authorization: token },
@@ -290,7 +290,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                                     {message.message.content}
                                 </p>
 
-                                {isOrganizer && (
+                                {(isOrganizer || isAdmin) && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation(); // Prevent message click

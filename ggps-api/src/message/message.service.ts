@@ -43,6 +43,10 @@ export class MessageService {
       if (!existingAccess) {
         throw new ForbiddenException('User does not have access to this chatroom');
       }
+
+      if (existingAccess.access.role!== 'admin' && existingAccess.access.role !== 'organizer' && existingAccess.access.role !== 'write') {
+        throw new ForbiddenException('User cannot send messages to this chatroom');
+      }
       const message = await this.prisma.message.create({
         data: {
           chatroom: {
@@ -325,6 +329,10 @@ export class MessageService {
   
     if (!user) {
       throw new ForbiddenException('User not found');
+    }
+
+    if (dto.role !== 'admin' && dto.role !== 'write' && dto.role !== 'read') {
+      throw new ForbiddenException('Invalid role');
     }
   
     // Step 2: Check if the user has 'admin' or 'organizer' role
