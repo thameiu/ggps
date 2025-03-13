@@ -29,6 +29,7 @@ model User{
 
   verified Boolean @default(false) 
   verificationToken String? @unique
+  resetToken String? @unique
 
   street           String?
   number           String?

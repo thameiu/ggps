@@ -109,7 +109,9 @@ export default function Login() {
           {error && (
         <p className="mt-4 text-sm text-center text-red-500">{error}</p>
           )}
+          <p className='text-center'>Forgot your password ? <a href='/forgot-password' className={styles.link}>Reset it here !</a></p>
           <p className='text-center'>Don't have an account ? <a href='/signup' className={styles.link}>Sign up !</a></p>
+
         </div>
       </div>
     </div>

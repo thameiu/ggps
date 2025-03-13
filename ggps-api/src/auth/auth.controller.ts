@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query, Req, UnauthorizedException } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, HttpCode, ParseIntPipe, Post, Query, Req, UnauthorizedException } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthDto, LogDto } from "./dto";
 
@@ -34,5 +34,24 @@ export class AuthController {
   @Get('verify')
   async verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
+  }
+
+  @Post('request-password-reset')
+  async requestPasswordReset(@Body('email') email: string) {
+    if (!email) {
+      throw new ForbiddenException('Email is required');
+    }
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body('token') token: string, 
+    @Body('newPassword') newPassword: string
+  ) {
+    if (!token || !newPassword) {
+      throw new ForbiddenException('Token and new password are required');
+    }
+    return this.authService.resetPassword(token, newPassword);
   }
 }

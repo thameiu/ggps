@@ -144,5 +144,62 @@ export class AuthService {
   
     return { message: 'Email verified successfully' };
   }
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+  
+    if (!user) {
+      throw new ForbiddenException('Email not found');
+    }
+  
+    const rawToken = randomBytes(32).toString('hex');
+    const hashedToken = await argon.hash(rawToken);
+  
+    await this.prisma.user.update({
+      where: { email },
+      data: { resetToken: hashedToken },
+    });
+  
+    const resetLink = `http://localhost:3000/reset-password?token=${rawToken}`;
+  
+    await this.mailerService.sendMail(
+      user.email,
+      'Reset Your Password',
+      `Hello ${user.firstName},\n\nClick this link to reset your password: ${resetLink}`
+    );
+  
+    return { message: 'Password reset email sent' };
+  }
+  
+  async resetPassword(token: string, newPassword: string) {
+    const users = await this.prisma.user.findMany({
+      where: { resetToken: { not: null } },
+    });
+  
+    if (!users.length) {
+      throw new ForbiddenException('Invalid reset token');
+    }
+  
+    let matchedUser = null;
+  
+    for (const user of users) {
+      if (await argon.verify(user.resetToken, token)) {
+        matchedUser = user;
+        break;
+      }
+    }
+  
+    if (!matchedUser) {
+      throw new ForbiddenException('Invalid reset token');
+    }
+  
+    const hashedPassword = await argon.hash(newPassword);
+  
+    await this.prisma.user.update({
+      where: { id: matchedUser.id },
+      data: { hash: hashedPassword, resetToken: null },
+    });
+  
+    return { message: 'Password reset successfully' };
+  }
   
 }
