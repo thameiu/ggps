@@ -76,7 +76,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             if (searchWord && selectedCategory === "" && newCategory === undefined ) {
                 finalCategory = "";
                 recommend = false;
-                console.log("cbon?")
             }
 
             // Prepare request parameters

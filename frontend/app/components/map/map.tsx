@@ -38,6 +38,8 @@ export default function MapComponent() {
     const [isPanelHovered, setIsPanelHovered] = useState(false); 
     const [userCoordinates, setUserCoordinates] = useState<LatLng | null>(null);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isUserVerified, setIsUserVerified] = useState(false);
+
 
     
     const [zoomLevel, setZoomLevel] = useState<number>(10);
@@ -67,6 +69,8 @@ export default function MapComponent() {
                 if (verifyResponse.data.user.latitude && verifyResponse.data.user.longitude){
                     setUserCoordinates(new L.LatLng(verifyResponse.data.user.latitude, verifyResponse.data.user.longitude));
                 }
+
+                setIsUserVerified(verifyResponse.data.user.verified);
                     
                 setIsTokenValid(true);
 
@@ -84,7 +88,6 @@ export default function MapComponent() {
 
     useEffect(() => {
         if (!isPopupOpen) {
-            console.log("useeffect",category);
             fetchEvents({ bounds, searchWord, category, setEvents, dateFilter, zoomLevel });
         }
     }, [bounds, searchWord, category, dateFilter, isTokenValid,]);
@@ -99,7 +102,6 @@ export default function MapComponent() {
         useMapEvents({
             zoom: (e) => {
                 setZoomLevel(e.target.getZoom());
-                console.log("Zoom level: ", e.target.getZoom()); 
             },
         });
         return null; 
@@ -136,6 +138,7 @@ export default function MapComponent() {
                 >
                     <EventBar />
                     
+
                     <RightPanel
                         position={positionRef.current}
                         setIsPanelOpen={setIsPanelOpen}
@@ -146,6 +149,7 @@ export default function MapComponent() {
                         setPlaceFromAddress={setPlaceFromAddress}
                         placeFromAddress={placeFromAddress}
                         addNewEvent={addNewEvent}
+                        isUserVerified={isUserVerified}
                     />
 
                     <SearchBar

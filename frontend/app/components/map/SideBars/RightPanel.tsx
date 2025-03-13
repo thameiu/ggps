@@ -7,6 +7,7 @@ import L from "leaflet";
 import { fetchEvents } from "../EventMarker";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { userAgent } from "next/server";
 
 
 type RightPanelProps = {
@@ -19,6 +20,8 @@ type RightPanelProps = {
     isPanelOpen: boolean;
     bounds: L.LatLngBounds | null;
     addNewEvent: (newEvent: any) => void; 
+    isUserVerified: boolean;
+
 };
 
 export default function RightPanel({
@@ -31,6 +34,7 @@ export default function RightPanel({
     isPanelOpen,
     bounds,
     addNewEvent,
+    isUserVerified,
 }: RightPanelProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -216,6 +220,26 @@ export default function RightPanel({
         setIsSubmitClicked(true); 
         await handleGeocodeAddress();
     };
+    if (!isUserVerified){
+        return <>
+            <button
+            className={styles.openForm}
+            style={{
+                right: isPanelOpen ? "310px" : "10px",
+            }}
+            disabled={isButtonDisabled}
+            title='You must verify your email to create an event. Check your inbox.'
+        >
+           <img 
+                className={styles.openFormIcon}
+                src= "images/lock.png"
+                width={35}
+                height={35}
+       
+            />
+        </button>
+        </>
+    }
     return (
     <>
         <button

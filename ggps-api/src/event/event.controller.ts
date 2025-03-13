@@ -22,6 +22,7 @@ import { AuthService } from 'src/auth/auth.service';
 export class EventController {
   private rateLimit = new Map<string, number>();
   private readonly RATE_LIMIT_INTERVAL = 15 * 60 * 1000;
+  private readonly FETCH_RATE_LIMIT = 2000; // 2 seconds timeout per user
 
   constructor(private eventService: EventService, private auth: AuthService) {}
 
@@ -32,6 +33,10 @@ export class EventController {
 
     if (!user) {
       throw new BadRequestException('User not authenticated.');
+    }
+    if (!user.verified){
+      throw new BadRequestException('User not verified.');
+      
     }
 
     const now = Date.now();
@@ -48,9 +53,7 @@ export class EventController {
 
     try {
       const event = await this.eventService.create(dto);
-
       this.rateLimit.set(user.username, now);
-
       return event;
     } catch (error) {
       throw error;
@@ -67,7 +70,21 @@ export class EventController {
   @Get()
   @UseGuards(AuthGuard)
   @HttpCode(200)
-  getInRadius(@Query() dto: EventFetchDto) {
+  async getInRadius(@Req() req, @Query() dto: EventFetchDto) {
+    const user = await this.auth.getUserFromToken(req.headers.authorization);
+    if (!user) {
+      throw new BadRequestException('User not authenticated.');
+    }
+
+
+    const now = Date.now();
+    const lastRequestTime = this.rateLimit.get(user.username);
+
+    if (lastRequestTime && now - lastRequestTime < this.FETCH_RATE_LIMIT) {
+      throw new BadRequestException('Please wait before making another request.');
+    }
+
+    this.rateLimit.set(user.username, now);
     return this.eventService.getFilteredEvents(dto);
   }
 
