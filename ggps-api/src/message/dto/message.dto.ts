@@ -40,3 +40,22 @@ export class PinMessageDto {
     @IsNotEmpty()
     eventId: string;
 }
+
+export class UpdateAccessDto {
+
+    @IsNotEmpty()
+    @IsString()
+    token: string;
+
+    @IsNotEmpty()
+    @IsString()
+    eventId: string;
+
+    @IsNotEmpty()
+    @IsString()
+    role: string;
+
+    @IsNotEmpty()
+    @IsString()
+    username: string;
+}

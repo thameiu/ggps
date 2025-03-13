@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreateMessageDto, CreateChatroomDto, PinMessageDto } from './dto';
+import { CreateMessageDto, CreateChatroomDto, PinMessageDto, UpdateAccessDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from 'src/auth/auth.service';
 // import { UpdateMessageDto } from './dto/update-message.dto';
@@ -314,7 +314,12 @@ export class MessageService {
 
   }
 
-  async updateUserAccess(token: string, eventId: number, role: string, username: string) {
+  async updateUserAccess(dto: UpdateAccessDto) {
+
+    const token = dto.token;
+    const eventId = dto.eventId;
+    const username = dto.username;
+    const role = dto.role;
     // Step 1: Verify the user's access level using the token
     const user = await this.auth.getUserFromToken(token);
   
@@ -339,7 +344,7 @@ export class MessageService {
     // Step 3: Find the chatroom associated with the given event ID
     const event = await this.prisma.event.findUnique({
       where: {
-        id: eventId,
+        id: parseInt(eventId),
       },
     });
   
@@ -347,7 +352,7 @@ export class MessageService {
       throw new ForbiddenException('Event not found');
     }
   
-    const chatroom = await this.getChatroomByEvent(eventId);
+    const chatroom = await this.getChatroomByEvent(parseInt(eventId));
   
     if (!chatroom) {
       throw new ForbiddenException('Chatroom not found');

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { MessageService } from './message.service';
-import { CreateMessageDto, CreateChatroomDto, PinMessageDto } from './dto';
+import { CreateMessageDto, CreateChatroomDto, PinMessageDto, UpdateAccessDto } from './dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Throttle } from '@nestjs/throttler';
 
@@ -37,6 +37,13 @@ export class MessageController {
   @UseGuards(AuthGuard)
   getUserAccess(@Query('token') token: string, @Query('eventId') eventId: string) {
     return this.messageService.checkUserAccess(token, parseInt(eventId));
+
+  }
+
+  @Put('access')
+  @UseGuards(AuthGuard)
+  updateUserAccess(@Body() updateAccessDto: UpdateAccessDto) {
+    return this.messageService.updateUserAccess(updateAccessDto);
 
   }
 
