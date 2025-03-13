@@ -15,12 +15,13 @@ export class MailerService {
     });
   }
 
-  async sendMail(to: string, subject: string, text: string) {
+  async sendMail(to: string, subject: string, htmlContent: string) {
     await this.transporter.sendMail({
       from: process.env.EMAIL_USER,
       to,
       subject,
-      text,
+      html: htmlContent, // Use the 'html' field instead of 'text'
     });
   }
+
 }

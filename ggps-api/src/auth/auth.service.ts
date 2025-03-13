@@ -62,10 +62,37 @@ export class AuthService {
       const confirmLink = `http://localhost:3000/verify-email?token=${rawToken}`;
   
       await this.mailerService.sendMail(
-        user.email,
-        'Confirm your GGPS account',
-        `Bonjour ${user.firstName},\n\nPlease confirm your email by clicking this link: ${confirmLink}`
+        user.email, 
+        'Confirm Your GGPS Account', 
+        `
+          <div style="padding: 20px; font-family: Arial, sans-serif;">
+            <!-- Title Section -->
+            <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #555653;">Confirm Your GGPS Account</h1>
+            <hr style="border: 0; border-top: 2px solid #960000; margin: 20px 0;" />
+            
+            <!-- Introduction -->
+            <p style="font-size: 16px; color: black; margin-bottom: 20px;">
+              Bonjour ${user.firstName},<br />
+              Thank you for registering for a GGPS account. To complete your registration, please confirm your email address.
+            </p>
+            
+            <!-- Instructions -->
+            <p style="font-size: 16px; color: black; margin-bottom: 20px;">
+              To confirm your email, simply click the button below. If you didn’t sign up for a GGPS account, you can safely ignore this email.
+            </p>
+            
+            <!-- Button Link -->
+            <a href="${confirmLink}" style="display: inline-block; background-color: #960000; color: white; padding: 12px 20px; font-size: 16px; text-decoration: none; border-radius: 5px; font-weight: bold; text-align: center;">Confirm Your Email</a>
+            
+            <!-- Footer -->
+            <p style="font-size: 14px; color: black; margin-top: 30px;">
+              If you have any issues or didn’t request this email, please contact our support team.<br />
+              Thank you for being part of the GGPS community!
+            </p>
+          </div>
+        `
       );
+      
   
       return user;
     } catch (error) {
@@ -162,12 +189,40 @@ export class AuthService {
     const resetLink = `http://localhost:3000/reset-password?token=${rawToken}`;
   
     await this.mailerService.sendMail(
-      user.email,
-      'Reset Your Password',
-      `Hello ${user.firstName},\n\nClick this link to reset your password: ${resetLink}`
+      user.email, 
+      'Password Reset Instructions', 
+      `
+        <div style="padding: 20px; font-family: Arial, sans-serif;">
+          <!-- Title Section -->
+          <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #555653;">Reset Your Password</h1>
+          <hr style="border: 0; border-top: 2px solid #960000; margin: 20px 0;" />
+          
+          <!-- Introduction -->
+          <p style="font-size: 16px; color: black; margin-bottom: 20px;">
+            Hello ${user.firstName},<br />
+            We received a request to reset the password for your account. If you did not make this request, you can ignore this email.
+          </p>
+          
+          <!-- Instructions -->
+          <p style="font-size: 16px; color: black; margin-bottom: 20px;">
+            To reset your password, simply click the button below.
+          </p>
+          
+          <!-- Button Link -->
+          <a href="${resetLink}" style="display: inline-block; background-color: #960000; color: white; padding: 12px 20px; font-size: 16px; text-decoration: none; border-radius: 5px; font-weight: bold; text-align: center;">Reset Your Password</a>
+          
+          <!-- Footer -->
+          <p style="font-size: 14px; color: black; margin-top: 30px;">
+            If you did not request a password reset, please disregard this email. Your account remains secure.<br />
+            Thank you for using GGPS !
+          </p>
+        </div>
+      `
     );
+    
+    
   
-    return { message: 'Password reset email sent' };
+    return { message: 'Password reset email sent. Check your inbox.' };
   }
   
   async resetPassword(token: string, newPassword: string) {
@@ -199,7 +254,7 @@ export class AuthService {
       data: { hash: hashedPassword, resetToken: null },
     });
   
-    return { message: 'Password reset successfully' };
+    return { message: 'Password reset successfully !' };
   }
   
 }
