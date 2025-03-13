@@ -91,6 +91,9 @@ export default function MapComponent() {
 
     const addNewEvent = (newEvent: any) => {
         setEvents((prevEvents) => [...prevEvents, newEvent]);
+        const fetchedEvents = JSON.parse(localStorage.getItem("fetchedEvents") || "[]");
+        fetchedEvents.push(newEvent);
+        localStorage.setItem("fetchedEvents", JSON.stringify(fetchedEvents));
     };
     const MapZoomHandler = () => {
         useMapEvents({
