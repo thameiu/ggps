@@ -310,7 +310,7 @@ export class EventService {
                     userId: userToRemove.id
                 }
             });
-            if (userEntry.status === 'organizer' || userEntry.status === 'admin') {
+            if ((userEntry.status === 'organizer' || userEntry.status === 'admin') && entry.status !== 'organizer') {
                 throw new HttpException('Cannot remove organizer or admin', HttpStatus.FORBIDDEN);
             }
             

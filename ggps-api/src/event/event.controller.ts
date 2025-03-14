@@ -147,7 +147,7 @@ export class EventController {
   @Delete('entry/user')
   @UseGuards(AuthGuard)
   @HttpCode(200)
-  deleteUserEntry(@Body() dto: RemoveEntryDto) {
+  removeUserEntry(@Body() dto: RemoveEntryDto) {
     return this.eventService.removeUserEntry(dto);
   }
 

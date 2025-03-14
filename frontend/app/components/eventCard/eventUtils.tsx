@@ -10,7 +10,7 @@ export const handleEntryAction = async (
   setIsSignedUp: (isSignedUp: boolean) => void,
   setShowRemoveEntryModal: (showRemoveEntryModal: boolean) => void,
   setIsPending: (isPending: boolean) => void,
-
+  socket: SocketIOClient.Socket
 ) => {
   setLoading(true);
   setSuccess(false);
@@ -39,6 +39,8 @@ export const handleEntryAction = async (
       }
     }
     setSuccess(true);
+    socket.emit('participantsUpdate', eventId);
+
   } catch (err) {
     console.error('Error updating entry:', err);
     setError('Failed to update entry. Please try again later.');

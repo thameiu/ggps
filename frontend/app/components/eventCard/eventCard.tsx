@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import styles from './event.module.css';
 import Chatroom from '../chatroom/chatroom';
 import { EventCardProps } from './types';
 import Modal from '../modal/Modal';
 import {useRouter} from 'next/navigation';
+import io from "socket.io-client";
+
 import { handleEntryAction, checkChatroomAvailability, checkOrganizerStatus, checkSignUpStatus,selectColor } from './eventUtils';
 import Image from 'next/image';
 import 'animate.css';
@@ -35,6 +37,40 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [username, setUsername] = useState<string | null>(null);
   const router = useRouter();
 
+  const socket = useRef(io("http://127.0.0.1:9000")).current;
+  
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Socket connected:', socket.id);
+    });
+    // Socket event listeners
+    socket.emit('joinRoom', event.id); // Join the room
+
+    // HERE
+
+    socket.on('joinedChatroom', (data:any) => {
+      console.log(data);
+    });
+
+    socket.on('participantsUpdateReceived', (data:any) => {
+
+      setParticipants(data);
+      recheckEntryStatus(data);
+      // }
+    });
+  
+    socket.on('eventDeleted', (data:any) => {
+      router.push('/map');
+    });
+
+    return () => {
+      // Cleanup on unmount
+      socket.off('participantsUpdateReceived');
+      socket.off('joinRoom');
+      socket.off('eventDeleted');
+    };
+  }, [event.id, username]); // 
+
   const confirmDeleteEvent = () => {
     setShowDeleteModal(true);
   };
@@ -52,13 +88,13 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     setShowDeleteModal(false);
     setLoading(true);
     setError(null);
-  
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('User not authenticated.');
       }
-  
+
       await axios.delete(`http://localhost:9000/event`, {
         data: {
           token,
@@ -68,7 +104,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           Authorization: token,
         },
       });
-  
+
+      socket.emit('deleteEvent', eventId);
       setSuccess(true);
 
     } catch (err) {
@@ -76,19 +113,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       setError('Failed to delete the event. Please try again later.');
     } finally {
       setLoading(false);
-      window.location.href = '/map';
     }
   };
 
   const handleRoleChange = async (e: React.ChangeEvent<HTMLSelectElement>, username: string) => {
     const newRole = e.target.value;
-  
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('User not authenticated.');
       }
-  
+
       const response = await axios.put('http://localhost:9000/chat/access', {
         token,
         eventId: event.id.toString(),
@@ -97,10 +133,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       }, {
         headers: { Authorization: token },
       });
-  
+
       if (response.status === 200) {
-        // alert(`User ${username} updated to ${newRole}`);
-        fetchParticipants();
+        socket.emit('participantsUpdate', event.id); 
       }
     } catch (error) {
       console.error('Error updating user role:', error);
@@ -110,16 +145,15 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
   const handleRemoveEntry = async (username: string) => {
     setSelectedParticipant(null);
-    
     setLoading(true);
     setError(null);
-  
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('User not authenticated.');
       }
-  
+
       await axios.delete('http://localhost:9000/event/entry/user', {
         data: {
           token,
@@ -128,9 +162,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
         },
         headers: { Authorization: token },
       });
-  
+      
+      socket.emit('participantsUpdate', event.id); // Emit user removal via WebSocket
       setSuccess(true);
-      fetchParticipants();
     } catch (err) {
       console.error('Error removing user entry:', err);
       setError('Failed to remove user entry. Please try again later.');
@@ -138,7 +172,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       setLoading(false);
     }
   };
-  
+
   const handleStatusChange = async (eventId: number, username: string, status: string) => {
     try {
       const token = localStorage.getItem('token');
@@ -146,7 +180,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
         console.error('No authentication token found.');
         return;
       }
-      console.log(status);
+
       const response = await axios.put('http://localhost:9000/event/entry/user', {
         token,
         username,
@@ -155,8 +189,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       }, {
         headers: { Authorization: token }
       });
-  
-      fetchParticipants();
+      socket.emit('participantsUpdate', event.id); // Emit status update via WebSocket
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error updating user status:', error.response?.data || error.message);
@@ -165,8 +198,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       }
     }
   };
-  
-
   const fetchOrganizerProfilePicture = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
@@ -206,10 +237,43 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
       setParticipants(response.data);
       console.log(response.data);
+
     } catch (err) {
       console.error('Failed to fetch participants:', err);
     }
   };
+
+  const recheckEntryStatus = (data:any) => {
+    const currentUserEntry = data.find((participant: any) => participant.username === username);
+    console.log(currentUserEntry);
+    if (!currentUserEntry) {
+      setIsBanned(false);
+      setIsPending(false);
+      setIsAdmin(false);
+      setIsSignedUp(false);
+    } else if (currentUserEntry.status === 'pending') {
+      setIsAdmin(false);
+      setIsBanned(false);
+      setIsPending(true);
+    } else if (currentUserEntry.status === 'banned') {
+      setIsAdmin(false);
+      setIsPending(false);
+      setIsBanned(true);
+      
+    } else if (currentUserEntry.status === 'admin') {
+      setIsBanned(false);
+      setIsPending(false);
+      setIsAdmin(true);
+      
+    }  else if (currentUserEntry.status === 'accepted') {
+      setIsBanned(false);
+      setIsPending(false);
+      setIsAdmin(false);
+      
+    }
+    
+    
+  }
 
   const toggleParticipants = () => {
     if (!showParticipants) {
@@ -231,6 +295,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     }
 
   }, [event.id, event.category]);
+
+
 
   return (
     <div className={styles.eventCard}>
@@ -335,7 +401,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
               <button
 
     
-                onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal,setIsPending);fetchParticipants();}}
+                onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal,setIsPending,socket);fetchParticipants();}}
                 className={styles.signUp}
                 style={{
                   backgroundColor: isSignedUp ? '#535352' : color || '#000',
@@ -434,6 +500,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                     {/* Role Selector (Only for Organizers) */}
                     {(isOrganizer || isAdmin)  && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username  && (
                       <select
+                        disabled={participant.status === "banned" || participant.status === "pending"}
                         className={styles.roleSelector}
                         value={participant.role || "member"}
                         onChange={(e) => handleRoleChange(e, participant.username)}
@@ -513,7 +580,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           confirmText="Remove"
           cancelText="Cancel"
             onConfirm={async () => {
-            await handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp, setShowRemoveEntryModal,setIsPending);
+            await handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp, setShowRemoveEntryModal,setIsPending,socket);
             fetchParticipants();
             }}
           onCancel={() => setShowRemoveEntryModal(false)}
