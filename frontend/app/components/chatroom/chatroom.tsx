@@ -63,6 +63,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     params: { token, eventId: event.id },
                     headers: { authorization: token },
                 });
+                console.log(accessResponse.data)
 
                 if (accessResponse.status === 200) {
                     setUsername(accessResponse.data.username);

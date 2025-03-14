@@ -21,6 +21,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [isOrganizer, setIsOrganizer] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRemoveEntryModal, setShowRemoveEntryModal] = useState(false);
+  const [showRemoveUserEntryModal, setShowRemoveUserEntryModal] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<string|null>(null);
   const [organizerProfilePicture, setOrganizerProfilePicture] = useState<string | null>(null);
   const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string, role?:string }[]>([]);
   const [showParticipants, setShowParticipants] = useState(false);
@@ -32,6 +34,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
   const confirmRemoveEntry = () => {
     setShowRemoveEntryModal(true);
+  };
+
+  const confirmRemoveUserEntry = () => {
+    setShowRemoveUserEntryModal(true);
   };
 
 
@@ -94,6 +100,38 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       alert('Failed to update role.');
     }
   };
+
+  const handleRemoveEntry = async (username: string) => {
+    setSelectedParticipant(null);
+    
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('User not authenticated.');
+      }
+  
+      await axios.delete('http://localhost:9000/event/entry/user', {
+        data: {
+          token,
+          username,
+          eventId: event.id.toString(),
+        },
+        headers: { Authorization: token },
+      });
+  
+      setSuccess(true);
+      fetchParticipants();
+    } catch (err) {
+      console.error('Error removing user entry:', err);
+      setError('Failed to remove user entry. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   
 
   const fetchOrganizerProfilePicture = async (username: string) => {
@@ -120,6 +158,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
       setOrganizerProfilePicture('/images/usericon.png');
     }
   };
+
   
 
   const fetchParticipants = async () => {
@@ -321,12 +360,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                       ></img>
                       <div className={styles.participantUsername}>{participant.username}</div>
                       <div className={styles.participantName}>{participant.firstName??'N/A'} {participant.lastName??'N/A'} </div>{' '}
-                      <div className={styles.participantStatus} style={{
-                        color: color || undefined,
-                      }}>{participant.status}</div>
+                      <div className={styles.participantStatus} >{participant.status}</div>
                     </a>
                     {/* Role Selector */}
-                    {(isOrganizer && participant.role!=='organizer') && (
+                    {(isOrganizer && participant.role!=='organizer' && participant.status!=='organizer') && (
                     <select 
                       className={styles.roleSelector} 
                       value={participant.role || 'member'} 
@@ -337,6 +374,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                       <option value="admin">Admin</option>
                     </select>
                     )}
+
+                  {((isOrganizer || participant.role === 'admin') && participant.role !== 'organizer'  && participant.status!=='organizer') && (
+                    <button
+                      className={styles.trashButton}
+                    onClick={() => setSelectedParticipant(participant.username)}
+                    >
+                      ❌
+                    </button>
+                    
+                  )}
+
+
                   </li>
                 ))}
               </ul>
@@ -358,6 +407,19 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
         </div>
       }
+
+        {selectedParticipant && (
+        <Modal
+          title="Confirm Removal"
+          message={`Are you sure you want to remove ${selectedParticipant} from this event?`}
+          confirmText="Remove"
+          cancelText="Cancel"
+          onCancel={() => setSelectedParticipant(null)}
+          onConfirm={() => handleRemoveEntry(selectedParticipant)}
+        >
+        </Modal>
+      )}
+      
       {showDeleteModal && (
         <Modal
           title="Delete Event"

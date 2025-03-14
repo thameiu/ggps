@@ -71,6 +71,21 @@ export class DeleteDto {
 }
 
 
+export class RemoveEntryDto {
+
+    @IsNotEmpty()
+    token: string;
+
+    @IsNotEmpty()
+    username: string;
+
+    @IsNotEmpty()
+    eventId: string;
+
+}
+
+
+
 export class EventFetchDto {
 
     @IsOptional()

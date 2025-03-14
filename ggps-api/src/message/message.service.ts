@@ -281,6 +281,49 @@ export class MessageService {
 
     return { message: 'Access removed successfully' };
   }
+
+
+  async removeUserAccess(username: string, chatroomId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('User not found');
+    }
+
+    const chatroom = await this.prisma.chatroom.findUnique({
+      where: {
+        id: chatroomId,
+      },
+    });
+
+    if (!chatroom) {
+      throw new ForbiddenException('Chatroom not found');
+    }
+
+    const existingAccess = await this.prisma.access.findFirst({
+      where: {
+        userId: user.id,
+        chatroomId: chatroomId,
+      },
+    });
+
+    if (!existingAccess) {
+      throw new ForbiddenException('User does not have access to this chatroom');
+    }
+
+    await this.prisma.access.delete({
+      where: {
+        id: existingAccess.id,
+      },
+    });
+
+    return { message: 'Access removed successfully' };
+  }
+  
   
   async checkUserAccess(token: string, eventId: number) {
     try {

@@ -86,7 +86,7 @@ margin-right: 10px;
   .selector {
     padding: 5px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 25px;
     background: black;
     cursor: pointer;
   }

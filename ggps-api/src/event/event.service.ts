@@ -1,6 +1,6 @@
 import { BadRequestException, Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DeleteDto, EntryDto, EventDto, EventFetchDto } from './dto';
+import { DeleteDto, EntryDto, EventDto, EventFetchDto, RemoveEntryDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
@@ -244,6 +244,51 @@ export class EventService {
             const chatroom = await this.message.getChatroomByEvent(parseInt(dto.eventId));
             if (chatroom){
                 await this.message.removeAccess(dto.token, chatroom.id);
+            }
+            return entry;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async removeUserEntry(dto: RemoveEntryDto) {
+        try {
+            const user = await this.auth.getUserFromToken(dto.token);
+            const entry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: user.id
+                }
+            });
+            if (!entry || (entry.status !== 'organizer' && entry.status !== 'admin')) {
+                throw new HttpException('User is not allowed this entry.', HttpStatus.NOT_FOUND);
+            }
+            const userToRemove = await this.prisma.user.findFirst({
+                where: {
+                    username: dto.username
+                }
+            });
+            if (!userToRemove) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+            const userEntry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: userToRemove.id
+                }
+            });
+            if (userEntry.status === 'organizer' || userEntry.status === 'admin') {
+                throw new HttpException('Cannot remove organizer or admin', HttpStatus.FORBIDDEN);
+            }
+            
+            await this.prisma.entry.delete({
+                where: {
+                    id: userEntry.id
+                }
+            });
+            const chatroom = await this.message.getChatroomByEvent(parseInt(dto.eventId));
+            if (chatroom){
+                await this.message.removeUserAccess(userToRemove.username, chatroom.id);
             }
             return entry;
         } catch (error) {
