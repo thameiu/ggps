@@ -7,6 +7,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { MessageService } from "src/message/message.service";
 import { TokenDto } from 'src/auth/dto';
 import { log } from 'console';
+import { debugPort } from 'process';
 
 @Injectable()
 export class EventService {
@@ -46,6 +47,7 @@ export class EventService {
                     longitude: parseFloat(dto.longitude),
                     category: dto.category,
                     game: dto.game?dto.game:null,
+                    private: dto.private,
                 }
             });
             if (dto.createChatroom){
@@ -197,11 +199,13 @@ export class EventService {
                 throw new HttpException('User already signed up for this event.', HttpStatus.BAD_REQUEST);
             }
     
+            const entryStatus = (dto.status !== 'organizer' && event.private ? 'pending' : 'accepted');
+            console.log(event);
             const entry = await this.prisma.entry.create({
                 data: {
                     userId: user.id,
                     eventId: event.id,
-                    status: dto.status,
+                    status: dto.status == 'organizer' ? 'organizer' : entryStatus
                 },
             });
     
@@ -210,7 +214,13 @@ export class EventService {
             if (chatroom) {
                 const existingAccess = await this.message.checkUserAccess(dto.token, event.id);
                 if (chatroom && !existingAccess.access) {
-                    await this.message.giveAccess(dto.token, chatroom.id, 'write');
+                    if (entry.status === 'organizer') {
+                        await this.message.giveAccess(dto.token, chatroom.id, 'organizer');
+                    } else if (entry.status === 'pending') {
+                        await this.message.giveAccess(dto.token, chatroom.id, 'none');
+                    } else {
+                        await this.message.giveAccess(dto.token, chatroom.id, 'write');
+                    }
                 }
             }
     
@@ -345,7 +355,7 @@ export class EventService {
             if(user.id === userToUpdate.id){
                 throw new HttpException('Cannot change own status', HttpStatus.FORBIDDEN);
             }
-            
+
             if (!userToUpdate) {
                 throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }

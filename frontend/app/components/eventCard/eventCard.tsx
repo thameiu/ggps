@@ -15,6 +15,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
+
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [hasChatroom, setHasChatroom] = useState(false);
@@ -219,7 +223,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   useEffect(() => {
     selectColor(event, setColor);
     checkOrganizerStatus(organizer, setIsOrganizer, setUsername);
-    checkSignUpStatus(event.id, setIsSignedUp, setIsAdmin);
+    checkSignUpStatus(event.id, setIsSignedUp, setIsAdmin, setIsBanned, setIsPending);
     checkChatroomAvailability(event.id, setHasChatroom);
     fetchParticipants();
     if (organizer) {
@@ -327,17 +331,27 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
                 {loading ? 'Processing...' : 'Delete Event'}
               </button>
             ) : (
+              
               <button
 
     
-                onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal);fetchParticipants();}}
+                onClick={async () => {isSignedUp ? confirmRemoveEntry() : await handleEntryAction(event.id,isSignedUp,setLoading,setSuccess, setError,setIsSignedUp,setShowRemoveEntryModal,setIsPending);fetchParticipants();}}
                 className={styles.signUp}
                 style={{
                   backgroundColor: isSignedUp ? '#535352' : color || '#000',
                 }}
+                disabled={isBanned || isPending}
               >
-                {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
+                {isBanned ? 'You are banned from this event' : isPending ? 'Your entry is pending approval' : ''}
+
+                {!isBanned && !isPending && (
+                  <>
+                    {loading ? 'Processing...' : isSignedUp ? 'Remove Entry' : 'Sign Up'}
+                  </>
+                )}
               </button>
+
+              
             )
           ):
           <div className={styles.signUp}
@@ -353,7 +367,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           )}
 
           {/* Participants Section */}
-          {isSignedUp || isOrganizer ? (
+          {(isSignedUp || isOrganizer) && (!isBanned && !isPending)  ? (
           <div className={styles.participantsSection}>
             <button
               className={styles.toggleParticipantsButton}
@@ -499,7 +513,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
           confirmText="Remove"
           cancelText="Cancel"
             onConfirm={async () => {
-            await handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp, setShowRemoveEntryModal);
+            await handleEntryAction(event.id, isSignedUp, setLoading, setSuccess, setError, setIsSignedUp, setShowRemoveEntryModal,setIsPending);
             fetchParticipants();
             }}
           onCancel={() => setShowRemoveEntryModal(false)}

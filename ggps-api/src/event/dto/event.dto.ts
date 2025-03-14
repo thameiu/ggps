@@ -58,6 +58,9 @@ export class EventDto {
 
     @IsBoolean()
     createChatroom: boolean;
+
+    @IsBoolean()
+    private: boolean;
 }
 
 export class DeleteDto {

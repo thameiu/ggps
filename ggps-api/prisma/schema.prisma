@@ -64,6 +64,7 @@ model Event{
   longitude Float
   category String
   game String?
+  private Boolean @default(false)
 
   entrants Entry[]
   chatrooms Chatroom[]

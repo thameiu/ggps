@@ -8,7 +8,9 @@ export const handleEntryAction = async (
   setSuccess: (success: boolean) => void,
   setError: (error: string | null) => void,
   setIsSignedUp: (isSignedUp: boolean) => void,
-  setShowRemoveEntryModal: (showRemoveEntryModal: boolean) => void
+  setShowRemoveEntryModal: (showRemoveEntryModal: boolean) => void,
+  setIsPending: (isPending: boolean) => void,
+
 ) => {
   setLoading(true);
   setSuccess(false);
@@ -26,12 +28,15 @@ export const handleEntryAction = async (
       setIsSignedUp(false);
       setShowRemoveEntryModal(false);
     } else {
-      await axios.post(
+      const response = await axios.post(
         'http://localhost:9000/event/entry',
         { eventId, token, status: 'accepted' },
         { headers: { Authorization: token } }
       );
       setIsSignedUp(true);
+      if (response.data.status === 'pending') {
+        setIsPending(true);
+      }
     }
     setSuccess(true);
   } catch (err) {
@@ -45,7 +50,9 @@ export const handleEntryAction = async (
 export const checkSignUpStatus = async (
   eventId: number,
   setIsSignedUp: (isSignedUp: boolean) => void,
-  setIsAdmin: (isAdmin: boolean) => void
+  setIsAdmin: (isAdmin: boolean) => void,
+  setIsBanned: (isBanned: boolean) => void,
+  setIsPending: (isPending: boolean) => void
 ) => {
   try {
     const token = localStorage.getItem('token');
@@ -58,6 +65,9 @@ export const checkSignUpStatus = async (
 
     setIsSignedUp(entryResponse.data.status);
     setIsAdmin(entryResponse.data.status === 'admin');
+    setIsBanned(entryResponse.data.status === 'banned');
+    setIsPending(entryResponse.data.status === 'pending');
+
 
   } catch (err) {
     console.error('Error checking sign-up status:', err);

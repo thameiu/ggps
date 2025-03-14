@@ -47,6 +47,8 @@ export default function RightPanel({
     const [zipCode, setZipCode] = useState("");
     const [country, setCountry] = useState("");
     const [createChatroom, setCreateChatroom] = useState<boolean | null>(true);
+    const [privateEvent, setPrivateEvent] = useState<boolean | null>(false);
+
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [validateAddress, setValidateAddress] = useState(false);
@@ -172,6 +174,7 @@ export default function RightPanel({
                         game: "",
                         token: token,
                         createChatroom: createChatroom,
+                        private: privateEvent,
                     },
                     {
                         headers: {
@@ -391,7 +394,17 @@ export default function RightPanel({
                         onChange={(e) => setCreateChatroom(e.target.checked)}
                     />
                     <span className={styles.slider}></span>
-                    <span className={styles.sliderText}>Create Chatroom</span>
+                    <span className={styles.sliderText}>Create chatroom</span>
+                </label>
+
+                <label className={styles.createChatroomToggle}>
+                    <input
+                        type="checkbox"
+                        checked={privateEvent ? true : false}
+                        onChange={(e) => setPrivateEvent(e.target.checked)}
+                    />
+                    <span className={styles.slider}></span>
+                    <span className={styles.sliderText}>Private event</span>
                 </label>
 
                 <div className={styles.submitLine}>

@@ -117,6 +117,7 @@ export class SeederService {
                 ],
                 token,
                 createChatroom: true,
+                private:false,
             };
     
             try {
