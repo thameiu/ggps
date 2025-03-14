@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import styles from "./prompt.module.css";
 import { LatLng } from "leaflet";
 
@@ -10,9 +10,14 @@ interface CompleteAccountAlertProps {
 
 const CompleteAccountAlert: React.FC<CompleteAccountAlertProps> = ({ verified, userCoordinates }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [isUnmounting, setIsUnmounting] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(false), 5000);
+    const timer = setTimeout(() => {
+      setIsUnmounting(true);
+      setTimeout(() => setIsVisible(false), 500); // Delay removal after exit animation
+    }, 5000);
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -20,19 +25,23 @@ const CompleteAccountAlert: React.FC<CompleteAccountAlertProps> = ({ verified, u
 
   const message = !verified
     ? "Please verify your account to access all features."
-    : "Complete your account by adding your adress for better event recommendations.";
+    : "Complete your account by adding your address for better event recommendations.";
 
   return (
-    <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 100, opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className={styles.verificationPrompt}
-    >
-      {message}
-      <button className={styles.closeButton} onClick={() => setIsVisible(false)}>✖</button>
-    </motion.div>
+    <AnimatePresence>
+      {!isUnmounting && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0, transition: { duration: 0.5 } }}
+          transition={{ duration: 0.5 }}
+          className={styles.verificationPrompt}
+        >
+          {message}
+          <button className={styles.closeButton} onClick={() => setIsUnmounting(true)}>✖</button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
