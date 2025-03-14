@@ -19,6 +19,7 @@ import { fetchEvents, getIconUrl } from "./EventMarker";
 import Image from "next/image";
 import Loader from "../loader/loader";
 import DisableZoom from "./SideBars/DisableZoom";
+import CompleteAccountAlert from "../CompleteAccountAlert/CompleteAccountAlert";
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
@@ -255,6 +256,7 @@ export default function MapComponent() {
                     </Marker>
                 ))}
                 <SimulateZoomOut />
+                <CompleteAccountAlert verified={isUserVerified} userCoordinates={userCoordinates}/>
             </MapContainer>
         </>
     );

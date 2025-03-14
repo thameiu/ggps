@@ -4,6 +4,7 @@ import Image from "next/image";
 import styles from './home.module.css';
 import { useRouter } from "next/navigation";
 import 'animate.css';
+import CompleteAccountAlert from "../../components/CompleteAccountAlert/CompleteAccountAlert";
 
 export default function Home() {
   const router = useRouter();
@@ -79,6 +80,7 @@ export default function Home() {
         }}
     
 >
+  
       {/* Canvas for topographical animation */}
       <canvas id="topo-canvas" className="fixed inset-0 -z-10"
       
