@@ -1,6 +1,6 @@
 import { BadRequestException, Body, ForbiddenException, HttpException, HttpStatus, Injectable, Post } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DeleteDto, EntryDto, EventDto, EventFetchDto, RemoveEntryDto } from './dto';
+import { CheckEntryDto, DeleteDto, EntryDto, EventDto, EventFetchDto, RemoveEntryDto, UpdateEntryStatusDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { AuthService } from 'src/auth/auth.service';
@@ -210,10 +210,33 @@ export class EventService {
             if (chatroom) {
                 const existingAccess = await this.message.checkUserAccess(dto.token, event.id);
                 if (chatroom && !existingAccess.access) {
-                    await this.message.giveAccess(dto.token, chatroom.id, dto.status);
+                    await this.message.giveAccess(dto.token, chatroom.id, 'write');
                 }
             }
     
+            return entry;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async hasUserEntry(dto: CheckEntryDto) {
+        try {
+            const user = await this.auth.getUserFromToken(dto.token);
+            if (!user) {
+                throw new ForbiddenException('User not found');
+            }
+
+            const entry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: user.id,
+                },
+            });
+
+            if (!entry) {
+                throw new ForbiddenException('User does not have an entry for this event');
+            }
             return entry;
         } catch (error) {
             throw error;
@@ -296,6 +319,109 @@ export class EventService {
         }
     }
 
+    async updateUserEntryStatus(dto: UpdateEntryStatusDto) {
+        try {
+            const user = await this.auth.getUserFromToken(dto.token);
+    
+            // Check if the user has permission (must be organizer or admin)
+            const entry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: user.id
+                }
+            });
+    
+            if (!entry || (entry.status !== 'organizer' && entry.status !== 'admin')) {
+                throw new HttpException('User is not allowed to modify entries.', HttpStatus.FORBIDDEN);
+            }
+    
+            // Find the user to update
+            const userToUpdate = await this.prisma.user.findFirst({
+                where: {
+                    username: dto.username
+                }
+            });
+    
+            if(user.id === userToUpdate.id){
+                throw new HttpException('Cannot change own status', HttpStatus.FORBIDDEN);
+            }
+            
+            if (!userToUpdate) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+    
+            // Find the entry of the user being updated
+            const userEntry = await this.prisma.entry.findFirst({
+                where: {
+                    eventId: parseInt(dto.eventId),
+                    userId: userToUpdate.id
+                }
+            });
+    
+            if (!userEntry) {
+                throw new HttpException('Entry not found', HttpStatus.NOT_FOUND);
+            }
+    
+            // Allowed statuses
+            const allowedStatuses = ['accepted', 'pending', 'refused', 'admin', 'banned'];
+            if (!allowedStatuses.includes(dto.status)) {
+                throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
+            }
+
+            if (userEntry.status === 'organizer') {
+                throw new HttpException('Cannot change organizer status', HttpStatus.FORBIDDEN);
+            }
+
+            if (userEntry.status === 'admin' && entry.status !== 'organizer') {
+                throw new HttpException('Only organizer can change admin status', HttpStatus.FORBIDDEN);
+            }
+    
+            // // Prevent demoting organizers or admins unless banning
+            // if ((userEntry.status === 'organizer' || userEntry.status === 'admin') 
+            //     && dto.status !== 'banned') {
+            //     throw new HttpException('Cannot change organizer or admin status unless banning', HttpStatus.FORBIDDEN);
+            // }
+    
+            // Update the status
+            const updatedEntry = await this.prisma.entry.update({
+                where: { id: userEntry.id },
+                data: { status: dto.status }
+            });
+    
+            // Determine new role in chat
+            let newRole: string | null = null;
+            if (
+                (userEntry.status === 'pending' && dto.status === 'accepted') ||
+                (userEntry.status === 'banned' && dto.status === 'accepted') ||
+                (userEntry.status === 'admin' && dto.status === 'accepted')
+            ) {
+                newRole = 'write';
+            } else if (dto.status === 'admin') {
+                newRole = 'admin';
+            } else if (dto.status === 'banned' || dto.status === 'pending') {
+                newRole = 'none';
+            }
+    
+            // Update chat access if necessary
+            if (newRole !== null) {
+                const chatroom = await this.message.getChatroomByEvent(parseInt(dto.eventId));
+                if (chatroom) {
+                    await this.message.updateUserAccess({
+                        token: dto.token,
+                        username: userToUpdate.username,
+                        eventId: dto.eventId,
+                        role: newRole
+                    });
+                }
+            }
+    
+            return updatedEntry;
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+    
     async getByCategoryInRadius(dto: EventFetchDto) {
         let events = await this.getInRadius(dto);
         events = events.filter(event => event.category === dto.category);

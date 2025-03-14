@@ -3,6 +3,7 @@ import {
   Controller,
   ParseIntPipe,
   Post,
+  Put,
   Req,
   UseGuards,
   HttpCode,
@@ -13,7 +14,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { DeleteDto, EntryDto, EventDto, EventFetchDto, RemoveEntryDto } from './dto';
+import { DeleteDto, EntryDto, EventDto, EventFetchDto, RemoveEntryDto, UpdateEntryStatusDto, CheckEntryDto } from './dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { TokenDto } from 'src/auth/dto';
 import { AuthService } from 'src/auth/auth.service';
@@ -95,6 +96,26 @@ export class EventController {
     return this.eventService.getEntriesByEventId(id);
   }
 
+  @Get('entry')
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
+  async hasUserEntry(@Query() dto: CheckEntryDto) {
+    try {
+      const user = await this.auth.getUserFromToken(dto.token);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      const entry = await this.eventService.hasUserEntry(dto);
+      if (!entry) {
+        throw new BadRequestException('User does not have an entry for this event');
+      }
+      return entry;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Delete()
   @UseGuards(AuthGuard)
   @HttpCode(204)
@@ -116,6 +137,13 @@ export class EventController {
     return this.eventService.deleteEntry(dto);
   }
 
+  @Put('entry/user')
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
+  async updateUserEntryStatus(@Body() dto: UpdateEntryStatusDto) {
+    return this.eventService.updateUserEntryStatus(dto);
+  }
+  
   @Delete('entry/user')
   @UseGuards(AuthGuard)
   @HttpCode(200)

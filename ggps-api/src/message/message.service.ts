@@ -166,6 +166,8 @@ export class MessageService {
         },
     });
 
+    
+
     if (!chatroom) {
         throw new ForbiddenException('No chatroom found for this event');
     }
@@ -374,7 +376,7 @@ export class MessageService {
       throw new ForbiddenException('User not found');
     }
 
-    if (dto.role !== 'admin' && dto.role !== 'write' && dto.role !== 'read') {
+    if (dto.role !== 'admin' && dto.role !== 'write' && dto.role !== 'read' && dto.role !=='none') {
       throw new ForbiddenException('Invalid role');
     }
   

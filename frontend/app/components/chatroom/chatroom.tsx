@@ -35,6 +35,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
     const [username, setUsername] = useState<string>('');
     const [isOrganizer, setIsOrganizer] = useState<boolean>(false);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [cannotRead, setCannotRead] = useState<boolean>(false);
+    const [cannotWrite, setCannotWrite] = useState<boolean>(false);
+
+
 
     const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
 
@@ -69,6 +73,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
                     setUsername(accessResponse.data.username);
                     setIsOrganizer(accessResponse.data.access.role === "organizer");
                     setIsAdmin(accessResponse.data.access.role === "admin");
+                    setCannotRead(accessResponse.data.access.role === "none");
 
                     const messagesResponse = await axios.get(`http://localhost:9000/chat/${event.id}/messages`, {
                         headers: { authorization: token },
@@ -239,6 +244,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             >
                 {isLoading ? (
                     <Loader/>
+                ) : cannotRead ? (
+                    <p className={styles.noMessages}>You do not have permission to read messages.</p>
                 ) : filteredMessages.length > 0 ? (
                     filteredMessages.map((message) => (
                         <div
@@ -336,15 +343,16 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ event, color }) => {
             <div style={{ display: "flex", gap: "10px" }}>
 
                 <input
-                    disabled={isSendDisabled}
+                    disabled={isSendDisabled || cannotWrite || cannotRead}
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Type a message..."
+                    placeholder={cannotWrite || cannotRead ? "You do not have permission to write messages." : "Type a message..."}
                     className={styles.inputField}
                 />
                 <button
+                    disabled={isSendDisabled || cannotWrite || cannotRead}
                     className={styles.sendButton}
                     onClick={sendMessage}
                     style={{

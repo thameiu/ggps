@@ -15,6 +15,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [hasChatroom, setHasChatroom] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [color, setColor] = useState<string | null>('');
@@ -26,6 +28,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [organizerProfilePicture, setOrganizerProfilePicture] = useState<string | null>(null);
   const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string, role?:string }[]>([]);
   const [showParticipants, setShowParticipants] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
   const router = useRouter();
 
   const confirmDeleteEvent = () => {
@@ -132,6 +135,32 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     }
   };
   
+  const handleStatusChange = async (eventId: number, username: string, status: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found.');
+        return;
+      }
+      console.log(status);
+      const response = await axios.put('http://localhost:9000/event/entry/user', {
+        token,
+        username,
+        eventId: eventId.toString(),
+        status
+      }, {
+        headers: { Authorization: token }
+      });
+  
+      fetchParticipants();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Error updating user status:', error.response?.data || error.message);
+      } else {
+        console.error('Error updating user status:', error);
+      }
+    }
+  };
   
 
   const fetchOrganizerProfilePicture = async (username: string) => {
@@ -189,8 +218,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
   useEffect(() => {
     selectColor(event, setColor);
-    checkOrganizerStatus(organizer, setIsOrganizer);
-    checkSignUpStatus(event.id, setIsSignedUp);
+    checkOrganizerStatus(organizer, setIsOrganizer, setUsername);
+    checkSignUpStatus(event.id, setIsSignedUp, setIsAdmin);
     checkChatroomAvailability(event.id, setHasChatroom);
     fetchParticipants();
     if (organizer) {
@@ -338,58 +367,89 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
             </button>
 
             {showParticipants && (
+            <div className={styles.participantsContainer}>
+
+
+              {/* Participants List */}
               <ul className={`${styles.participantsList} animate__animated animate__fadeIn`}>
                 {participants.map((participant) => (
                   <li className={styles.participantItem} key={participant.id}>
-                    <a className={styles.participantLink} 
-                      style={{
-                        cursor: 'pointer',
+                    {/* Profile Picture */}
+                    <img
+                      src={`http://localhost:9000/user/${participant.username}/profile-picture`}
+                      className={styles.participantPicture}
+                      alt={`${participant.username}'s profile`}
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/usericon.png";
                       }}
+                    />
+
+                    {/* Username (Clickable) */}
+                    <a
+                      className={styles.participantLink}
+                      style={{ cursor: "pointer" }}
                       onClick={(e) => {
                         e.preventDefault();
                         router.push(`/profile?username=${participant.username}`);
                       }}
                     >
-                      <img
-                        src={`http://localhost:9000/user/${participant.username}/profile-picture`}
-                        className={styles.participantPicture}
-                        alt={`${participant.username}'s profile`}
-                        onError={(e) => {
-                            e.currentTarget.src = "/images/usericon.png";
-                        }}
-                      ></img>
                       <div className={styles.participantUsername}>{participant.username}</div>
-                      <div className={styles.participantName}>{participant.firstName??'N/A'} {participant.lastName??'N/A'} </div>{' '}
-                      <div className={styles.participantStatus} >{participant.status}</div>
                     </a>
-                    {/* Role Selector */}
-                    {(isOrganizer && participant.role!=='organizer' && participant.status!=='organizer') && (
-                    <select 
-                      className={styles.roleSelector} 
-                      value={participant.role || 'member'} 
-                      onChange={(e) => handleRoleChange(e, participant.username)}
-                    >
-                      <option value="write">Write</option>
-                      <option value="read">Read only</option>
-                      <option value="admin">Admin</option>
-                    </select>
+
+                    {/* Full Name */}
+                    <div className={styles.participantName}>
+                      {participant.firstName ?? "N/A"} {participant.lastName ?? "N/A"}
+                    </div>
+
+                    {/* Status (Dropdown for organizers/admins, Text for others) */}
+                    {(isOrganizer || isAdmin) && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username ? (
+                      <select
+                        className={styles.statusSelector}
+                        value={participant.status}
+                        onChange={(e) => handleStatusChange(event.id, participant.username, e.target.value)}
+                      >
+                        <option value="accepted">Accepted</option>
+                        <option value="pending">Pending</option>
+                        <option value="banned">Banned</option>
+                        {isOrganizer && <option value="admin">Admin</option>}
+                      </select>
+                    ) : (
+                      <div className={styles.participantStatus}>{participant.status}</div>
                     )}
 
-                  {((isOrganizer || participant.role === 'admin') && participant.role !== 'organizer'  && participant.status!=='organizer') && (
-                    <button
-                      className={styles.trashButton}
-                    onClick={() => setSelectedParticipant(participant.username)}
-                    >
-                      ❌
-                    </button>
-                    
-                  )}
+                    {/* Role Selector (Only for Organizers) */}
+                    {(isOrganizer || isAdmin)  && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username  && (
+                      <select
+                        className={styles.roleSelector}
+                        value={participant.role || "member"}
+                        onChange={(e) => handleRoleChange(e, participant.username)}
+                      >
+                        <option value="none">None</option>
+                        <option value="write">Write</option>
+                        <option value="read">Read only</option>
+                        {isOrganizer && <option value="admin">Admin</option>}
 
+                      </select>
+                    )}
 
+                    {/* Delete Button (For Organizers/Admins) */}
+                    {(isOrganizer || isAdmin) &&
+                      participant.role !== "organizer" &&
+                      participant.status !== "organizer "&& 
+                      participant.username !== username && (
+                        <button
+                          className={styles.trashButton}
+                          onClick={() => setSelectedParticipant(participant.username)}
+                        >
+                          ❌
+                        </button>
+                      )}
                   </li>
                 ))}
               </ul>
-            )}
+            </div>
+          )}
+
           </div>
           ):''}
 

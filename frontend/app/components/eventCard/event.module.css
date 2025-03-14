@@ -211,6 +211,8 @@
   color: #bbb;
 }
 
+
+
 .participantStatus {
   grid-column: 4; 
   font-size: 0.9em;
@@ -233,6 +235,21 @@
   display: contents; 
 }
 
+.statusSelector{
+  /* grid-column: 5;  */
+  font-size: 0.9em;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  text-align: center;
+  appearance: none;
+  width: 100px;
+}
+
 .roleSelector {
   grid-column: 5; 
   font-size: 0.9em;
@@ -249,21 +266,21 @@
 }
 
 /* Style dropdown arrow */
-.roleSelector::-ms-expand {
+.roleSelector::-ms-expand, .statusSelector::-ms-expand {
   display: none; 
 }
 
-.roleSelector:hover {
+.roleSelector:hover, .statusSelector:hover {
   background-color: rgba(0, 0, 0, 0.7);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-.roleSelector:focus {
+  .roleSelector:focus , .statusSelector:focus {
   outline: none;
   border-color: white;
 }
 
-.roleSelector option {
+.roleSelector option , .statusSelector option {
   background-color: #222;
   color: white;
 }
@@ -271,3 +288,4 @@
 .thrashButton{
   grid-column:6;
 }
+

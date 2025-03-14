@@ -44,19 +44,21 @@ export const handleEntryAction = async (
 
 export const checkSignUpStatus = async (
   eventId: number,
-  setIsSignedUp: (isSignedUp: boolean) => void
+  setIsSignedUp: (isSignedUp: boolean) => void,
+  setIsAdmin: (isAdmin: boolean) => void
 ) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get('http://localhost:9000/event/userEntries', {
-      params: { token },
+
+
+    const entryResponse = await axios.get('http://localhost:9000/event/entry', {
+      params: { eventId, token },
       headers: { Authorization: token },
     });
-    const { events, organizedEvents } = response.data;
-    setIsSignedUp(
-      events.some((e: { id: number }) => e.id === eventId) ||
-      organizedEvents.some((e: { id: number }) => e.id === eventId)
-    );
+
+    setIsSignedUp(entryResponse.data.status);
+    setIsAdmin(entryResponse.data.status === 'admin');
+
   } catch (err) {
     console.error('Error checking sign-up status:', err);
   }
@@ -64,7 +66,8 @@ export const checkSignUpStatus = async (
 
 export const checkOrganizerStatus = async (
   organizer: string | null,
-  setIsOrganizer: (isOrganizer: boolean) => void
+  setIsOrganizer: (isOrganizer: boolean) => void,
+  setUsername: (username: string) => void
 ) => {
   try {
     const token = localStorage.getItem('token');
@@ -74,6 +77,7 @@ export const checkOrganizerStatus = async (
       { headers: { authorization: token } }
     );
     const loggedInUser = response.data.user.username;
+    setUsername(loggedInUser);
     setIsOrganizer(loggedInUser === organizer);
   } catch (err) {
     console.error('Error verifying organizer status:', err);

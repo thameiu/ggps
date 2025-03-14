@@ -139,3 +139,32 @@ export class EntryDto {
     status: string;
 
 }
+
+export class UpdateEntryStatusDto {
+
+    @IsNotEmpty()
+    token: string;
+
+    @IsNotEmpty()
+    username: string;
+
+    @IsNotEmpty()
+    eventId: string;
+
+    @IsString()
+    @IsNotEmpty()
+    status: string;
+
+}
+
+
+export class CheckEntryDto {
+
+    @IsNotEmpty()
+    token: string;
+
+    @IsNotEmpty()
+    eventId: string;
+
+
+}
