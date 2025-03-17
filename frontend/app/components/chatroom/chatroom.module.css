@@ -168,3 +168,144 @@
     color:#fff;
     cursor:pointer;
 }
+
+/* Search and filter styles */
+.searchContainer {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  
+  .searchInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 14px;
+  }
+  
+  .searchIcon {
+    position: absolute;
+    left: 12px;
+    color: #888;
+    font-size: 14px;
+  }
+  
+  .clearSearchButton {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .userDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #222;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .userDropdownItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .userDropdownItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .userProfilePic {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .selectedUserChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 4px 10px 4px 4px;
+    margin-top: 8px;
+    color: white;
+  }
+  
+  .removeUserButton {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 2px;
+  }
+  
+  .removeUserButton:hover {
+    color: white;
+  }
+  
+  .searchModeButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  
+  .searchModeLabel {
+    font-size: 12px;
+  }
+  
+  .filterStatus {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .filterBadge {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+  
+  /* Mobile responsiveness */
+  @media screen and (max-width: 768px) {
+    .searchModeLabel {
+      display: none;
+    }
+  }

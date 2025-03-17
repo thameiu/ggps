@@ -14,28 +14,33 @@ export class SeederService {
     constructor( private eventService:EventService, private prisma:PrismaService, private auth:AuthService) {
     }
 
-    async seedUsers(count:number){
-        for (let i=0; i < count; i++){
-
+    async seedUsers(count: number) {
+        const tasks = Array.from({ length: count }).map(async () => {
             const dto: AuthDto = {
-                email:faker.internet.email(),
-                username:faker.internet.username(),
-                firstName:faker.person.firstName(),
-                lastName:faker.person.lastName(),
-                password:'azerty',
-            }
+                email: faker.internet.email(),
+                username: faker.internet.username(),
+                firstName: faker.person.firstName(),
+                lastName: faker.person.lastName(),
+                password: 'azerty',
+            };
+            
             try {
                 await this.auth.signup(dto);
-                
             } catch (error) {
                 if (error instanceof Prisma.PrismaClientKnownRequestError) {
                     if (error.code === 'P2002') {
-                        throw new ForbiddenException('Duplicate entry');
+                        console.warn('Duplicate user skipped');
+                    } else {
+                        throw error;
                     }
+                } else {
+                    throw error;
                 }
-                throw error;
             }
-        }
+        });
+        
+        await Promise.allSettled(tasks);
+        console.log('Users seeded');
     }
 
 
@@ -132,6 +137,7 @@ export class SeederService {
         });
     
         await Promise.allSettled(tasks);
+        console.log('Events seeded');
     }
     
     

@@ -24,7 +24,7 @@ import {
     @WebSocketServer()
     server: Server;
   
-    constructor(private readonly eventController: EventController, private readonly messageController: MessageController) {console.log('en vie')}
+    constructor(private readonly eventController: EventController, private readonly messageController: MessageController) {}
 
     @SubscribeMessage('joinRoom')
     handleJoinRoom(@MessageBody() eventId: string, @ConnectedSocket() client: Socket) {

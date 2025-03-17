@@ -35,9 +35,31 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
   const [participants, setParticipants] = useState<{ id: number; username:string; firstName: string; lastName: string; status: string, role?:string }[]>([]);
   const [showParticipants, setShowParticipants] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  
+  // New state for filtering participants
+  const [participantSearch, setParticipantSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
+  
   const router = useRouter();
 
   const socket = useRef(io("http://127.0.0.1:9000")).current;
+  
+  // Apply filters to participants
+  const filteredParticipants = participants.filter(participant => {
+    // Search by username
+    const matchesSearch = participant.username.toLowerCase().includes(participantSearch.toLowerCase()) ||
+      (participant.firstName && participant.firstName.toLowerCase().includes(participantSearch.toLowerCase())) ||
+      (participant.lastName && participant.lastName.toLowerCase().includes(participantSearch.toLowerCase()));
+    
+    // Filter by status
+    const matchesStatus = statusFilter === 'all' || participant.status === statusFilter;
+    
+    // Filter by role
+    const matchesRole = roleFilter === 'all' || participant.role === roleFilter;
+    
+    return matchesSearch && matchesStatus && matchesRole;
+  });
   
   useEffect(() => {
     socket.on('connect', () => {
@@ -282,6 +304,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
     setShowParticipants(!showParticipants);
   };
 
+  // Reset filters function
+  const resetFilters = () => {
+    setParticipantSearch('');
+    setStatusFilter('all');
+    setRoleFilter('all');
+  };
 
 
   useEffect(() => {
@@ -448,85 +476,152 @@ const EventCard: React.FC<EventCardProps> = ({ event, organizer }) => {
 
             {showParticipants && (
             <div className={styles.participantsContainer}>
-
-
-              {/* Participants List */}
-              <ul className={`${styles.participantsList} animate__animated animate__fadeIn`}>
-                {participants.map((participant) => (
-                  <li className={styles.participantItem} key={participant.id}>
-                    {/* Profile Picture */}
-                    <img
-                      src={`http://localhost:9000/user/${participant.username}/profile-picture`}
-                      className={styles.participantPicture}
-                      alt={`${participant.username}'s profile`}
-                      onError={(e) => {
-                        e.currentTarget.src = "/images/usericon.png";
-                      }}
-                    />
-
-                    {/* Username (Clickable) */}
-                    <a
-                      className={styles.participantLink}
-                      style={{ cursor: "pointer" }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(`/profile?username=${participant.username}`);
-                      }}
+              {/* Search and Filter UI */}
+              <div className={styles.participantFilters}>
+                {/* Search Bar */}
+                <div className={styles.searchInputContainer}>
+                  <input
+                    type="text"
+                    placeholder="Search by name or username..."
+                    value={participantSearch}
+                    onChange={(e) => setParticipantSearch(e.target.value)}
+                    className={styles.participantSearchInput}
+                  />
+                </div>
+                
+                <div className={styles.filtersGroup}>
+                  {/* Status Filter */}
+                  <div className={styles.filterItem}>
+                    <label htmlFor="statusFilter" className={styles.filterLabel}>Status:</label>
+                    <select
+                      id="statusFilter"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className={styles.filterSelect}
                     >
-                      <div className={styles.participantUsername}>{participant.username}</div>
-                    </a>
+                      <option value="all">All Statuses</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="pending">Pending</option>
+                      <option value="banned">Banned</option>
+                      <option value="admin">Admin</option>
+                      <option value="organizer">Organizer</option>
+                    </select>
+                  </div>
+                  
+                  {/* Role Filter */}
+                  <div className={styles.filterItem}>
+                    <label htmlFor="roleFilter" className={styles.filterLabel}>Role:</label>
+                    <select
+                      id="roleFilter"
+                      value={roleFilter}
+                      onChange={(e) => setRoleFilter(e.target.value)}
+                      className={styles.filterSelect}
+                    >
+                      <option value="all">All Roles</option>
+                      <option value="write">Write</option>
+                      <option value="read">Read Only</option>
+                      <option value="admin">Admin</option>
+                      <option value="none">None</option>
+                      <option value="organizer">Organizer</option>
+                    </select>
+                  </div>
+                  
+                  {/* Reset Button */}
+                  <button 
+                    onClick={resetFilters}
+                    className={styles.resetFiltersButton}
+                  >
+                    Reset
+                  </button>
+                </div>
+                
+                {/* Results Count */}
+                <div className={styles.resultsCount}>
+                  Showing {filteredParticipants.length} of {participants.length} participants
+                </div>
+              </div>
 
-                    {/* Full Name */}
-                    <div className={styles.participantName}>
-                      {participant.firstName ?? "N/A"} {participant.lastName ?? "N/A"}
-                    </div>
+              {/* Participants List - Now using filteredParticipants instead of participants */}
+              <ul className={`${styles.participantsList} animate__animated animate__fadeIn`}>
+                {filteredParticipants.length > 0 ? (
+                  filteredParticipants.map((participant) => (
+                    <li className={styles.participantItem} key={participant.id}>
+                      {/* Profile Picture */}
+                      <img
+                        src={`http://localhost:9000/user/${participant.username}/profile-picture`}
+                        className={styles.participantPicture}
+                        alt={`${participant.username}'s profile`}
+                        onError={(e) => {
+                          e.currentTarget.src = "/images/usericon.png";
+                        }}
+                      />
 
-                    {/* Status (Dropdown for organizers/admins, Text for others) */}
-                    {(isOrganizer || isAdmin) && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username ? (
-                      <select
-                        className={styles.statusSelector}
-                        value={participant.status}
-                        onChange={(e) => handleStatusChange(event.id, participant.username, e.target.value)}
+                      {/* Username (Clickable) */}
+                      <a
+                        className={styles.participantLink}
+                        style={{ cursor: "pointer" }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push(`/profile?username=${participant.username}`);
+                        }}
                       >
-                        <option value="accepted">Accepted</option>
-                        <option value="pending">Pending</option>
-                        <option value="banned">Banned</option>
-                        {isOrganizer && <option value="admin">Admin</option>}
-                      </select>
-                    ) : (
-                      <div className={styles.participantStatus}>{participant.status}</div>
-                    )}
+                        <div className={styles.participantUsername}>{participant.username}</div>
+                      </a>
 
-                    {/* Role Selector (Only for Organizers) */}
-                    {(isOrganizer || isAdmin)  && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username  && (
-                      <select
-                        disabled={participant.status === "banned" || participant.status === "pending"}
-                        className={styles.roleSelector}
-                        value={participant.role || "member"}
-                        onChange={(e) => handleRoleChange(e, participant.username)}
-                      >
-                        <option value="none">None</option>
-                        <option value="write">Write</option>
-                        <option value="read">Read only</option>
-                        {isOrganizer && <option value="admin">Admin</option>}
+                      {/* Full Name */}
+                      <div className={styles.participantName}>
+                        {participant.firstName ?? "N/A"} {participant.lastName ?? "N/A"}
+                      </div>
 
-                      </select>
-                    )}
-
-                    {/* Delete Button (For Organizers/Admins) */}
-                    {(isOrganizer || isAdmin) &&
-                      participant.role !== "organizer" &&
-                      participant.status !== "organizer "&& 
-                      participant.username !== username && (
-                        <button
-                          className={styles.trashButton}
-                          onClick={() => setSelectedParticipant(participant.username)}
+                      {/* Status (Dropdown for organizers/admins, Text for others) */}
+                      {(isOrganizer || isAdmin) && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username ? (
+                        <select
+                          className={styles.statusSelector}
+                          value={participant.status}
+                          onChange={(e) => handleStatusChange(event.id, participant.username, e.target.value)}
                         >
-                          ❌
-                        </button>
+                          <option value="accepted">Accepted</option>
+                          <option value="pending">Pending</option>
+                          <option value="banned">Banned</option>
+                          {isOrganizer && <option value="admin">Admin</option>}
+                        </select>
+                      ) : (
+                        <div className={styles.participantStatus}>{participant.status}</div>
                       )}
-                  </li>
-                ))}
+
+                      {/* Role Selector (Only for Organizers) */}
+                      {(isOrganizer || isAdmin)  && participant.role !== "organizer" && participant.status !== "organizer" && participant.username !== username  && (
+                        <select
+                          disabled={participant.status === "banned" || participant.status === "pending"}
+                          className={styles.roleSelector}
+                          value={participant.role || "member"}
+                          onChange={(e) => handleRoleChange(e, participant.username)}
+                        >
+                          <option value="none">None</option>
+                          <option value="write">Write</option>
+                          <option value="read">Read only</option>
+                          {isOrganizer && <option value="admin">Admin</option>}
+
+                        </select>
+                      )}
+
+                      {/* Delete Button (For Organizers/Admins) */}
+                      {(isOrganizer || isAdmin) &&
+                        participant.role !== "organizer" &&
+                        participant.status !== "organizer "&& 
+                        participant.username !== username && (
+                          <button
+                            className={styles.trashButton}
+                            onClick={() => setSelectedParticipant(participant.username)}
+                          >
+                            ❌
+                          </button>
+                        )}
+                    </li>
+                  ))
+                ) : (
+                  <li className={styles.noResults}>No participants match your filters</li>
+                )}
               </ul>
             </div>
           )}

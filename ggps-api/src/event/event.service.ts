@@ -200,7 +200,7 @@ export class EventService {
             }
     
             const entryStatus = (dto.status !== 'organizer' && event.private ? 'pending' : 'accepted');
-            console.log(event);
+
             const entry = await this.prisma.entry.create({
                 data: {
                     userId: user.id,

@@ -22,7 +22,7 @@ export class UserService {
     
         let address = '';
     
-        if (dto.country || dto.city) {
+        if ((dto.country || dto.city) && dto.country !==null) {
             address += dto.country;
     
             if (dto.city) {
@@ -46,7 +46,7 @@ export class UserService {
                         addressdetails: 1,
                     },
                 });
-    
+                console.log(response.data);
                 if (response.data && response.data.length > 0) {
                     const { lat, lon } = response.data[0];
     

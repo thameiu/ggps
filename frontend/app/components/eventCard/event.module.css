@@ -285,3 +285,93 @@
   grid-column:6;
 }
 
+/* Participant filters */
+.participantFilters {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.searchInputContainer {
+  margin-bottom: 10px;
+}
+
+.participantSearchInput {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  color: white;
+  font-size: 14px;
+}
+
+.participantSearchInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filtersGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.filterItem {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.filterLabel {
+  color: #bbb;
+  margin-right: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  flex: 1;
+  padding: 6px 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  color: white;
+  font-size: 14px;
+}
+
+.filterSelect option{
+  background-color: #000;
+  color: white;
+}
+
+.resetFiltersButton {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.resetFiltersButton:hover {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.resultsCount {
+  color: #999;
+  font-size: 12px;
+  text-align: right;
+  padding-top: 5px;
+}
+
+.noResults {
+  text-align: center;
+  color: #999;
+  padding: 20px 0;
+  font-style: italic;
+}
