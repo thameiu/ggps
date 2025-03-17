@@ -35,4 +35,30 @@
     text-decoration: underline;
     cursor:pointer;
 }
-
+.gridViewButton {
+    position: absolute;
+    top: 25vh; /* Position below zoom controls */
+    left: 10px;
+    z-index: 900; /* Lower than EventBar (1000) */
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    color: white;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-family: var(--font-sofia-pro-medium-az);
+  }
+  
+  .gridViewButton:hover {
+    background-color: rgba(0, 0, 0, 0.95);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .gridViewIcon {
+    width: 20px;
+    height: 20px;
+  }

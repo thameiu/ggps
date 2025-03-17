@@ -20,6 +20,8 @@ import Image from "next/image";
 import Loader from "../loader/loader";
 import DisableZoom from "./SideBars/DisableZoom";
 import CompleteAccountAlert from "../CompleteAccountAlert/CompleteAccountAlert";
+import EventGrid, { useGridEscapeHandler } from './EventGrid/EventGrid';
+
 
 export default function MapComponent() {
     const [position, setPosition] = useState<LatLng | null>(null);
@@ -40,7 +42,7 @@ export default function MapComponent() {
     const [userCoordinates, setUserCoordinates] = useState<LatLng | null>(null);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isUserVerified, setIsUserVerified] = useState(false);
-
+    const [isGridViewActive, setIsGridViewActive] = useState(false);
 
     
     const [zoomLevel, setZoomLevel] = useState<number>(10);
@@ -107,6 +109,10 @@ export default function MapComponent() {
         });
         return null; 
     };
+    const toggleGridView = () => {
+        setIsGridViewActive(prev => !prev);
+      };
+    useGridEscapeHandler(isGridViewActive, toggleGridView);
 
     if (loading) 
         return (
@@ -257,7 +263,45 @@ export default function MapComponent() {
                 ))}
                 <SimulateZoomOut />
                 <CompleteAccountAlert verified={isUserVerified} userCoordinates={userCoordinates}/>
+
             </MapContainer>
+            <div 
+                className={styles.gridViewButton}
+                onClick={() => setIsGridViewActive(true)}
+                role="button"
+                tabIndex={0}
+                aria-label="Show events in grid view for accessibility"
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setIsGridViewActive(true);
+                    }
+                }}
+            >
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className={styles.gridViewIcon}
+                >
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>List View</span>
+            </div>
+            {/* Add the EventGrid component just before closing the MapContainer */}
+            <EventGrid 
+                isActive={isGridViewActive} 
+                onClose={toggleGridView} 
+            />
         </>
     );
 }

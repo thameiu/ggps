@@ -1,0 +1,171 @@
+.eventGridOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .eventGridContainer {
+    width: 90%;
+    height: 90%;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    font-family: var(--font-sofia-pro-medium-az); /* Match EventBar font */
+  }
+
+    .eventGrid::-webkit-scrollbar {
+        width: 5px !important;
+        padding: 30px;
+    
+    }
+    
+    
+    .eventGrid::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color:#fff;
+    margin-right: 10px;
+    margin-left: 10px;
+
+    
+    }
+  
+  .eventGridHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 5px 12px;
+    border-radius: 25px;
+    transition: background-color 0.2s;
+  }
+  
+  .closeButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .filtersContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .eventGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    overflow-y: auto;
+  }
+  
+  .eventCount {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 10px;
+    text-align: right;
+  }
+  
+  .noEvents {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: 18px;
+    color: #999;
+    font-style: italic;
+    font-family: var(--font-sofia-pro-ultralight-az);
+  }
+  
+  /* Match the EventBar scrollbar styles */
+  .eventGridContainer::-webkit-scrollbar {
+    width: 5px !important;
+    padding: 30px;
+  }
+  
+  .eventGridContainer::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: #fff;
+    margin-right: 10px;
+  }
+  
+  .viewDetails {
+    color: #999;
+    text-align: center;
+    margin-top: 10px;
+    font-style: italic;
+    font-size: 0.9em;
+    font-family: var(--font-sofia-pro-ultralight-az);
+  }
+  
+  /* Make sure the event card uses the same styling as EventBar */
+  .eventCard {
+    background-color: #111;
+    color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    font-family: var(--font-sofia-pro-ultralight-az);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+  }
+  
+  .eventCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .headerControls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .keyboardTip {
+    font-size: 14px;
+    color: #888;
+    display: flex;
+    align-items: center;
+  }
+  
+  .keyboardTip kbd {
+    background-color: #333;
+    border-radius: 3px;
+    border: 1px solid #555;
+    box-shadow: 0 1px 1px rgba(0,0,0,.2);
+    color: #fff;
+    display: inline-block;
+    font-size: 12px;
+    font-family: monospace;
+    line-height: 1;
+    padding: 3px 5px;
+    margin: 0 5px;
+  }
+  
+  @media (max-width: 768px) {
+    .eventGrid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+  }
