@@ -145,11 +145,16 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       data.append("firstName", formData.firstName);
       data.append("lastName", formData.lastName);
       data.append("biography", formData.biography);
-      data.append("country", formData.country);
-      data.append("city", formData.city);
-      data.append("street", formData.street);
-      data.append("zipCode", formData.zipCode);
-      data.append("number", formData.number);
+      if (formData.country)
+        data.append("country", formData.country);
+      if (formData.city)
+        data.append("city", formData.city);
+      if (formData.street)
+        data.append("street", formData.street);
+      if (formData.zipCode)
+        data.append("zipCode", formData.zipCode);
+      if (formData.number)
+        data.append("number", formData.number);
 
   
       const response = await axios.put(`http://localhost:9000/user`, data, {
@@ -177,7 +182,7 @@ const Profile: React.FC<ProfileProps> = ({ username }) => {
       setSuccessMessage("Profile updated successfully!");
       setProfileData(formData);
       setEditMode(false);
-      // window.location.reload();
+      window.location.reload();
     } catch (err) {
       console.error("Error saving profile data:", err);
       setErrorMessage("Failed to update profile. Please try again.");
