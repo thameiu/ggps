@@ -41,70 +41,74 @@ export class AuthService {
     }
   }
 
-  async signup(dto: AuthDto) {
-    const hash = await argon.hash(dto.password);
-    const rawToken = randomBytes(32).toString('hex');
-    const hashedToken = await argon.hash(rawToken);
-  
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          email: dto.email,
-          username: dto.username,
-          lastName: dto.lastName,
-          firstName: dto.firstName,
-          hash,
-          verificationToken: hashedToken,
-        },
-      });
-      delete user.hash;
-  
-      const confirmLink = `http://localhost:3000/verify-email?token=${rawToken}`;
-  
-      await this.mailerService.sendMail(
-        user.email, 
-        'Confirm Your GGPS Account', 
-        `
-          <div style="padding: 20px; font-family: Arial, sans-serif;">
-            <!-- Title Section -->
-            <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #555653;">Confirm Your GGPS Account</h1>
-            <hr style="border: 0; border-top: 2px solid #960000; margin: 20px 0;" />
-            
-            <!-- Introduction -->
-            <p style="font-size: 16px; color: black; margin-bottom: 20px;">
-              Bonjour ${user.firstName},<br />
-              Thank you for registering for a GGPS account. To complete your registration, please confirm your email address.
-            </p>
-            
-            <!-- Instructions -->
-            <p style="font-size: 16px; color: black; margin-bottom: 20px;">
-              To confirm your email, simply click the button below. If you didn’t sign up for a GGPS account, you can safely ignore this email.
-            </p>
-            
-            <!-- Button Link -->
-            <a href="${confirmLink}" style="display: inline-block; background-color: #960000; color: white; padding: 12px 20px; font-size: 16px; text-decoration: none; border-radius: 5px; font-weight: bold; text-align: center;">Confirm Your Email</a>
-            
-            <!-- Footer -->
-            <p style="font-size: 14px; color: black; margin-top: 30px;">
-              If you have any issues or didn’t request this email, please contact our support team.<br />
-              Thank you for being part of the GGPS community!
-            </p>
-          </div>
-        `
-      );
-      
-  
-      return user;
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ForbiddenException('Username or email taken');
-        }
+// In the signup method, after creating the user
+async signup(dto: AuthDto) {
+  const hash = await argon.hash(dto.password);
+  const rawToken = randomBytes(32).toString('hex');
+  const hashedToken = await argon.hash(rawToken);
+
+  try {
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        username: dto.username,
+        lastName: dto.lastName,
+        firstName: dto.firstName,
+        hash,
+        verificationToken: hashedToken,
+      },
+    });
+    delete user.hash;
+
+    // Generate JWT for this user
+    const payload = { userId: user.id, email: user.email };
+    const jwtToken = this.jwtService.sign(payload);
+
+    // Include JWT in the verification link
+    const confirmLink = `http://localhost:3000/verify-email?token=${rawToken}&jwt=${jwtToken}`;
+
+    await this.mailerService.sendMail(
+      user.email, 
+      'Confirm Your GGPS Account', 
+      `
+        <div style="padding: 20px; font-family: Arial, sans-serif;">
+          <!-- Title Section -->
+          <h1 style="font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #555653;">Confirm Your GGPS Account</h1>
+          <hr style="border: 0; border-top: 2px solid #960000; margin: 20px 0;" />
+          
+          <!-- Introduction -->
+          <p style="font-size: 16px; color: black; margin-bottom: 20px;">
+            Bonjour ${user.firstName},<br />
+            Thank you for registering for a GGPS account. To complete your registration, please confirm your email address.
+          </p>
+          
+          <!-- Instructions -->
+          <p style="font-size: 16px; color: black; margin-bottom: 20px;">
+            To confirm your email, simply click the button below. If you didn't sign up for a GGPS account, you can safely ignore this email.
+          </p>
+          
+          <!-- Button Link -->
+          <a href="${confirmLink}" style="display: inline-block; background-color: #960000; color: white; padding: 12px 20px; font-size: 16px; text-decoration: none; border-radius: 5px; font-weight: bold; text-align: center;">Confirm Your Email</a>
+          
+          <!-- Footer -->
+          <p style="font-size: 14px; color: black; margin-top: 30px;">
+            If you have any issues or didn't request this email, please contact our support team.<br />
+            Thank you for being part of the GGPS community!
+          </p>
+        </div>
+      `
+    );
+
+    return user;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        throw new ForbiddenException('Username or email taken');
       }
-      throw error;
     }
+    throw error;
   }
-  
+}
 
   async verifyToken(token: string) {
     try {
@@ -142,35 +146,42 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(token: string) {
-    const users = await this.prisma.user.findMany({
-      where: { verificationToken: { not: null } },
-    });
-  
-    if (!users.length) {
-      throw new ForbiddenException('Invalid or expired verification token');
-    }
-  
-    let matchedUser = null;
-  
-    for (const user of users) {
-      if (await argon.verify(user.verificationToken, token)) {
-        matchedUser = user;
-        break;
+  async verifyEmail(token: string, jwtToken: string) {
+    try {
+      
+      const user = await this.getUserFromToken(jwtToken);
+      
+      if (!user) {
+        throw new ForbiddenException('Invalid authentication token');
       }
+      
+      
+      if (!user.verificationToken) {
+        throw new ForbiddenException('User already verified or invalid user');
+      }
+      
+      
+      const isValid = await argon.verify(user.verificationToken, token);
+      
+      if (!isValid) {
+        throw new ForbiddenException('Invalid verification token');
+      }
+      
+      
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { verified: true, verificationToken: null },
+      });
+      
+      return { message: 'Email verified successfully' };
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new ForbiddenException('Verification failed');
     }
-  
-    if (!matchedUser) {
-      throw new ForbiddenException('Invalid or expired verification token');
-    }
-  
-    await this.prisma.user.update({
-      where: { id: matchedUser.id },
-      data: { verified: true, verificationToken: null },
-    });
-  
-    return { message: 'Email verified successfully' };
   }
+
   async requestPasswordReset(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
   

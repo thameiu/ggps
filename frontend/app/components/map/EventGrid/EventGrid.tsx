@@ -81,7 +81,7 @@ const EventGrid: React.FC<EventGridProps> = ({ isActive, onClose }) => {
     >
       <div className={styles.eventGridContainer}>
         <div className={styles.eventGridHeader}>
-          <h2 className={eventbarStyles.eventBarSectionTitle}>Events List View</h2>
+          <h2 className={eventbarStyles.eventBarSectionTitle}>Events Grid View</h2>
           <div className={styles.headerControls}>
             <div className={styles.keyboardTip}>
               Press <kbd>Esc</kbd> to toggle view

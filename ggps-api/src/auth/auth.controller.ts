@@ -32,16 +32,14 @@ export class AuthController {
   }
 
   @Get('verify')
-  async verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
-
-  @Post('request-password-reset')
-  async requestPasswordReset(@Body('email') email: string) {
-    if (!email) {
-      throw new ForbiddenException('Email is required');
+  async verifyEmail(
+    @Query('token') token: string,
+    @Query('jwt') jwtToken: string
+  ) {
+    if (!token || !jwtToken) {
+      throw new ForbiddenException('Missing verification parameters');
     }
-    return this.authService.requestPasswordReset(email);
+    return this.authService.verifyEmail(token, jwtToken);
   }
 
   @Post('reset-password')

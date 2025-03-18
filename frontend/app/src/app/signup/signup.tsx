@@ -22,58 +22,59 @@ export default function Signup() {
       [name]: value,
     });
   };
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    setError(null); // Reset error state
-    try {
-      // Signup request
-      const signupResponse = await fetch('http://localhost:9000/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+  // Modify the signup function to generate and send a confirmation link with both tokens
+const handleSubmit = async (e: { preventDefault: () => void }) => {
+  e.preventDefault();
+  setError(null);
+  
+  try {
+    // Signup request
+    const signupResponse = await fetch('http://localhost:9000/auth/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-      if (!signupResponse.ok) {
-        const { message } = await signupResponse.json();
-        throw new Error(message || 'An error occurred during signup.');
-      }
-
-      // Login request
-      const loginResponse = await fetch('http://localhost:9000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      if (!loginResponse.ok) {
-        const { message } = await loginResponse.json();
-        throw new Error(message || 'An error occurred during login.');
-      }
-      localStorage.clear();
-
-
-      const { token } = await loginResponse.json(); // Get token from response
-      localStorage.setItem("token", token); // Store token in localStorage
-
-      // Redirect to the map page
-      window.location.href = "/map";
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-        console.error(err.message);
-      } else {
-        setError('An error occurred.');
-        console.error('An unknown error occurred.');
-      }
+    if (!signupResponse.ok) {
+      const { message } = await signupResponse.json();
+      throw new Error(message || 'An error occurred during signup.');
     }
-  };
+    
+    // Login immediately to get JWT token
+    const loginResponse = await fetch('http://localhost:9000/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    if (!loginResponse.ok) {
+      const { message } = await loginResponse.json();
+      throw new Error(message || 'An error occurred during login.');
+    }
+    
+    localStorage.clear();
+    const { token } = await loginResponse.json();
+    localStorage.setItem("token", token);
+
+    // Redirect to the map page
+    window.location.href = "/map";
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      setError(err.message);
+      console.error(err.message);
+    } else {
+      setError('An error occurred.');
+      console.error('An unknown error occurred.');
+    }
+  }
+};
   
   document.title = "GGPS - Log in";
 

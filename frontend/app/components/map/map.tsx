@@ -295,7 +295,7 @@ export default function MapComponent() {
                     <rect x="3" y="14" width="7" height="7"></rect>
                     <rect x="14" y="14" width="7" height="7"></rect>
                 </svg>
-                <span>List View</span>
+                <span>Grid View</span>
             </div>
             {/* Add the EventGrid component just before closing the MapContainer */}
             <EventGrid 
