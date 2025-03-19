@@ -8,19 +8,16 @@ interface EventGridProps {
   onClose: () => void;
 }
 
-// Create a global key handler that will be available to the parent component
 export const useGridEscapeHandler = (isActive: boolean, toggleGrid: () => void) => {
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        toggleGrid(); // Toggle grid state regardless of current state
+        toggleGrid(); 
       }
     };
 
-    // Always listen for Escape key
     document.addEventListener('keydown', handleEscKey);
 
-    // Clean up event listener when component unmounts
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
@@ -33,7 +30,6 @@ const EventGrid: React.FC<EventGridProps> = ({ isActive, onClose }) => {
   const [localEvents, setLocalEvents] = useState<any[]>([]);
   const router = useRouter();
 
-  // Load events from localStorage when component is mounted or isActive changes
   useEffect(() => {
     if (isActive) {
       const storedEvents = JSON.parse(localStorage.getItem("fetchedEvents") || "[]");
@@ -41,8 +37,6 @@ const EventGrid: React.FC<EventGridProps> = ({ isActive, onClose }) => {
     }
   }, [isActive]);
 
-  // We no longer need the internal Escape handler since we're using the external one
-  // Now the parent component will handle both opening and closing with Escape
 
   if (!isActive) return null;
 
@@ -58,10 +52,8 @@ const EventGrid: React.FC<EventGridProps> = ({ isActive, onClose }) => {
     return matchesSearch && matchesCategory;
   });
 
-  // Get unique categories for the filter dropdown
   const categories = ['all', ...Array.from(new Set(localEvents.map(event => event.category)))];
 
-  // Get color based on event category
   const getEventColor = (category: string) => {
     switch(category.toLowerCase()) {
       case 'convention': return 'rgba(100, 0, 200, 1)';

@@ -42,6 +42,14 @@ export class AuthController {
     return this.authService.verifyEmail(token, jwtToken);
   }
 
+  @Post('request-password-reset')
+  async requestPasswordReset(@Body('email') email: string) {
+    if (!email) {
+      throw new ForbiddenException('Email is required');
+    }
+    return this.authService.requestPasswordReset(email);
+  }
+  
   @Post('reset-password')
   async resetPassword(
     @Body('token') token: string, 
