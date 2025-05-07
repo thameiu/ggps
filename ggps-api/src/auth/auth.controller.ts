@@ -48,7 +48,7 @@ export class AuthController {
       throw new ForbiddenException('Email is required');
     }
     return this.authService.requestPasswordReset(email);
-  }
+  } 
   
   @Post('reset-password')
   async resetPassword(
